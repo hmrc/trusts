@@ -29,32 +29,39 @@ import services.TrustsService
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class CheckTrustController @Inject()(trustsService: TrustsService,
-                                     cc: ControllerComponents,
-                                     identify: IdentifierAction)(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
+class CheckTrustController @Inject() (
+  trustsService: TrustsService,
+  cc: ControllerComponents,
+  identify: IdentifierAction
+)(implicit ec: ExecutionContext)
+    extends TrustsBaseController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
   def checkExistingTrust(): Action[JsValue] = identify.async(parse.json) { implicit request =>
-    withJsonBody[ExistingCheckRequest] {
-      trustsCheckRequest =>
-        trustsService.checkExistingTrust(trustsCheckRequest).value.map {
-          case Right(Matched) => Ok(matchResponse)
-          case Right(NotMatched) =>
-            logger.warn(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trust could not be matched")
-            Ok(noMatchResponse)
-          case Right(AlreadyRegistered) =>
+    withJsonBody[ExistingCheckRequest] { trustsCheckRequest =>
+      trustsService.checkExistingTrust(trustsCheckRequest).value.map {
+        case Right(Matched)                                 => Ok(matchResponse)
+        case Right(NotMatched)                              =>
+          logger.warn(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trust could not be matched")
+          Ok(noMatchResponse)
+        case Right(AlreadyRegistered)                       =>
           logger.warn(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trust already registered")
           Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-          case Right(response) => logger.error(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed due to $response")
-            InternalServerError(Json.toJson(internalServerErrorResponse))
-          case Left(ServerError(message)) if message.nonEmpty =>
-            logger.warn(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed. Message: $message")
-            InternalServerError(Json.toJson(internalServerErrorResponse))
-          case Left(_) =>
-            logger.warn(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed.")
-            InternalServerError(Json.toJson(internalServerErrorResponse))
-        }
+        case Right(response)                                =>
+          logger.error(
+            s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed due to $response"
+          )
+          InternalServerError(Json.toJson(internalServerErrorResponse))
+        case Left(ServerError(message)) if message.nonEmpty =>
+          logger.warn(
+            s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed. Message: $message"
+          )
+          InternalServerError(Json.toJson(internalServerErrorResponse))
+        case Left(_)                                        =>
+          logger.warn(s"[$className][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed.")
+          InternalServerError(Json.toJson(internalServerErrorResponse))
+      }
     }
   }
 

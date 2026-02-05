@@ -30,15 +30,17 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NonRepudiationConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
+class NonRepudiationConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+    extends Logging {
 
   private def headers = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
-  val fullUrl: String =config.nonRepudiationUrl
-   def nonRepudiate(payload: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
-     http.post(url"$fullUrl")
-       .setHeader(headers: _*)
-       .withBody(Json.toJson(payload))
-       .execute[NRSResponse]
-  }
+  val fullUrl: String = config.nonRepudiationUrl
+
+  def nonRepudiate(payload: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] =
+    http
+      .post(url"$fullUrl")
+      .setHeader(headers: _*)
+      .withBody(Json.toJson(payload))
+      .execute[NRSResponse]
 
 }

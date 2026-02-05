@@ -35,7 +35,7 @@ import scala.concurrent.Future
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   private val mockMigrationService = mock[TaxableMigrationService]
-  private val trn = "XTRN1234567"
+  private val trn                  = "XTRN1234567"
 
   ".taxableSubscriptionCallback" should {
 
@@ -43,9 +43,15 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
       "tax enrolment callback for subscription id enrolment  " in {
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
-        val result = SUT.taxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({
-          """{ "url" : "http//","state" : "SUCCESS"}"""
-        })))
+        val result = SUT
+          .taxableSubscriptionCallback(trn)
+          .apply(
+            postRequestWithPayload(
+              Json.parse(
+                """{ "url" : "http//","state" : "SUCCESS"}"""
+              )
+            )
+          )
         status(result) mustBe OK
       }
     }
@@ -57,27 +63,37 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
       "tax enrolment callback for subscription id enrolment  " in {
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
-        val result = SUT.nonTaxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({
-          """{ "url" : "http//","state" : "SUCCESS"}"""
-        })))
+        val result = SUT
+          .nonTaxableSubscriptionCallback(trn)
+          .apply(
+            postRequestWithPayload(
+              Json.parse(
+                """{ "url" : "http//","state" : "SUCCESS"}"""
+              )
+            )
+          )
         status(result) mustBe OK
       }
     }
   }
 
   ".migrationSubscriptionCallback" should {
-    val urn = "NTTRUST00000001"
+    val urn            = "NTTRUST00000001"
     val subscriptionId = "testSubId"
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment " in {
         when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any()))
-          .thenReturn(EitherT[Future, TrustErrors, OrchestratorToTaxableSuccessResponse](Future.successful(Right(OrchestratorToTaxableSuccessResponse()))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, OrchestratorToTaxableSuccessResponse](
+              Future.successful(Right(OrchestratorToTaxableSuccessResponse()))
+            )
+          )
 
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
-        val url = s"/tax-enrolment/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId"
+        val url     = s"/tax-enrolment/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId"
         val request = FakeRequest("POST", url).withHeaders(CONTENT_TYPE -> "application/json")
-        val result = SUT.migrationSubscriptionCallback(subscriptionId, urn).apply(request)
+        val result  = SUT.migrationSubscriptionCallback(subscriptionId, urn).apply(request)
         status(result) mustBe OK
       }
     }
@@ -85,15 +101,18 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
     "return 500" when {
       "callback failed" in {
         when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any()))
-          .thenReturn(EitherT[Future, TrustErrors, OrchestratorToTaxableSuccessResponse](Future.successful(Left(ServerError()))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, OrchestratorToTaxableSuccessResponse](Future.successful(Left(ServerError())))
+          )
 
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
-        val url = s"/tax-enrolment/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId"
+        val url     = s"/tax-enrolment/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId"
         val request = FakeRequest("POST", url).withHeaders(CONTENT_TYPE -> "application/json")
-        val result = SUT.migrationSubscriptionCallback(subscriptionId, urn).apply(request)
+        val result  = SUT.migrationSubscriptionCallback(subscriptionId, urn).apply(request)
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
   }
+
 }

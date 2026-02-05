@@ -20,17 +20,16 @@ import play.api.libs.json.{Json, OFormat}
 import utils.Constants._
 
 case class ErrorResponse(code: String, message: String)
+
 object ErrorResponse {
   implicit val formats: OFormat[ErrorResponse] = Json.format[ErrorResponse]
 }
 
 object ApiResponse {
-  def alreadyRegisteredEstateResponse = ErrorResponse(ALREADY_REGISTERED_CODE, ALREADY_REGISTERED_ESTATE_MESSAGE)
-  def invalidUTRErrorResponse = ErrorResponse(INVALID_UTR_CODE, INVALID_UTR_MESSAGE)
-  def noMatchRegistrationResponse = ErrorResponse(NO_MATCH_CODE, NO_MATCH_MESSAGE)
-  def internalServerErrorResponse = ErrorResponse(INTERNAL_SERVER_ERROR_CODE, INTERNAL_SERVER_ERROR_MESSAGE)
+  def alreadyRegisteredEstateResponse    = ErrorResponse(ALREADY_REGISTERED_CODE, ALREADY_REGISTERED_ESTATE_MESSAGE)
+  def invalidUTRErrorResponse            = ErrorResponse(INVALID_UTR_CODE, INVALID_UTR_MESSAGE)
+  def noMatchRegistrationResponse        = ErrorResponse(NO_MATCH_CODE, NO_MATCH_MESSAGE)
+  def internalServerErrorResponse        = ErrorResponse(INTERNAL_SERVER_ERROR_CODE, INTERNAL_SERVER_ERROR_MESSAGE)
   def insufficientEnrolmentErrorResponse = ErrorResponse(UNAUTHORISED, INSUFFICIENT_ENROLMENT_MESSAGE)
-  def noDraftIdProvided = ErrorResponse(NO_DRAFT_ID, NO_DRAFT_ID_MESSAGE)
+  def noDraftIdProvided                  = ErrorResponse(NO_DRAFT_ID, NO_DRAFT_ID_MESSAGE)
 }
-
-

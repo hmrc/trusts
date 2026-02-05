@@ -27,7 +27,7 @@ import java.time.LocalDate
 class AmendSubmissionDataServiceSpec extends BaseSpec {
 
   private val mockLocalDateService = mock[LocalDateService]
-  private val service = new AmendSubmissionDataService(mockLocalDateService)
+  private val service              = new AmendSubmissionDataService(mockLocalDateService)
 
   "AmendSubmissionDataService" when {
 
@@ -53,4 +53,5 @@ class AmendSubmissionDataServiceSpec extends BaseSpec {
       }
     }
   }
+
 }

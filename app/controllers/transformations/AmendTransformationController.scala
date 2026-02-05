@@ -30,49 +30,60 @@ import utils.Session
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AmendTransformationController @Inject()(identify: IdentifierAction,
-                                                       transformationService: TransformationService)
-                                                      (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends TrustsBaseController(cc) with TransformationHelper with Logging {
+abstract class AmendTransformationController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends TrustsBaseController(cc) with TransformationHelper with Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform
+  def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit
+    wts: Writes[T]
+  ): DeltaTransform
 
-  def addNewTransform[T](identifier: String, index: Option[Int], `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
-    identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[T] match {
+  def addNewTransform[T](identifier: String, index: Option[Int], `type`: String = "")(implicit
+    rds: Reads[T],
+    wts: Writes[T]
+  ): Action[JsValue] =
+    identify.async(parse.json) { implicit request =>
+      request.body.validate[T] match {
 
-          case JsSuccess(amendedEntity, _) =>
-            val expectedResult = for {
-              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
-              isTaxable <- isTrustTaxable(trust)
-              originalEntity <- findJson(trust, `type`, index)
-              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(originalEntity, amendedEntity, index, `type`, isTaxable))
-            } yield {
-              Ok
-            }
+        case JsSuccess(amendedEntity, _) =>
+          val expectedResult = for {
+            trust          <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
+            isTaxable      <- isTrustTaxable(trust)
+            originalEntity <- findJson(trust, `type`, index)
+            _              <- transformationService.addNewTransform(
+                                identifier,
+                                request.internalId,
+                                transform(originalEntity, amendedEntity, index, `type`, isTaxable)
+                              )
+          } yield Ok
 
-            expectedResult.value.map {
-              case Right(status) => status
-              case Left(ServerError(message)) if message.nonEmpty =>
-                logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-                  s"failed to add new transform. Message: $message")
-                InternalServerError
-              case Left(_) =>
-                logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-                  s"failed to add new transform.")
-                InternalServerError
-            }
+          expectedResult.value.map {
+            case Right(status)                                  => status
+            case Left(ServerError(message)) if message.nonEmpty =>
+              logger.warn(
+                s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+                  s"failed to add new transform. Message: $message"
+              )
+              InternalServerError
+            case Left(_)                                        =>
+              logger.warn(
+                s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+                  s"failed to add new transform."
+              )
+              InternalServerError
+          }
 
-          case JsError(errors) =>
-            logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json did not pass validation - $errors")
-            Future.successful(BadRequest)
-        }
+        case JsError(errors) =>
+          logger.warn(
+            s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+              s"Supplied json did not pass validation - $errors"
+          )
+          Future.successful(BadRequest)
       }
     }
-  }
 
 }

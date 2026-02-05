@@ -33,37 +33,41 @@ import utils.Session
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
-                                              val parser: BodyParsers.Default)
-                                             (implicit val executionContext: ExecutionContext)
-  extends IdentifierAction with AuthorisedFunctions with Logging {
+class AuthenticatedIdentifierAction @Inject() (
+  override val authConnector: AuthConnector,
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAction with AuthorisedFunctions with Logging {
 
-  def invokeBlock[A](request: Request[A],
-                     block: IdentifierRequest[A] => Future[Result]) : Future[Result] = {
+  def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     val retrievals = Retrievals.internalId and
-                     Retrievals.affinityGroup and
-                     Retrievals.groupIdentifier and
-                     Retrievals.loginTimes and
-                     Retrievals.credentials and
-                     Retrievals.email
+      Retrievals.affinityGroup and
+      Retrievals.groupIdentifier and
+      Retrievals.loginTimes and
+      Retrievals.credentials and
+      Retrievals.email
 
-    implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     authorised().retrieve(retrievals) {
-      case Some(internalId) ~ Some(Agent) ~ groupIdentifier ~ loginTimes ~ credentials ~ email =>
+      case Some(internalId) ~ Some(Agent) ~ groupIdentifier ~ loginTimes ~ credentials ~ email        =>
         val credential = CredentialData(groupIdentifier, loginTimes, credentials, email)
         block(IdentifierRequest(request, internalId, Session.id(hc), Agent, credential))
       case Some(internalId) ~ Some(Organisation) ~ groupIdentifier ~ loginTimes ~ credentials ~ email =>
         val credential = CredentialData(groupIdentifier, loginTimes, credentials, email)
         block(IdentifierRequest(request, internalId, Session.id(hc), Organisation, credential))
-      case _ =>
-        logger.warn(s"[AuthenticatedIdentifierAction][invokeBlock][Session ID: ${Session.id(hc)}] user isn't authorised due to insufficient enrolments")
+      case _                                                                                          =>
+        logger.warn(
+          s"[AuthenticatedIdentifierAction][invokeBlock][Session ID: ${Session.id(hc)}] user isn't authorised due to insufficient enrolments"
+        )
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))
-    } recoverWith {
-      case e : AuthorisationException =>
-        logger.error(s"[AuthenticatedIdentifierAction][invokeBlock][AuthenticatedIdentifierAction][invokeBlock][Session ID: ${Session.id(hc)}] AuthorisationException: $e", e)
-        Future.successful(Unauthorized)
+    } recoverWith { case e: AuthorisationException =>
+      logger.error(
+        s"[AuthenticatedIdentifierAction][invokeBlock][AuthenticatedIdentifierAction][invokeBlock][Session ID: ${Session.id(hc)}] AuthorisationException: $e",
+        e
+      )
+      Future.successful(Unauthorized)
     }
   }
 

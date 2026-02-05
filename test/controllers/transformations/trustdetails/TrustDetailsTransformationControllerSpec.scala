@@ -42,11 +42,8 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
-  with MockitoSugar
-  with ScalaFutures
-  with GuiceOneAppPerSuite
-  with BeforeAndAfterEach {
+class TrustDetailsTransformationControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -54,7 +51,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
 
   private val utr: String = "utr"
 
-  private val mockTransformationService = mock[TransformationService]
+  private val mockTransformationService   = mock[TransformationService]
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   override def beforeEach(): Unit = {
@@ -757,15 +754,17 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(PUT, "path")
-          .withBody(Json.parse(
-            """
+          .withBody(
+            Json.parse(
+              """
               |{
               |  "uk": {
               |    "foo": "bar"
               |  }
               |}
               |""".stripMargin
-          ))
+            )
+          )
           .withHeaders(CONTENT_TYPE -> "application/json")
 
         val result = controller.setResidentialStatus(utr).apply(request)
@@ -790,27 +789,31 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
             mockTaxableMigrationService
           )(Implicits.global, Helpers.stubControllerComponents())
 
-          val body = Json.toJson(MigratingTrustDetails(
-            lawCountry = None,
-            administrationCountry = "GB",
-            residentialStatus = ResidentialStatusType(
-              uk = Some(UkType(
-                scottishLaw = true,
-                preOffShore = None
-              )),
-              nonUK = None
-            ),
-            trustUKProperty = true,
-            trustRecorded = true,
-            trustUKRelation = None,
-            trustUKResident = true,
-            typeOfTrust = "Will Trust or Intestacy Trust",
-            deedOfVariation = None,
-            interVivos = None,
-            efrbsStartDate = None,
-            settlorsUkBased = None,
-            schedule3aExempt = Some(true)
-          ))
+          val body = Json.toJson(
+            MigratingTrustDetails(
+              lawCountry = None,
+              administrationCountry = "GB",
+              residentialStatus = ResidentialStatusType(
+                uk = Some(
+                  UkType(
+                    scottishLaw = true,
+                    preOffShore = None
+                  )
+                ),
+                nonUK = None
+              ),
+              trustUKProperty = true,
+              trustRecorded = true,
+              trustUKRelation = None,
+              trustUKResident = true,
+              typeOfTrust = "Will Trust or Intestacy Trust",
+              deedOfVariation = None,
+              interVivos = None,
+              efrbsStartDate = None,
+              settlorsUkBased = None,
+              schedule3aExempt = Some(true)
+            )
+          )
 
           val request = FakeRequest(PUT, "path")
             .withBody(body)
@@ -829,14 +832,18 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
-            equalTo(SetTrustDetailTransform(Json.parse(
-              """
+            equalTo(
+              SetTrustDetailTransform(
+                Json.parse("""
                 |{
                 |  "uk": {
                 |    "scottishLaw": true
                 |  }
                 |}
-                |""".stripMargin), RESIDENTIAL_STATUS))
+                |""".stripMargin),
+                RESIDENTIAL_STATUS
+              )
+            )
           )(any())
 
           verify(mockTransformationService).addNewTransform(
@@ -896,7 +903,9 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
             mockTaxableMigrationService
           )(Implicits.global, Helpers.stubControllerComponents())
 
-          val body = Json.toJson(NonMigratingTrustDetails(trustUKProperty = true, trustRecorded = true, None, trustUKResident = true))
+          val body = Json.toJson(
+            NonMigratingTrustDetails(trustUKProperty = true, trustRecorded = true, None, trustUKResident = true)
+          )
 
           val request = FakeRequest(PUT, "path")
             .withBody(body)
@@ -965,13 +974,17 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
         controller.setProperty(utr).apply(request)
       }
 
-      val expressTrustTransform = SetTrustDetailTransform(JsBoolean(true), "expressTrust")
+      val expressTrustTransform    = SetTrustDetailTransform(JsBoolean(true), "expressTrust")
       val trustUKPropertyTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKProperty")
 
       status(result) mustBe OK
 
-      verify(mockTransformationService).addNewTransform(equalTo(utr), equalTo("id"), equalTo(expressTrustTransform))(any())
-      verify(mockTransformationService).addNewTransform(equalTo(utr), equalTo("id"), equalTo(trustUKPropertyTransform))(any())
+      verify(mockTransformationService).addNewTransform(equalTo(utr), equalTo("id"), equalTo(expressTrustTransform))(
+        any()
+      )
+      verify(mockTransformationService).addNewTransform(equalTo(utr), equalTo("id"), equalTo(trustUKPropertyTransform))(
+        any()
+      )
     }
 
     "must return an Internal Server error when addNewTransform fails" in {
@@ -997,4 +1010,5 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
+
 }

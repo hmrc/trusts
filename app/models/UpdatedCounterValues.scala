@@ -29,4 +29,5 @@ case class UpdatedCounterValues(matched: Long = 0L, updated: Long = 0L, errors: 
 
   def report(name: String): Unit =
     logger.info(s"[UpdatedCounterValues] matched=$matched updated=$updated errors=$errors name = $name  ")
+
 }

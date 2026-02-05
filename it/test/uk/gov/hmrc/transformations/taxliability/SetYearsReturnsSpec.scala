@@ -48,13 +48,19 @@ class SetYearsReturnsSpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-      ).build()
+      )
+      .build()
 
     def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
@@ -67,8 +73,9 @@ class SetYearsReturnsSpec extends IntegrationTestBase {
       runTest("0123456789", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
@@ -79,13 +86,17 @@ class SetYearsReturnsSpec extends IntegrationTestBase {
 
       val initialYearsReturns = contentAsJson(initialGetResult).as[JsValue]
 
-      val body = Json.toJson(YearsReturns(
-        returns = Some(List(
-          YearReturnType("18", taxConsequence = true),
-          YearReturnType("19", taxConsequence = true),
-          YearReturnType("20", taxConsequence = true)
-        ))
-      ))
+      val body = Json.toJson(
+        YearsReturns(
+          returns = Some(
+            List(
+              YearReturnType("18", taxConsequence = true),
+              YearReturnType("19", taxConsequence = true),
+              YearReturnType("20", taxConsequence = true)
+            )
+          )
+        )
+      )
 
       val setYearsReturnsRequest = FakeRequest(PUT, s"/trusts/tax-liability/$identifier/years-returns")
         .withBody(body)
@@ -94,7 +105,8 @@ class SetYearsReturnsSpec extends IntegrationTestBase {
       val setYearsReturnsResponse = route(application, setYearsReturnsRequest).get
       status(setYearsReturnsResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/tax-liability/$identifier/transformed")).get
+      val subsequentGetResult =
+        route(application, FakeRequest(GET, s"/trusts/tax-liability/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val subsequentYearsReturns = contentAsJson(subsequentGetResult).as[JsValue]
@@ -103,4 +115,5 @@ class SetYearsReturnsSpec extends IntegrationTestBase {
 
     }
   }
+
 }

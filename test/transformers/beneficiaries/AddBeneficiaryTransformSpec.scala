@@ -37,7 +37,9 @@ class AddBeneficiaryTransformSpec extends AnyFreeSpec {
         organisationName = "Charity",
         beneficiaryDiscretion = Some(false),
         beneficiaryShareOfIncome = Some("50"),
-        identification = Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+        identification = Some(
+          IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)
+        ),
         countryOfResidence = None,
         entityStart = LocalDate.parse("1990-10-10"),
         entityEnd = None
@@ -65,10 +67,13 @@ class AddBeneficiaryTransformSpec extends AnyFreeSpec {
         organisationName = "Organisation Name",
         beneficiaryDiscretion = Some(false),
         beneficiaryShareOfIncome = Some("50"),
-        identification = Some(IdentificationOrgType(
-          Some("company utr"),
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
-          None)),
+        identification = Some(
+          IdentificationOrgType(
+            Some("company utr"),
+            Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+            None
+          )
+        ),
         countryOfResidence = None,
         entityStart = LocalDate.parse("1990-10-10"),
         entityEnd = None
@@ -90,7 +95,8 @@ class AddBeneficiaryTransformSpec extends AnyFreeSpec {
 
     "when individual" - {
 
-      val beneficiary = IndividualDetailsType(None,
+      val beneficiary = IndividualDetailsType(
+        None,
         bpMatchStatus = None,
         name = NameType("First", None, "Last"),
         dateOfBirth = Some(LocalDate.parse("2000-01-01")),
@@ -132,11 +138,13 @@ class AddBeneficiaryTransformSpec extends AnyFreeSpec {
         description3 = None,
         description4 = None,
         numberOfBeneficiary = "501",
-        identification = Some(IdentificationOrgType(
-          None,
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
-          None
-        )),
+        identification = Some(
+          IdentificationOrgType(
+            None,
+            Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+            None
+          )
+        ),
         beneficiaryDiscretion = None,
         beneficiaryShareOfIncome = None,
         countryOfResidence = None,
@@ -194,10 +202,13 @@ class AddBeneficiaryTransformSpec extends AnyFreeSpec {
         organisationName = "Organisation Name",
         beneficiaryDiscretion = Some(false),
         beneficiaryShareOfIncome = Some("50"),
-        identification = Some(IdentificationOrgType(
-          Some("company utr"),
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
-          None)),
+        identification = Some(
+          IdentificationOrgType(
+            Some("company utr"),
+            Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+            None
+          )
+        ),
         countryOfResidence = None,
         entityStart = LocalDate.parse("1990-10-10"),
         entityEnd = None
@@ -243,4 +254,5 @@ class AddBeneficiaryTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

@@ -39,61 +39,66 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class GetTrustController @Inject()(identify: IdentifierAction,
-                                   auditService: AuditService,
-                                   trustsService: TrustsService,
-                                   transformationService: TransformationService,
-                                   taxYearService: TaxYearService,
-                                   validateIdentifier: ValidateIdentifierActionProvider,
-                                   requiredDetailsUtil: RequiredEntityDetailsForMigration,
-                                   cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
+class GetTrustController @Inject() (
+  identify: IdentifierAction,
+  auditService: AuditService,
+  trustsService: TrustsService,
+  transformationService: TransformationService,
+  taxYearService: TaxYearService,
+  validateIdentifier: ValidateIdentifierActionProvider,
+  requiredDetailsUtil: RequiredEntityDetailsForMigration,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends BackendController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
-    BadRequestResponse -> "Bad Request received from DES.",
-    ResourceNotFoundResponse -> "Not Found received from DES.",
+    BadRequestResponse          -> "Bad Request received from DES.",
+    ResourceNotFoundResponse    -> "Not Found received from DES.",
     InternalServerErrorResponse -> "Internal Server Error received from DES.",
-    ServiceUnavailableResponse -> "Service Unavailable received from DES.",
-    ClosedRequestResponse -> "Closed Request response received from DES."
+    ServiceUnavailableResponse  -> "Service Unavailable received from DES.",
+    ClosedRequestResponse       -> "Closed Request response received from DES."
   )
 
   val errorResponses: Map[GetTrustResponse, Result] = Map(
-    ResourceNotFoundResponse -> NotFound,
-    ClosedRequestResponse -> Status(CLOSED_REQUEST_STATUS),
+    ResourceNotFoundResponse   -> NotFound,
+    ClosedRequestResponse      -> Status(CLOSED_REQUEST_STATUS),
     ServiceUnavailableResponse -> ServiceUnavailable
   )
 
   def getFromEtmp(identifier: String): Action[AnyContent] =
-    doGet(identifier, applyTransformations = false, refreshEtmpData = true) {
-      result: GetTrustSuccessResponse => Ok(Json.toJson(result))
+    doGet(identifier, applyTransformations = false, refreshEtmpData = true) { result: GetTrustSuccessResponse =>
+      Ok(Json.toJson(result))
     }
 
   def get(identifier: String, applyTransformations: Boolean = false): Action[AnyContent] =
-    doGet(identifier, applyTransformations) {
-      result: GetTrustSuccessResponse => Ok(Json.toJson(result))
+    doGet(identifier, applyTransformations) { result: GetTrustSuccessResponse =>
+      Ok(Json.toJson(result))
     }
 
-  def getLeadTrustee(identifier: String): Action[AnyContent] = {
+  def getLeadTrustee(identifier: String): Action[AnyContent] =
     getEtmpData(identifier) { processed =>
       val pick = (ENTITIES \ LEAD_TRUSTEE).json.pick
-      processed.getTrust.transform(pick).fold(
-        _ => InternalServerError,
-        json => {
-          json.validate[DisplayTrustLeadTrusteeType] match {
-            case JsSuccess(DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None), _) =>
-              Ok(Json.toJson(leadTrusteeInd))
-            case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
-              Ok(Json.toJson(leadTrusteeOrg))
-            case _ =>
-              logger.error(s"[$className][getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
-                s"doGet has succeeded but picked lead trustee json has failed validation.")
-              InternalServerError
-          }
-        }
-      )
+      processed.getTrust
+        .transform(pick)
+        .fold(
+          _ => InternalServerError,
+          json =>
+            json.validate[DisplayTrustLeadTrusteeType] match {
+              case JsSuccess(DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None), _) =>
+                Ok(Json.toJson(leadTrusteeInd))
+              case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
+                Ok(Json.toJson(leadTrusteeOrg))
+              case _                                                                     =>
+                logger.error(
+                  s"[$className][getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
+                    s"doGet has succeeded but picked lead trustee json has failed validation."
+                )
+                InternalServerError
+            }
+        )
     }
-  }
 
   def wasTrustRegisteredWithDeceasedSettlor(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR, applyTransformations = false)
@@ -114,44 +119,45 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     getArrayAtPath(identifier, TRUST \ ASSETS, ASSETS)
 
   def getSettlors(identifier: String): Action[AnyContent] =
-    processEtmpData(identifier) {
-      transformed =>
-        val settlorsPath = ENTITIES \ SETTLORS
-        val deceasedPath = ENTITIES \ DECEASED_SETTLOR
+    processEtmpData(identifier) { transformed =>
+      val settlorsPath = ENTITIES \ SETTLORS
+      val deceasedPath = ENTITIES \ DECEASED_SETTLOR
 
-        val settlors = transformed.transform(settlorsPath.json.pick).getOrElse(Json.obj())
-        val deceased = transformed.transform(deceasedPath.json.pick)
-        val amendedSettlors = deceased.map {
-          deceased => settlors.as[JsObject] + (DECEASED_SETTLOR -> deceased)
-        }.getOrElse(settlors)
+      val settlors        = transformed.transform(settlorsPath.json.pick).getOrElse(Json.obj())
+      val deceased        = transformed.transform(deceasedPath.json.pick)
+      val amendedSettlors = deceased
+        .map { deceased =>
+          settlors.as[JsObject] + (DECEASED_SETTLOR -> deceased)
+        }
+        .getOrElse(settlors)
 
-        Json.obj(SETTLORS -> amendedSettlors)
+      Json.obj(SETTLORS -> amendedSettlors)
     }
 
   def getDeceasedSettlorDeathRecorded(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH, applyTransformations = false)
 
   def getProtectorsAlreadyExist(identifier: String): Action[AnyContent] =
-    processEtmpData(identifier) {
-      trustData =>
-        JsBoolean(!trustData.transform((ENTITIES \ PROTECTORS).json.pick).asOpt.contains(
-          Json.obj(INDIVIDUAL_PROTECTOR -> JsArray(), BUSINESS_PROTECTOR -> JsArray()))
-        )
+    processEtmpData(identifier) { trustData =>
+      JsBoolean(
+        !trustData
+          .transform((ENTITIES \ PROTECTORS).json.pick)
+          .asOpt
+          .contains(Json.obj(INDIVIDUAL_PROTECTOR -> JsArray(), BUSINESS_PROTECTOR -> JsArray()))
+      )
     }
 
   def getProtectors(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, ENTITIES \ PROTECTORS, PROTECTORS)
 
-  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] = {
+  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, ENTITIES \ OTHER_INDIVIDUALS \ 0)
-  }
 
   def getOtherIndividuals(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, ENTITIES \ OTHER_INDIVIDUALS, OTHER_INDIVIDUALS)
 
-  def getNonEeaCompaniesAlreadyExist(identifier: String): Action[AnyContent] = {
+  def getNonEeaCompaniesAlreadyExist(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET \ 0)
-  }
 
   def areBeneficiariesCompleteForMigration(identifier: String): Action[AnyContent] =
     areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areBeneficiariesCompleteForMigration)
@@ -159,17 +165,19 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] =
     areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areSettlorsCompleteForMigration)
 
-  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[MigrationStatus]): Action[AnyContent] = {
-    getEtmpData(identifier) {
-      processed =>
-        f(processed.getTrust) match {
-          case JsSuccess(value, _) => Ok(Json.toJson(value))
-          case JsError(errors) =>
-            logger.error(s"[$className][areEntitiesCompleteForMigration][Identifier: $identifier] Failed to check entities: $errors")
-            InternalServerError
-        }
+  private def areEntitiesCompleteForMigration(
+    identifier: String
+  )(f: JsValue => JsResult[MigrationStatus]): Action[AnyContent] =
+    getEtmpData(identifier) { processed =>
+      f(processed.getTrust) match {
+        case JsSuccess(value, _) => Ok(Json.toJson(value))
+        case JsError(errors)     =>
+          logger.error(
+            s"[$className][areEntitiesCompleteForMigration][Identifier: $identifier] Failed to check entities: $errors"
+          )
+          InternalServerError
+      }
     }
-  }
 
   def isTrust5mld(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS, applyTransformations = false)
@@ -177,98 +185,114 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getTrustName(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, TRUST_NAME)
 
-  def getFirstTaxYearAvailable(identifier: String): Action[AnyContent] = {
+  def getFirstTaxYearAvailable(identifier: String): Action[AnyContent] =
     getEtmpData(identifier) { processed =>
       processed.getTrust.transform((TRUST \ DETAILS \ START_DATE).json.pick) match {
         case JsSuccess(value, _) =>
           Ok(Json.toJson(taxYearService.firstTaxYearAvailable(value.as[LocalDate])))
-        case JsError(errors) =>
+        case JsError(errors)     =>
           logger.error(s"[Identifier: $identifier] Failed to pick trust start date: $errors")
           InternalServerError
       }
     }
-  }
 
-  private def isPickSuccessfulAtPath(identifier: String, path: JsPath, applyTransformations: Boolean = true): Action[AnyContent] = {
-    processEtmpData(identifier, applyTransformations) {
-      etmpData =>
-        JsBoolean(etmpData.transform(path.json.pick).isSuccess)
+  private def isPickSuccessfulAtPath(
+    identifier: String,
+    path: JsPath,
+    applyTransformations: Boolean = true
+  ): Action[AnyContent] =
+    processEtmpData(identifier, applyTransformations) { etmpData =>
+      JsBoolean(etmpData.transform(path.json.pick).isSuccess)
     }
-  }
 
-  private def getArrayAtPath(identifier: String, path: JsPath, fieldName: String, applyTransformations: Boolean = true): Action[AnyContent] = {
+  private def getArrayAtPath(
+    identifier: String,
+    path: JsPath,
+    fieldName: String,
+    applyTransformations: Boolean = true
+  ): Action[AnyContent] =
     getElementAtPath(
       identifier,
       path,
       Json.obj(fieldName -> JsArray()),
       applyTransformations
-    ) {
-      json => Json.obj(fieldName -> json)
+    ) { json =>
+      Json.obj(fieldName -> json)
     }
-  }
 
-  private def getItemAtPath(identifier: String, path: JsPath, applyTransformations: Boolean = true): Action[AnyContent] = {
+  private def getItemAtPath(
+    identifier: String,
+    path: JsPath,
+    applyTransformations: Boolean = true
+  ): Action[AnyContent] =
     getElementAtPath(
       identifier,
       path,
       Json.obj(),
       applyTransformations
-    ) {
-      json => json
+    ) { json =>
+      json
     }
-  }
 
-  private def getElementAtPath(identifier: String, path: JsPath, defaultValue: JsValue, applyTransformations: Boolean)
-                              (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
-    processEtmpData(identifier, applyTransformations) {
-      transformed =>
-        transformed
-          .transform(path.json.pick)
-          .map(insertIntoObject)
-          .getOrElse(defaultValue)
+  private def getElementAtPath(identifier: String, path: JsPath, defaultValue: JsValue, applyTransformations: Boolean)(
+    insertIntoObject: JsValue => JsValue
+  ): Action[AnyContent] =
+    processEtmpData(identifier, applyTransformations) { transformed =>
+      transformed
+        .transform(path.json.pick)
+        .map(insertIntoObject)
+        .getOrElse(defaultValue)
     }
-  }
 
-  private def processEtmpData(identifier: String, applyTransformations: Boolean = true)
-                             (processObject: JsValue => JsValue): Action[AnyContent] = {
+  private def processEtmpData(identifier: String, applyTransformations: Boolean = true)(
+    processObject: JsValue => JsValue
+  ): Action[AnyContent] =
 
     getEtmpData(identifier, applyTransformations) { processed =>
-      processed.transform.map {
-        case transformed: TrustProcessedResponse =>
-          Ok(processObject(transformed.getTrust))
-        case _ =>
-          InternalServerError
-      }.getOrElse(InternalServerError)
+      processed.transform
+        .map {
+          case transformed: TrustProcessedResponse =>
+            Ok(processObject(transformed.getTrust))
+          case _                                   =>
+            InternalServerError
+        }
+        .getOrElse(InternalServerError)
     }
-  }
 
-  private def getEtmpData(identifier: String, applyTransformations: Boolean = true)
-                         (processObject: TrustProcessedResponse => Result): Action[AnyContent] = {
+  private def getEtmpData(identifier: String, applyTransformations: Boolean = true)(
+    processObject: TrustProcessedResponse => Result
+  ): Action[AnyContent] =
     doGet(identifier, applyTransformations) {
       case processed: TrustProcessedResponse =>
         processObject(processed)
-      case _ =>
+      case _                                 =>
         Forbidden
     }
-  }
 
-  private def resetCacheIfRequested(identifier: String, internalId: String, sessionId: String, refreshEtmpData: Boolean): TrustEnvelope[Unit] = EitherT {
+  private def resetCacheIfRequested(
+    identifier: String,
+    internalId: String,
+    sessionId: String,
+    refreshEtmpData: Boolean
+  ): TrustEnvelope[Unit] = EitherT {
     logger.info(s"resetCacheIfRequested --start $identifier, $internalId, $sessionId, $refreshEtmpData")
     if (refreshEtmpData) {
       val resetTransforms = transformationService.removeAllTransformations(identifier, internalId, sessionId)
-      val resetCache = trustsService.resetCache(identifier, internalId, sessionId)
+      val resetCache      = trustsService.resetCache(identifier, internalId, sessionId)
 
       val expectedResult = for {
-        _ <- resetTransforms
+        _     <- resetTransforms
         cache <- resetCache
       } yield cache
 
       expectedResult.value.map {
-        case Right(cache) => Right(cache)
+        case Right(cache)                                   => Right(cache)
         case Left(ServerError(message)) if message.nonEmpty =>
-          logger.warn(s"[$className][resetCacheIfRequested][SessionId: $sessionId] failed to reset cache. Message: $message")
+          logger.warn(
+            s"[$className][resetCacheIfRequested][SessionId: $sessionId] failed to reset cache. Message: $message"
+          )
           Left(ServerError())
-        case Left(_) =>
+        case Left(_)                                        =>
           logger.warn(s"[$className][resetCacheIfRequested][SessionId: $sessionId] failed to reset cache.")
           Left(ServerError())
       }
@@ -278,77 +302,76 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
-                   (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
-    implicit request => {
-      logger.info(s"doGet ... start $identifier, $applyTransformations, $refreshEtmpData")
-      val expectedResult = for {
-        _ <- resetCacheIfRequested(identifier, request.internalId, Session.id(hc), refreshEtmpData)
-        data <- if (applyTransformations) {
-          transformationService.getTransformedData(identifier, request.internalId, Session.id(hc))
-        } else {
-          trustsService.getTrustInfo(identifier, request.internalId, Session.id(hc))
-        }
-      } yield (
-        successResponse(f, identifier) orElse
-          notEnoughDataResponse(identifier) orElse
-          errorResponse(identifier)
-        ).apply(data)
+  private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(
+    f: GetTrustSuccessResponse => Result
+  ): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async { implicit request =>
+    logger.info(s"doGet ... start $identifier, $applyTransformations, $refreshEtmpData")
+    val expectedResult = for {
+      _    <- resetCacheIfRequested(identifier, request.internalId, Session.id(hc), refreshEtmpData)
+      data <- if (applyTransformations) {
+                transformationService.getTransformedData(identifier, request.internalId, Session.id(hc))
+              } else {
+                trustsService.getTrustInfo(identifier, request.internalId, Session.id(hc))
+              }
+    } yield (
+      successResponse(f, identifier) orElse
+        notEnoughDataResponse(identifier) orElse
+        errorResponse(identifier)
+    ).apply(data)
 
-      expectedResult.value.map {
-        case Right(result) => result
-        case Left(ServerError(message)) if message.nonEmpty =>
-          logger.warn(s"[$className][doGet][SessionID: ${Session.id(hc)}] failed to get trust info. Message: $message")
-          InternalServerError
-        case Left(_) =>
-          logger.warn(s"[$className][doGet][SessionID: ${Session.id(hc)}] failed to get trust info.")
-          InternalServerError
-      }
+    expectedResult.value.map {
+      case Right(result)                                  => result
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][doGet][SessionID: ${Session.id(hc)}] failed to get trust info. Message: $message")
+        InternalServerError
+      case Left(_)                                        =>
+        logger.warn(s"[$className][doGet][SessionID: ${Session.id(hc)}] failed to get trust info.")
+        InternalServerError
     }
   }
 
-  private def successResponse(f: GetTrustSuccessResponse => Result,
-                              identifier: String)
-                             (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
-    case response: GetTrustSuccessResponse =>
-      auditService.audit(
-        event = TrustAuditing.GET_TRUST,
-        request = Json.obj("utr" -> identifier),
-        internalId = request.internalId,
-        response = Json.toJson(response)
-      )
+  private def successResponse(f: GetTrustSuccessResponse => Result, identifier: String)(implicit
+    request: IdentifierRequest[AnyContent]
+  ): PartialFunction[GetTrustResponse, Result] = { case response: GetTrustSuccessResponse =>
+    auditService.audit(
+      event = TrustAuditing.GET_TRUST,
+      request = Json.obj("utr" -> identifier),
+      internalId = request.internalId,
+      response = Json.toJson(response)
+    )
 
-      f(response)
+    f(response)
   }
 
-  private def notEnoughDataResponse(identifier: String)
-                                   (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
-    case NotEnoughDataResponse(json, errors) =>
-      val reason = Json.obj(
-        "response" -> json,
-        "reason" -> "Missing mandatory fields in response received from DES",
-        "errors" -> errors
-      )
+  private def notEnoughDataResponse(identifier: String)(implicit
+    request: IdentifierRequest[AnyContent]
+  ): PartialFunction[GetTrustResponse, Result] = { case NotEnoughDataResponse(json, errors) =>
+    val reason = Json.obj(
+      "response" -> json,
+      "reason"   -> "Missing mandatory fields in response received from DES",
+      "errors"   -> errors
+    )
 
-      auditService.audit(
-        event = TrustAuditing.GET_TRUST,
-        request = Json.obj("utr" -> identifier),
-        internalId = request.internalId,
-        response = reason
-      )
+    auditService.audit(
+      event = TrustAuditing.GET_TRUST,
+      request = Json.obj("utr" -> identifier),
+      internalId = request.internalId,
+      response = reason
+    )
 
-      NoContent
+    NoContent
   }
 
-  private def errorResponse(identifier: String)
-                           (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
-    case err =>
-      auditService.auditErrorResponse(
-        TrustAuditing.GET_TRUST,
-        Json.obj("utr" -> identifier),
-        request.internalId,
-        errorAuditMessages.getOrElse(err, "UNKNOWN")
-      )
-      errorResponses.getOrElse(err, InternalServerError)
+  private def errorResponse(
+    identifier: String
+  )(implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = { case err =>
+    auditService.auditErrorResponse(
+      TrustAuditing.GET_TRUST,
+      Json.obj("utr" -> identifier),
+      request.internalId,
+      errorAuditMessages.getOrElse(err, "UNKNOWN")
+    )
+    errorResponses.getOrElse(err, InternalServerError)
   }
+
 }

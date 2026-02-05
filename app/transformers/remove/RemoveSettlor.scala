@@ -20,17 +20,16 @@ import java.time.LocalDate
 import play.api.libs.json.{Format, Json, OWrites, Reads}
 import utils.Constants._
 
-case class RemoveSettlor(endDate: LocalDate,
-                         index: Int,
-                         override val `type`: String) extends Remove
+case class RemoveSettlor(endDate: LocalDate, index: Int, override val `type`: String) extends Remove
 
 object RemoveSettlor {
+
   val validSettlorTypes: Seq[String] = Seq(
     INDIVIDUAL_SETTLOR,
     BUSINESS_SETTLOR
   )
 
-  val reads: Reads[RemoveSettlor] = Json.reads[RemoveSettlor].filter(rb => validSettlorTypes.contains(rb.`type`))
+  val reads: Reads[RemoveSettlor]    = Json.reads[RemoveSettlor].filter(rb => validSettlorTypes.contains(rb.`type`))
   val writes: OWrites[RemoveSettlor] = Json.writes[RemoveSettlor]
 
   implicit val formats: Format[RemoveSettlor] = Format(reads, writes)

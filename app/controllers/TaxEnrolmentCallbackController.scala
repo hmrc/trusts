@@ -29,45 +29,47 @@ import utils.Session
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-
-class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigrationService,
-                                               cc: ControllerComponents
-                                               )(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
+class TaxEnrolmentCallbackController @Inject() (migrationService: TaxableMigrationService, cc: ControllerComponents)(
+  implicit ec: ExecutionContext
+) extends BackendController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
-      val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-      logger.info(s"[$className][taxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
-        s" Tax-enrolment: taxable subscription callback message was: ${request.body}")
-      Future(Ok(""))
+  def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+    logger.info(
+      s"[$className][taxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
+        s" Tax-enrolment: taxable subscription callback message was: ${request.body}"
+    )
+    Future(Ok(""))
   }
 
-  def nonTaxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
-      val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-      logger.info(s"[$className][nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
-        s" Tax-enrolment: non-taxable subscription callback message was: ${request.body}")
-      Future(Ok(""))
+  def nonTaxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+    logger.info(
+      s"[$className][nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
+        s" Tax-enrolment: non-taxable subscription callback message was: ${request.body}"
+    )
+    Future(Ok(""))
   }
 
   def migrationSubscriptionCallback(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>
-      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(
         s"[$className][migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
-        s" Tax-enrolment: migration subscription callback triggered"
+          s" Tax-enrolment: migration subscription callback triggered"
       )
 
       migrationService.completeMigration(subscriptionId, urn).value.flatMap {
         case Right(utr) =>
           logger.info(s"[$className][migrationSubscriptionCallback] callback complete utr $utr")
           Future.successful(Ok(""))
-        case Left(_) =>
+        case Left(_)    =>
           logger.warn(s"[$className][migrationSubscriptionCallback] callback failed")
           Future.successful(InternalServerError)
       }
   }
+
 }

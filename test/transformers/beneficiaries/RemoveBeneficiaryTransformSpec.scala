@@ -48,8 +48,7 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
 
     if (withLineNo) {
       b.deepMerge(Json.obj("lineNo" -> 12))
-    }
-    else b
+    } else b
   }
 
   private def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
@@ -62,82 +61,117 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
   }
 
   "Remove Beneficiary Transforms should round trip through JSON as part of Composed Transform" in {
-    val OUT = ComposedDeltaTransform(Seq(
-      RemoveBeneficiaryTransform(Some(56), beneficiaryJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "unidentified"),
-      RemoveBeneficiaryTransform(Some(12), beneficiaryJson("Foo"), LocalDate.of(2317, 12, 21), "individualDetails")
-    ))
+    val OUT = ComposedDeltaTransform(
+      Seq(
+        RemoveBeneficiaryTransform(
+          Some(56),
+          beneficiaryJson("Blah Blah Blah"),
+          LocalDate.of(1563, 10, 23),
+          "unidentified"
+        ),
+        RemoveBeneficiaryTransform(Some(12), beneficiaryJson("Foo"), LocalDate.of(2317, 12, 21), "individualDetails")
+      )
+    )
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
       case JsSuccess(result, _) => result mustBe OUT
-      case _ => fail("Transform failed")
+      case _                    => fail("Transform failed")
     }
   }
 
   "the remove unidentified beneficiary normal transform must" - {
     "remove an unidentified beneficiary from the list that is returned to the frontend" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val expectedOutput = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Three")
-      ))
+      val expectedOutput = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveBeneficiaryTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
-        case JsError(errors) => fail(s"Transform failed: $errors")
+        case JsError(errors)     => fail(s"Transform failed: $errors")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveBeneficiaryTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveBeneficiaryTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
     "remove the section if the last beneficiary in that section is removed" in {
-      val inputJson = buildInputJson("charity", Seq(
-        beneficiaryJson("One")
-      ))
+      val inputJson = buildInputJson(
+        "charity",
+        Seq(
+          beneficiaryJson("One")
+        )
+      )
 
       val transforms = Seq(
-        RemoveBeneficiaryTransform(Some(0), beneficiaryJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "charity")
+        RemoveBeneficiaryTransform(
+          Some(0),
+          beneficiaryJson("One", None, withLineNo = false),
+          LocalDate.of(2018, 4, 21),
+          "charity"
+        )
       )
 
       val OUT = ComposedDeltaTransform(transforms)
 
       OUT.applyTransform(inputJson) match {
-        case JsSuccess(value, _) => value.transform(
-          (JsPath() \ "details" \ "trust" \ "entities" \ "beneficiary" \ "charity").json.pick).isError mustBe true
-        case _ => fail("Transform failed")
+        case JsSuccess(value, _) =>
+          value
+            .transform((JsPath() \ "details" \ "trust" \ "entities" \ "beneficiary" \ "charity").json.pick)
+            .isError mustBe true
+        case _                   => fail("Transform failed")
       }
     }
 
@@ -145,88 +179,130 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
 
   "the remove unidentified beneficiary declaration transform must" - {
     "set an end date on  an unidentified beneficiary from the list that is sent to ETMP" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val expectedOutput = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Three"),
-        beneficiaryJson("Two", Some(LocalDate.of(2018, 4, 21)))
+      val expectedOutput = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Three"),
+          beneficiaryJson("Two", Some(LocalDate.of(2018, 4, 21)))
+        )
+      )
 
-      ))
-
-      val repo = mock[TransformationRepository]
+      val repo          = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
-      val auditService = mock[AuditService]
-      val transforms = Seq(RemoveBeneficiaryTransform(Some(1), beneficiaryJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
+      val auditService  = mock[AuditService]
+      val transforms    =
+        Seq(RemoveBeneficiaryTransform(Some(1), beneficiaryJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
       when(repo.get(any(), any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(transforms))))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](
+            Future.successful(Right(Some(ComposedDeltaTransform(transforms))))
+          )
+        )
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 
-      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).value.futureValue match {
+      SUT
+        .applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier())
+        .value
+        .futureValue match {
         case Right(JsSuccess(value, _)) => value mustBe expectedOutput
-        case _ => fail("Transform failed")
+        case _                          => fail("Transform failed")
       }
     }
 
     "ignore a beneficiary that was added then removed" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val repo = mock[TransformationRepository]
+      val repo          = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
-      val auditService = mock[AuditService]
-      val transforms = Seq(
-        AddBeneficiaryTransform(Json.toJson(UnidentifiedType(None, None, "Description", None, None, LocalDate.parse("1967-12-30"), None)), "unidentified"),
-        RemoveBeneficiaryTransform(Some(3), beneficiaryJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "unidentified")
+      val auditService  = mock[AuditService]
+      val transforms    = Seq(
+        AddBeneficiaryTransform(
+          Json.toJson(UnidentifiedType(None, None, "Description", None, None, LocalDate.parse("1967-12-30"), None)),
+          "unidentified"
+        ),
+        RemoveBeneficiaryTransform(
+          Some(3),
+          beneficiaryJson("Two", None, withLineNo = false),
+          LocalDate.of(2018, 4, 21),
+          "unidentified"
+        )
       )
 
       when(repo.get(any(), any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(transforms))))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](
+            Future.successful(Right(Some(ComposedDeltaTransform(transforms))))
+          )
+        )
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 
-      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).value.futureValue match {
+      SUT
+        .applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier())
+        .value
+        .futureValue match {
         case Right(JsSuccess(value, _)) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                          => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveBeneficiaryTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Two"),
-        beneficiaryJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "unidentified",
+        Seq(
+          beneficiaryJson("One"),
+          beneficiaryJson("Two"),
+          beneficiaryJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveBeneficiaryTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
   }
+
 }

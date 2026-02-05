@@ -30,11 +30,12 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AmendSettlorController @Inject()(identify: IdentifierAction,
-                                       transformationService: TransformationService,
-                                       localDateService: LocalDateService)
-                                      (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) with SettlorController {
+class AmendSettlorController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  localDateService: LocalDateService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AmendTransformationController(identify, transformationService) with SettlorController {
 
   def amendIndividual(identifier: String, index: Int): Action[JsValue] =
     addNewTransform[SettlorIndividual](identifier, Some(index), INDIVIDUAL_SETTLOR)
@@ -45,7 +46,9 @@ class AmendSettlorController @Inject()(identify: IdentifierAction,
   def amendDeceased(identifier: String): Action[JsValue] =
     addNewTransform[AmendDeceasedSettlor](identifier, None, DECEASED_SETTLOR)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AmendSettlorTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
-  }
+
 }

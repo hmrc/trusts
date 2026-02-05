@@ -113,4 +113,5 @@ class AddTrusteeTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

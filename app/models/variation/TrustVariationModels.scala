@@ -23,20 +23,20 @@ import play.api.libs.json._
 import java.time.LocalDate
 
 case class TrustVariation(
-                           matchData: MatchData,
-                           correspondence: Correspondence,
-                           yearsReturn: Option[YearsReturns],
-                           declaration: Declaration,
-                           details: Trust,
-                           agentDetails: Option[AgentDetails] = None,
-                           trustEndDate: Option[LocalDate],
-                           reqHeader: ReqHeader,
-                           submissionDate: Option[LocalDate]   // New to 5MLD variation, mandatory in 5MLD
-                         )
+  matchData: MatchData,
+  correspondence: Correspondence,
+  yearsReturn: Option[YearsReturns],
+  declaration: Declaration,
+  details: Trust,
+  agentDetails: Option[AgentDetails] = None,
+  trustEndDate: Option[LocalDate],
+  reqHeader: ReqHeader,
+  submissionDate: Option[LocalDate] // New to 5MLD variation, mandatory in 5MLD
+)
 
 object TrustVariation {
 
-  private val variationReads: Reads[TrustVariation] = {
+  private val variationReads: Reads[TrustVariation] =
     (
       (__ \ "matchData").read[MatchData] and
         (__ \ "correspondence").read[Correspondence] and
@@ -47,8 +47,7 @@ object TrustVariation {
         (__ \ "trustEndDate").readNullable[LocalDate] and
         (__ \ "reqHeader").read[ReqHeader] and
         (__ \ "submissionDate").readNullable[LocalDate]
-      ) (TrustVariation.apply _)
-  }
+    )(TrustVariation.apply _)
 
   private val writeToDes: Writes[TrustVariation] = (
     (JsPath \ "matchData").write[MatchData] and
@@ -60,7 +59,7 @@ object TrustVariation {
       (JsPath \ "trustEndDate").writeNullable[LocalDate] and
       (JsPath \ "reqHeader").write[ReqHeader] and
       (JsPath \ "submissionDate").writeNullable[LocalDate]
-    ) (unlift(TrustVariation.unapply))
+  )(unlift(TrustVariation.unapply))
 
   implicit val variationFormat: Format[TrustVariation] = Format(variationReads, writeToDes)
 
@@ -79,46 +78,48 @@ object ReqHeader {
   implicit val reqHeaderFormat: Format[ReqHeader] = Json.format[ReqHeader]
 }
 
-case class Trust(details: TrustDetailsType,
-                 entities: TrustEntitiesType,
-                 assets: Option[variation.Assets])
+case class Trust(details: TrustDetailsType, entities: TrustEntitiesType, assets: Option[variation.Assets])
 
 object Trust {
   implicit val trustFormat: Format[Trust] = Json.format[Trust]
 }
 
-case class TrustEntitiesType(naturalPerson: Option[List[variation.NaturalPersonType]],
-                             beneficiary: variation.BeneficiaryType,
-                             deceased: Option[variation.WillType],
-                             leadTrustees: List[variation.LeadTrusteeType],
-                             trustees: Option[List[variation.TrusteeType]],
-                             protectors: Option[variation.ProtectorsType],
-                             settlors: Option[variation.Settlors])
+case class TrustEntitiesType(
+  naturalPerson: Option[List[variation.NaturalPersonType]],
+  beneficiary: variation.BeneficiaryType,
+  deceased: Option[variation.WillType],
+  leadTrustees: List[variation.LeadTrusteeType],
+  trustees: Option[List[variation.TrusteeType]],
+  protectors: Option[variation.ProtectorsType],
+  settlors: Option[variation.Settlors]
+)
 
 object TrustEntitiesType {
   implicit val trustEntitiesTypeFormat: Format[TrustEntitiesType] = Json.format[TrustEntitiesType]
 }
 
-case class IdentificationType(nino: Option[String],
-                              passport: Option[PassportType],
-                              address: Option[AddressType],
-                              safeId: Option[String])
+case class IdentificationType(
+  nino: Option[String],
+  passport: Option[PassportType],
+  address: Option[AddressType],
+  safeId: Option[String]
+)
 
 object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
 }
 
-case class IdentificationOrgType(utr: Option[String],
-                                 address: Option[AddressType],
-                                 safeId: Option[String])
+case class IdentificationOrgType(utr: Option[String], address: Option[AddressType], safeId: Option[String])
 
 object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
 
-case class DeclarationForApi(declaration: DeclarationName,
-                             agentDetails: Option[AgentDetails],
-                             endDate: Option[LocalDate])
+case class DeclarationForApi(
+  declaration: DeclarationName,
+  agentDetails: Option[AgentDetails],
+  endDate: Option[LocalDate]
+)
 
 object DeclarationForApi {
   implicit val declarationForApiFormat: Format[DeclarationForApi] = Json.format[DeclarationForApi]

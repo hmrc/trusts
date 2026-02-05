@@ -27,16 +27,20 @@ import utils.ErrorResponses._
 
 import javax.inject.Inject
 
-class VariationsResponseHandler @Inject()(auditService: AuditService) extends Logging {
+class VariationsResponseHandler @Inject() (auditService: AuditService) extends Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def recoverErrorResponse(variationFailure: VariationFailureForAudit, auditType: String)
-                          (implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Result = {
+  def recoverErrorResponse(variationFailure: VariationFailureForAudit, auditType: String)(implicit
+    request: IdentifierRequest[JsValue],
+    hc: HeaderCarrier
+  ): Result =
 
     variationFailure.reason match {
       case InvalidCorrelationIdErrorResponse =>
-        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] InvalidCorrelationIdErrorResponse returned")
+        logger.error(
+          s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] InvalidCorrelationIdErrorResponse returned"
+        )
         auditService.auditErrorResponse(
           auditType,
           request.body,
@@ -46,12 +50,21 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
         invalidCorrelationIdErrorResponse
 
       case DuplicateSubmissionErrorResponse =>
-        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] DuplicateSubmissionErrorResponse returned")
-        auditService.auditErrorResponse(auditType, request.body, request.internalId, errorReason = "Duplicate Correlation Id was submitted.")
+        logger.error(
+          s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] DuplicateSubmissionErrorResponse returned"
+        )
+        auditService.auditErrorResponse(
+          auditType,
+          request.body,
+          request.internalId,
+          errorReason = "Duplicate Correlation Id was submitted."
+        )
         duplicateSubmissionErrorResponse
 
       case ServiceNotAvailableErrorResponse =>
-        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] ServiceNotAvailableErrorResponse returned")
+        logger.error(
+          s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] ServiceNotAvailableErrorResponse returned"
+        )
         auditService.auditErrorResponse(
           auditType,
           request.body,
@@ -61,7 +74,9 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
         serviceUnavailableErrorResponse
 
       case EtmpCacheDataStaleErrorResponse =>
-        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] EtmpCacheDataStaleErrorResponse returned")
+        logger.error(
+          s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] EtmpCacheDataStaleErrorResponse returned"
+        )
         auditService.auditErrorResponse(
           auditType,
           request.body,
@@ -71,8 +86,9 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
         etmpDataStaleErrorResponse
 
       case errorResponse =>
-        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] " +
-          s"$errorResponse returned with message: ${variationFailure.message}"
+        logger.error(
+          s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] " +
+            s"$errorResponse returned with message: ${variationFailure.message}"
         )
 
         auditService.auditErrorResponse(
@@ -84,6 +100,5 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
 
         internalServerErrorErrorResponse
     }
-  }
 
 }

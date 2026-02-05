@@ -49,8 +49,8 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
 
   private val invalidBody: JsValue = Json.parse("{}")
@@ -68,19 +68,21 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
     "individual trustee" - {
 
       val trustee = TrusteeType(
-        trusteeInd = Some(TrusteeIndividualType(
-          lineNo = None,
-          bpMatchStatus = None,
-          name = NameType("Joe", None, "Bloggs"),
-          dateOfBirth = None,
-          phoneNumber = None,
-          identification = None,
-          countryOfResidence = None,
-          legallyIncapable = None,
-          nationality = None,
-          entityStart = LocalDate.parse("2012-03-14"),
-          entityEnd = None
-        )),
+        trusteeInd = Some(
+          TrusteeIndividualType(
+            lineNo = None,
+            bpMatchStatus = None,
+            name = NameType("Joe", None, "Bloggs"),
+            dateOfBirth = None,
+            phoneNumber = None,
+            identification = None,
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            entityStart = LocalDate.parse("2012-03-14"),
+            entityEnd = None
+          )
+        ),
         trusteeOrg = None
       )
 
@@ -94,7 +96,9 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(trustee)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(trustee))))))
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -156,17 +160,19 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
       val trustee = TrusteeType(
         trusteeInd = None,
-        trusteeOrg = Some(TrusteeOrgType(
-          lineNo = None,
-          bpMatchStatus = None,
-          name = "Name",
-          phoneNumber = None,
-          email = None,
-          identification = None,
-          countryOfResidence = None,
-          entityStart = LocalDate.parse("2012-03-14"),
-          entityEnd = None
-        ))
+        trusteeOrg = Some(
+          TrusteeOrgType(
+            lineNo = None,
+            bpMatchStatus = None,
+            name = "Name",
+            phoneNumber = None,
+            email = None,
+            identification = None,
+            countryOfResidence = None,
+            entityStart = LocalDate.parse("2012-03-14"),
+            entityEnd = None
+          )
+        )
       )
 
       "add a new remove transform" in {
@@ -179,7 +185,9 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(trustee)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(trustee))))))
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -215,7 +223,9 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(trustee)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(trustee))))))
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -256,4 +266,5 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     }
   }
+
 }

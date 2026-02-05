@@ -21,6 +21,7 @@ import java.time.{LocalDate, MonthDay}
 object Implicits {
 
   implicit class LocalDateImplicits(date: LocalDate) {
+
     def next(monthDay: MonthDay): LocalDate = {
       val year = if (!monthDay.isBefore(date.getMonthDay)) {
         date.getYear

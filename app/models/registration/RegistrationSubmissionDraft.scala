@@ -34,16 +34,14 @@ object RegistrationSubmission {
   }
 
   // Answer row and section, for display in print summary.
-  case class AnswerRow(label: String,
-                       answer: String,
-                       labelArgs: Seq[String])
+  case class AnswerRow(label: String, answer: String, labelArgs: Seq[String])
 
   object AnswerRow {
 
     lazy val labelArgReads: Reads[Seq[String]] =
       (JsPath \ "labelArg").read[String].map[Seq[String]] {
         case x if x.isEmpty => Nil
-        case x => x :: Nil
+        case x              => x :: Nil
       } orElse
         (JsPath \ "labelArgs").readWithDefault[Seq[String]](Nil)
 
@@ -51,17 +49,19 @@ object RegistrationSubmission {
       (JsPath \ "label").read[String] and
         (JsPath \ "answer").read[String] and
         labelArgReads
-      )(AnswerRow.apply _)
+    )(AnswerRow.apply _)
 
     implicit lazy val writes: Writes[AnswerRow] = Json.writes[AnswerRow]
 
     implicit lazy val format: Format[AnswerRow] = Format(reads, writes)
   }
 
-  case class AnswerSection(headingKey: Option[String],
-                           rows: Seq[AnswerRow],
-                           sectionKey: Option[String],
-                           headingArgs: Seq[String])
+  case class AnswerSection(
+    headingKey: Option[String],
+    rows: Seq[AnswerRow],
+    sectionKey: Option[String],
+    headingArgs: Seq[String]
+  )
 
   object AnswerSection {
 
@@ -72,7 +72,7 @@ object RegistrationSubmission {
         (JsPath \ "rows").read[Seq[AnswerRow]] and
         (JsPath \ "sectionKey").readNullable[String] and
         (JsPath \ "headingArgs").readWithDefault[Seq[String]](Nil)
-      )(AnswerSection.apply _)
+    )(AnswerSection.apply _)
 
     implicit lazy val writes: Writes[AnswerSection] = Json.writes[AnswerSection]
 
@@ -80,31 +80,30 @@ object RegistrationSubmission {
   }
 
   // Set of data sent by sub-frontend, with user answers, any mapped pieces and answer sections.
-  case class DataSet(data: JsValue,
-                     registrationPieces: List[MappedPiece],
-                     answerSections: List[AnswerSection])
+  case class DataSet(data: JsValue, registrationPieces: List[MappedPiece], answerSections: List[AnswerSection])
 
   object DataSet {
     implicit lazy val format: Format[DataSet] = Json.format[DataSet]
   }
+
 }
 
 // Primary front end draft data (e.g, trusts-frontend), including reference and in-progress.
-case class RegistrationSubmissionDraftData(data: JsValue,
-                                           reference: Option[String],
-                                           inProgress: Option[Boolean])
+case class RegistrationSubmissionDraftData(data: JsValue, reference: Option[String], inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraftData {
   implicit lazy val format: Format[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
 }
 
 // Full draft data as stored in database.
-case class RegistrationSubmissionDraft(draftId: String,
-                                       internalId: String,
-                                       createdAt: Instant,
-                                       draftData: JsValue,
-                                       reference: Option[String],
-                                       inProgress: Option[Boolean])
+case class RegistrationSubmissionDraft(
+  draftId: String,
+  internalId: String,
+  createdAt: Instant,
+  draftData: JsValue,
+  reference: Option[String],
+  inProgress: Option[Boolean]
+)
 
 object RegistrationSubmissionDraft {
 
@@ -115,7 +114,7 @@ object RegistrationSubmissionDraft {
       (__ \ "draftData").read[JsValue] and
       (__ \ "reference").readNullable[String] and
       (__ \ "inProgress").readNullable[Boolean]
-    ) (RegistrationSubmissionDraft.apply _)
+  )(RegistrationSubmissionDraft.apply _)
 
   implicit lazy val writes: OWrites[RegistrationSubmissionDraft] = (
     (__ \ "draftId").write[String] and
@@ -124,5 +123,6 @@ object RegistrationSubmissionDraft {
       (__ \ "draftData").write[JsValue] and
       (__ \ "reference").writeNullable[String] and
       (__ \ "inProgress").writeNullable[Boolean]
-    ) (unlift(RegistrationSubmissionDraft.unapply))
+  )(unlift(RegistrationSubmissionDraft.unapply))
+
 }

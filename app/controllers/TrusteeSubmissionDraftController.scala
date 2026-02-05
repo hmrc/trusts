@@ -26,20 +26,19 @@ import services.dates.TimeService
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TrusteeSubmissionDraftController @Inject()(
-                                                  submissionRepository: RegistrationSubmissionRepository,
-                                                  identify: IdentifierAction,
-                                                  timeService: TimeService,
-                                                  cc: ControllerComponents
-                                                )(implicit ec: ExecutionContext)
-  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
+class TrusteeSubmissionDraftController @Inject() (
+  submissionRepository: RegistrationSubmissionRepository,
+  identify: IdentifierAction,
+  timeService: TimeService,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
-  def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
-      implicit val writes: Writes[LeadTrusteeType] = LeadTrusteeType.writes
+  def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    val path                                     = JsPath \ "registration" \ "trust/entities/leadTrustees"
+    implicit val writes: Writes[LeadTrusteeType] = LeadTrusteeType.writes
 
-      getResult[LeadTrusteeType](draftId, path)
+    getResult[LeadTrusteeType](draftId, path)
   }
 
 }

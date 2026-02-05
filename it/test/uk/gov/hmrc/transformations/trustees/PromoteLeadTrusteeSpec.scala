@@ -41,7 +41,9 @@ import scala.concurrent.Future
 
 class PromoteLeadTrusteeSpec extends IntegrationTestBase {
 
-  val getTrustResponse: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+  val getTrustResponse: GetTrustSuccessResponse =
+    JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "a promote lead trustee call" should {
@@ -56,15 +58,18 @@ class PromoteLeadTrusteeSpec extends IntegrationTestBase {
       identification = IdentificationType(
         Some("ST123456"),
         None,
-        Some(AddressType(
-          "221B Baker Street",
-          "Suite 16",
-          Some("Newcastle upon Tyne"),
-          None,
-          Some("NE1 2LA"),
-          "GB"
-        )),
-        None),
+        Some(
+          AddressType(
+            "221B Baker Street",
+            "Suite 16",
+            Some("Newcastle upon Tyne"),
+            None,
+            Some("NE1 2LA"),
+            "GB"
+          )
+        ),
+        None
+      ),
       countryOfResidence = None,
       legallyIncapable = None,
       nationality = None,
@@ -72,7 +77,8 @@ class PromoteLeadTrusteeSpec extends IntegrationTestBase {
       entityEnd = None
     )
 
-    val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")
+    val expectedGetAfterPromoteTrusteeJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
     when(stubbedTrustsConnector.getTrustInfo(any()))
@@ -80,22 +86,23 @@ class PromoteLeadTrusteeSpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 
-    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)({ (app) =>
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)(app =>
       runTest("5174384721", app)
-    })
+    )
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)({ (app) =>
-      runTest("0123456789ABCDE", app)
-    })
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)(
+      app => runTest("0123456789ABCDE", app)
+    )
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
       val promoteRequest = FakeRequest(POST, s"/trusts/trustees/promote/$identifier/0")
@@ -106,9 +113,10 @@ class PromoteLeadTrusteeSpec extends IntegrationTestBase {
       status(promoteResult) mustBe OK
 
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+      status(newResult)        mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterPromoteTrusteeJson
 
     }
   }
+
 }

@@ -37,28 +37,28 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class RegisterTrustController @Inject()(
-                                         trustsService: TrustsService,
-                                         config: AppConfig,
-                                         validationService: ValidationService,
-                                         identify: IdentifierAction,
-                                         rosmPatternService: RosmPatternService,
-                                         nonRepudiationService: NonRepudiationService,
-                                         cc: ControllerComponents,
-                                         amendSubmissionDataService: AmendSubmissionDataService
-                                       )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
+class RegisterTrustController @Inject() (
+  trustsService: TrustsService,
+  config: AppConfig,
+  validationService: ValidationService,
+  identify: IdentifierAction,
+  rosmPatternService: RosmPatternService,
+  nonRepudiationService: NonRepudiationService,
+  cc: ControllerComponents,
+  amendSubmissionDataService: AmendSubmissionDataService
+)(implicit ec: ExecutionContext)
+    extends TrustsBaseController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def registration(): Action[JsValue] = identify.async(parse.json) {
-    implicit request =>
-      request.headers.get(Headers.DRAFT_REGISTRATION_ID) match {
-        case Some(_) =>
-          amendRegistration
-        case _ =>
-          logger.warn(s"[$className][registration][Session ID: ${request.sessionId}] no draft id provided in headers")
-          Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
-      }
+  def registration(): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    request.headers.get(Headers.DRAFT_REGISTRATION_ID) match {
+      case Some(_) =>
+        amendRegistration
+      case _       =>
+        logger.warn(s"[$className][registration][Session ID: ${request.sessionId}] no draft id provided in headers")
+        Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
+    }
   }
 
   private def amendRegistration(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
@@ -69,57 +69,63 @@ class RegisterTrustController @Inject()(
     validateRegistration(schema, payload)
   }
 
-  private def validateRegistration(schema: String, data: JsValue)
-                                  (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    validationService.get(schema)
+  private def validateRegistration(schema: String, data: JsValue)(implicit
+    request: IdentifierRequest[JsValue]
+  ): Future[Result] =
+    validationService
+      .get(schema)
       .validate[Registration](data.toString()) match {
-        case Right(registration) =>
-          register(registration)
-        case Left(validationErrors) =>
-          logger.warn(s"[$className][validateRegistration][Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
-          Future.successful(invalidRequestErrorResponse)
-      }
-  }
+      case Right(registration)    =>
+        register(registration)
+      case Left(validationErrors) =>
+        logger.warn(
+          s"[$className][validateRegistration][Session ID: ${request.sessionId}] problem validating submission: $validationErrors"
+        )
+        Future.successful(invalidRequestErrorResponse)
+    }
 
-  private def register(registration: Registration)
-                      (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+  private def register(registration: Registration)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     trustsService.registerTrust(registration).value.flatMap {
-      case Right(response: RegistrationTrnResponse) =>
-        if (config.nonRepudiate){
+      case Right(response: RegistrationTrnResponse)       =>
+        if (config.nonRepudiate) {
           nonRepudiationService.register(response.trn, Json.toJson(registration))
         }
         enrol(response, registration)
-      case Right(AlreadyRegisteredResponse) =>
+      case Right(AlreadyRegisteredResponse)               =>
         handleAlreadyRegisteredResponse()
-      case Right(NoMatchResponse) =>
+      case Right(NoMatchResponse)                         =>
         handleNoMatchResponse()
-      case Right(BadRequestResponse) =>
+      case Right(BadRequestResponse)                      =>
         handleBadRequestResponse()
-      case Right(ServiceUnavailableResponse) =>
+      case Right(ServiceUnavailableResponse)              =>
         handleServiceUnavailableResponse()
-      case Right(_) =>
+      case Right(_)                                       =>
         handleInternalServerErrorResponse()
       case Left(ServerError(message)) if message.nonEmpty =>
-        logger.error(s"[$className][registration][Session ID: ${request.sessionId}] failed to register. Message: $message")
+        logger.error(
+          s"[$className][registration][Session ID: ${request.sessionId}] failed to register. Message: $message"
+        )
         Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
-      case Left(_) =>
+      case Left(_)                                        =>
         logger.error(s"[$className][registration][Session ID: ${request.sessionId}] failed to register")
         Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
     }
-  }
 
-  private def enrol(response: RegistrationTrnResponse, registration: Registration)
-                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+  private def enrol(response: RegistrationTrnResponse, registration: Registration)(implicit
+    request: IdentifierRequest[JsValue]
+  ): Future[Result] =
 
-    rosmPatternService.enrolAndLogResult(
-      trn = response.trn,
-      affinityGroup = request.affinityGroup,
-      taxable = registration.trust.details.trustTaxable.getOrElse(true)
-    ).value.map {
-      case Right(_) => Ok(Json.toJson(response))
-      case Left(_) => InternalServerError(Json.toJson(internalServerErrorResponse))
-    }
-  }
+    rosmPatternService
+      .enrolAndLogResult(
+        trn = response.trn,
+        affinityGroup = request.affinityGroup,
+        taxable = registration.trust.details.trustTaxable.getOrElse(true)
+      )
+      .value
+      .map {
+        case Right(_) => Ok(Json.toJson(response))
+        case Left(_)  => InternalServerError(Json.toJson(internalServerErrorResponse))
+      }
 
   private def handleAlreadyRegisteredResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
 

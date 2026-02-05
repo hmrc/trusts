@@ -46,29 +46,33 @@ class AddTrusteeSpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 
-    "return amended data in a subsequent 'get' call with provisional flags, for identifier '5174384721'" in assertMongoTest(application)({ (app) =>
-      runTest("0123456789ABCDE", app)
-    })
+    "return amended data in a subsequent 'get' call with provisional flags, for identifier '5174384721'" in assertMongoTest(
+      application
+    )(app => runTest("0123456789ABCDE", app))
 
-    "return amended data in a subsequent 'get' call with provisional flags, for identifier '0123456789ABCDE'" in assertMongoTest(application)({ (app) =>
-      runTest("0123456789ABCDE", app)
-    })
+    "return amended data in a subsequent 'get' call with provisional flags, for identifier '0123456789ABCDE'" in assertMongoTest(
+      application
+    )(app => runTest("0123456789ABCDE", app))
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/trustees/$identifier/transformed/trustee")).get
       status(result) mustBe OK
 
-      val addTrusteeJson = Json.parse(
-        """
+      val addTrusteeJson = Json.parse("""
           |{
           |	"name": {
           |   "firstName": "Adam",
@@ -90,8 +94,7 @@ class AddTrusteeSpec extends IntegrationTestBase {
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]
-      trustees mustBe Json.parse(
-        """
+      trustees mustBe Json.parse("""
           |[
           |            {
           |              "trusteeInd": {
@@ -108,4 +111,5 @@ class AddTrusteeSpec extends IntegrationTestBase {
 
     }
   }
+
 }

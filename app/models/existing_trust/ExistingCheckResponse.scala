@@ -21,7 +21,6 @@ import play.api.libs.json.Format
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Constants
 
-
 sealed trait ExistingCheckResponse
 
 object ExistingCheckResponse {
@@ -33,14 +32,14 @@ object ExistingCheckResponse {
   final case object ServerError extends ExistingCheckResponse
   final case object ServiceUnavailable extends ExistingCheckResponse
 
-  implicit val desResponseReads : Format[ExistingTrustResponse] = ExistingTrustResponse.formats
-  implicit val desErrorResponseReads : Format[DesErrorResponse] = DesErrorResponse.formats
+  implicit val desResponseReads: Format[ExistingTrustResponse] = ExistingTrustResponse.formats
+  implicit val desErrorResponseReads: Format[DesErrorResponse] = DesErrorResponse.formats
 
   implicit lazy val httpReads: HttpReads[ExistingCheckResponse] =
     new HttpReads[ExistingCheckResponse] {
-      override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse = {
+      override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse =
         response.status match {
-          case OK =>
+          case OK       =>
             if (response.json.as[ExistingTrustResponse].`match`) Matched else NotMatched
           case CONFLICT =>
 
@@ -49,17 +48,13 @@ object ExistingCheckResponse {
             } else {
               ServerError
             }
-          case BAD_REQUEST =>
+          case BAD_REQUEST         =>
             BadRequest
           case SERVICE_UNAVAILABLE =>
             ServiceUnavailable
-          case _ =>
+          case _                   =>
             ServerError
         }
-      }
     }
 
 }
-
-
-

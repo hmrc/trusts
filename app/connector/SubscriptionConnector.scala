@@ -31,39 +31,41 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
+class SubscriptionConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+    extends ConnectorErrorResponseHandler {
 
   val className: String = this.getClass.getSimpleName
 
-  private lazy val trustsServiceUrl : String = s"${config.subscriptionBaseUrl}/trusts"
+  private lazy val trustsServiceUrl: String = s"${config.subscriptionBaseUrl}/trusts"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
 
-  private def desHeaders(correlationId : String) : Seq[(String, String)] =
+  private def desHeaders(correlationId: String): Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.subscriptionToken}",
-      CONTENT_TYPE -> CONTENT_TYPE_JSON,
-      ENVIRONMENT_HEADER -> config.subscriptionEnvironment,
-      CORRELATION_HEADER -> correlationId
+      CONTENT_TYPE              -> CONTENT_TYPE_JSON,
+      ENVIRONMENT_HEADER        -> config.subscriptionEnvironment,
+      CORRELATION_HEADER        -> correlationId
     )
 
-   def getSubscriptionId(trn: String): TrustEnvelope[SubscriptionIdSuccessResponse] = EitherT {
+  def getSubscriptionId(trn: String): TrustEnvelope[SubscriptionIdSuccessResponse] = EitherT {
 
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
-    http.get(url"$subscriptionIdEndpointUrl")
+    http
+      .get(url"$subscriptionIdEndpointUrl")
       .execute[SubscriptionIdResponse]
-    .map {
-      case response: SubscriptionIdSuccessResponse => Right(response)
-      case response: SubscriptionIdFailureResponse => Left(ServerError(response.message))
-    }.recover {
-      case ex =>
+      .map {
+        case response: SubscriptionIdSuccessResponse => Right(response)
+        case response: SubscriptionIdFailureResponse => Left(ServerError(response.message))
+      }
+      .recover { case ex =>
         Left(handleError(ex, "getSubscriptionId", subscriptionIdEndpointUrl))
-    }
+      }
   }
 
 }

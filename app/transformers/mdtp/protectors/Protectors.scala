@@ -24,9 +24,8 @@ trait Protectors[T <: Protector[T]] extends Entities[T]
 
 object Protectors {
 
-  def transform(response: JsValue): Reads[JsObject] = {
+  def transform(response: JsValue): Reads[JsObject] =
     Individual.transform(response) andThen
-    Business.transform(response)
-  }
+      Business.transform(response)
 
 }

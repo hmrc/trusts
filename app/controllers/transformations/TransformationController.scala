@@ -27,31 +27,39 @@ import utils.Session
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class TransformationController @Inject()(
-                                          identify: IdentifierAction,
-                                          transformationService: TransformationService,
-                                          cc: ControllerComponents
-                                        )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
+class TransformationController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends TrustsBaseController(cc) with Logging {
 
   def removeTransforms(identifier: String): Action[AnyContent] = identify.async { implicit request =>
     transformationService.removeAllTransformations(identifier, request.internalId, Session.id(hc)).value.flatMap {
-      case Left(_) => Future.successful(InternalServerError)
+      case Left(_)  => Future.successful(InternalServerError)
       case Right(_) => Future.successful(Ok)
     }
   }
 
-  def removeTrustTypeDependentTransformFields(identifier: String): Action[AnyContent] = identify.async { implicit request =>
-    transformationService.removeTrustTypeDependentTransformFields(identifier, request.internalId, Session.id(hc)).value.map {
-      case Left(_) => InternalServerError
-      case Right(_) => Ok
+  def removeTrustTypeDependentTransformFields(identifier: String): Action[AnyContent] =
+    identify.async { implicit request =>
+      transformationService
+        .removeTrustTypeDependentTransformFields(identifier, request.internalId, Session.id(hc))
+        .value
+        .map {
+          case Left(_)  => InternalServerError
+          case Right(_) => Ok
+        }
     }
-  }
 
   def removeOptionalTrustDetailTransforms(identifier: String): Action[AnyContent] = identify.async { implicit request =>
-    transformationService.removeOptionalTrustDetailTransforms(identifier, request.internalId, Session.id(hc)).value.map {
-      case Left(_) => InternalServerError
-      case Right(_) => Ok
-    }
+    transformationService
+      .removeOptionalTrustDetailTransforms(identifier, request.internalId, Session.id(hc))
+      .value
+      .map {
+        case Left(_)  => InternalServerError
+        case Right(_) => Ok
+      }
   }
 
 }

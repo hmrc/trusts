@@ -24,6 +24,7 @@ import transformers.remove.RemoveBeneficiary
 import java.time.LocalDate
 
 class RemoveBeneficiarySpecs extends AnyWordSpec {
+
   "Can round trip throuh Json" in {
     val OUT = RemoveBeneficiary(LocalDate.of(1478, 12, 31), 67, "unidentified")
 
@@ -33,9 +34,9 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
   "Can deserialise" when {
     "beneficiary is unidentified" in {
       val json = Json.obj(
-        "type" -> "unidentified",
+        "type"    -> "unidentified",
         "endDate" -> LocalDate.of(2019, 12, 31),
-        "index" -> 6
+        "index"   -> 6
       )
 
       json.as[RemoveBeneficiary] mustBe RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "unidentified")
@@ -43,9 +44,9 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
 
     "beneficiary is IndividualType" in {
       val json = Json.obj(
-        "type" -> "individualDetails",
+        "type"    -> "individualDetails",
         "endDate" -> LocalDate.of(2019, 12, 31),
-        "index" -> 6
+        "index"   -> 6
       )
 
       json.as[RemoveBeneficiary] mustBe RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "individualDetails")
@@ -55,12 +56,13 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
   "Fail to deserialise" when {
     "beneficiray type is not understood" in {
       val json = Json.obj(
-        "type" -> "INVALID TYPE",
+        "type"    -> "INVALID TYPE",
         "endDate" -> LocalDate.of(2019, 12, 31),
-        "index" -> 6
+        "index"   -> 6
       )
 
       json.validate[RemoveBeneficiary] mustBe a[JsError]
     }
   }
+
 }

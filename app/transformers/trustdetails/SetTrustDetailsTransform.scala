@@ -20,8 +20,8 @@ import play.api.libs.json._
 import transformers.SetValueTransform
 import utils.Constants._
 
-case class SetTrustDetailsTransform(value: JsValue,
-                                    migratingFromNonTaxableToTaxable: Boolean) extends SetValueTransform {
+case class SetTrustDetailsTransform(value: JsValue, migratingFromNonTaxableToTaxable: Boolean)
+    extends SetValueTransform {
 
   override val path: JsPath = TRUST \ DETAILS
 
@@ -33,7 +33,15 @@ case class SetTrustDetailsTransform(value: JsValue,
      */
     def pruneOptionalFields(existingTrustDetails: JsValue): JsValue = {
       val fields = if (migratingFromNonTaxableToTaxable) {
-        Seq(LAW_COUNTRY, SCHEDULE_3A_EXEMPT, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
+        Seq(
+          LAW_COUNTRY,
+          SCHEDULE_3A_EXEMPT,
+          RESIDENTIAL_STATUS,
+          UK_RELATION,
+          DEED_OF_VARIATION,
+          INTER_VIVOS,
+          EFRBS_START_DATE
+        )
       } else {
         Seq(UK_RELATION, SCHEDULE_3A_EXEMPT)
       }
@@ -43,10 +51,11 @@ case class SetTrustDetailsTransform(value: JsValue,
     for {
       existingTrustDetails <- input.transform(path.json.pick)
       optionalFieldsRemoved = pruneOptionalFields(existingTrustDetails)
-      mergedTrustDetails = merge(optionalFieldsRemoved, value)
-      updatedInput <- pruneThenAddTo(input, path, mergedTrustDetails)
+      mergedTrustDetails    = merge(optionalFieldsRemoved, value)
+      updatedInput         <- pruneThenAddTo(input, path, mergedTrustDetails)
     } yield updatedInput
   }
+
 }
 
 object SetTrustDetailsTransform {

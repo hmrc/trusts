@@ -19,12 +19,11 @@ package transformers.trustees
 import play.api.libs.json._
 import transformers.AddEntityTransform
 
-case class AddTrusteeTransform(entity: JsValue,
-                               `type`: String) extends TrusteeTransform with AddEntityTransform {
+case class AddTrusteeTransform(entity: JsValue, `type`: String) extends TrusteeTransform with AddEntityTransform {
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     addToList(input, path, Json.obj(`type` -> entity))
-  }
+
 }
 
 object AddTrusteeTransform {

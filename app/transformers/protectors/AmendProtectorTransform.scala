@@ -21,11 +21,13 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendProtectorTransform(index: Option[Int],
-                                   amended: JsValue,
-                                   original: JsValue,
-                                   endDate: LocalDate,
-                                   `type`: String) extends ProtectorTransform with AmendEntityTransform
+case class AmendProtectorTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends ProtectorTransform with AmendEntityTransform
 
 object AmendProtectorTransform {
 

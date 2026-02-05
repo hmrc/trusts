@@ -28,26 +28,24 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TaxLiabilitySubmissionDraftController @Inject()(
-                                                       submissionRepository: RegistrationSubmissionRepository,
-                                                       identify: IdentifierAction,
-                                                       timeService: TimeService,
-                                                       cc: ControllerComponents,
-                                                       taxYearService: TaxYearService
-                                                     )(implicit ec: ExecutionContext)
-  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
+class TaxLiabilitySubmissionDraftController @Inject() (
+  submissionRepository: RegistrationSubmissionRepository,
+  identify: IdentifierAction,
+  timeService: TimeService,
+  cc: ControllerComponents,
+  taxYearService: TaxYearService
+)(implicit ec: ExecutionContext)
+    extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 
-  def getTaxLiabilityStartDate(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
-      getResult[LocalDate, JsValue](draftId, taxLiabilityStartDatePath)(x => Json.obj("startDate" -> x))
+  def getTaxLiabilityStartDate(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
+    getResult[LocalDate, JsValue](draftId, taxLiabilityStartDatePath)(x => Json.obj("startDate" -> x))
   }
 
-  def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      getResult[LocalDate, FirstTaxYearAvailable](draftId, whenTrustSetupPath)(taxYearService.firstTaxYearAvailable)
+  def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    getResult[LocalDate, FirstTaxYearAvailable](draftId, whenTrustSetupPath)(taxYearService.firstTaxYearAvailable)
   }
+
 }

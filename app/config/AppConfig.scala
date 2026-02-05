@@ -24,24 +24,24 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
 @Singleton
-class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
+class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
-  val registrationBaseUrl : String = servicesConfig.baseUrl("registration")
-  val subscriptionBaseUrl : String = servicesConfig.baseUrl("subscription")
-  val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
-  val taxEnrolmentsMigrationUrl : String = servicesConfig.baseUrl("tax-enrolments-migration")
-  val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
-  val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
-  val orchestratorUrl : String = servicesConfig.baseUrl("orchestrator")
-  val nonRepudiationUrl : String = s"${servicesConfig.baseUrl("non-repudiation")}/nrs-orchestrator/submission"
+  val registrationBaseUrl: String       = servicesConfig.baseUrl("registration")
+  val subscriptionBaseUrl: String       = servicesConfig.baseUrl("subscription")
+  val taxEnrolmentsUrl: String          = servicesConfig.baseUrl("tax-enrolments")
+  val taxEnrolmentsMigrationUrl: String = servicesConfig.baseUrl("tax-enrolments-migration")
+  val getTrustOrEstateUrl: String       = servicesConfig.baseUrl("playback")
+  val varyTrustOrEstateUrl: String      = servicesConfig.baseUrl("variation")
+  val orchestratorUrl: String           = servicesConfig.baseUrl("orchestrator")
+  val nonRepudiationUrl: String         = s"${servicesConfig.baseUrl("non-repudiation")}/nrs-orchestrator/submission"
 
-  val registrationEnvironment : String = configuration.get[String]("microservice.services.registration.environment")
-  val registrationToken : String = configuration.get[String]("microservice.services.registration.token")
+  val registrationEnvironment: String = configuration.get[String]("microservice.services.registration.environment")
+  val registrationToken: String       = configuration.get[String]("microservice.services.registration.token")
 
-  val subscriptionEnvironment : String = configuration.get[String]("microservice.services.subscription.environment")
-  val subscriptionToken : String = configuration.get[String]("microservice.services.subscription.token")
+  val subscriptionEnvironment: String = configuration.get[String]("microservice.services.subscription.environment")
+  val subscriptionToken: String       = configuration.get[String]("microservice.services.subscription.token")
 
-  val trustsApiRegistrationSchema5MLD : String =
+  val trustsApiRegistrationSchema5MLD: String =
     "/resources/schemas/5MLD/trusts-api-registration-schema-1.4.2.json"
 
   val variationsApiSchema5MLD: String =
@@ -49,38 +49,39 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
-  val taxEnrolmentsPayloadBodyServiceNameTaxable : String =
+  val taxEnrolmentsPayloadBodyServiceNameTaxable: String =
     configuration.get[String]("microservice.services.tax-enrolments.taxable.serviceName")
 
-  private val taxEnrolmentsPayloadBodyCallbackTaxableTemplate : String =
+  private val taxEnrolmentsPayloadBodyCallbackTaxableTemplate: String =
     configuration.get[String]("microservice.services.tax-enrolments.taxable.callback")
 
-  def taxEnrolmentsPayloadBodyCallbackTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackTaxableTemplate, trn)
+  def taxEnrolmentsPayloadBodyCallbackTaxable(trn: String): String =
+    insertTRN(taxEnrolmentsPayloadBodyCallbackTaxableTemplate, trn)
 
   val taxEnrolmentsPayloadBodyServiceNameNonTaxable: String =
     configuration.get[String]("microservice.services.tax-enrolments.non-taxable.serviceName")
 
-  private val taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate : String =
+  private val taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate: String =
     configuration.get[String]("microservice.services.tax-enrolments.non-taxable.callback")
 
-  def taxEnrolmentsPayloadBodyCallbackNonTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate, trn)
+  def taxEnrolmentsPayloadBodyCallbackNonTaxable(trn: String): String =
+    insertTRN(taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate, trn)
 
-  val taxEnrolmentsMigrationPayloadServiceName : String =
+  val taxEnrolmentsMigrationPayloadServiceName: String =
     configuration.get[String]("microservice.services.tax-enrolments-migration.to-taxable.serviceName")
 
-  private val taxEnrolmentsMigrationPayloadCallbackTemplate : String =
+  private val taxEnrolmentsMigrationPayloadCallbackTemplate: String =
     configuration.get[String]("microservice.services.tax-enrolments-migration.to-taxable.callback")
 
-  def taxEnrolmentsMigrationPayloadBodyCallback(subscriptionId: String, urn: String): String = {
+  def taxEnrolmentsMigrationPayloadBodyCallback(subscriptionId: String, urn: String): String =
     taxEnrolmentsMigrationPayloadCallbackTemplate
       .replace(":urn", urn)
       .replace(":subscriptionId", subscriptionId)
-  }
 
-  val delayToConnectTaxEnrolment : Int =
+  val delayToConnectTaxEnrolment: Int =
     configuration.get[String]("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
 
-  val maxRetry : Int = configuration.get[Int]("microservice.services.trusts.maxRetry")
+  val maxRetry: Int = configuration.get[Int]("microservice.services.trusts.maxRetry")
 
   val ttlInSeconds: Int = configuration.get[Int]("mongodb.ttlSeconds")
 
@@ -94,9 +95,9 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val nonRepudiate: Boolean = configuration.get[Boolean]("features.nonRepudiate")
 
-  val nrsRetryWaitMs = configuration.get[Int]("nrs-orchestrator.retryWaitMs")
+  val nrsRetryWaitMs     = configuration.get[Int]("nrs-orchestrator.retryWaitMs")
   val nrsRetryWaitFactor = configuration.get[Int]("nrs-orchestrator.retryWaitFactor")
-  val nrsTotalAttempts = configuration.get[Int]("nrs-orchestrator.totalAttempts")
+  val nrsTotalAttempts   = configuration.get[Int]("nrs-orchestrator.totalAttempts")
 
   val registrationValidationInterval: FiniteDuration = Duration.apply(
     configuration.get[Int]("mongodb.registration.validation.interval"),
@@ -110,4 +111,3 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
                  |=============== ============= ===============""".stripMargin)
 
 }
-

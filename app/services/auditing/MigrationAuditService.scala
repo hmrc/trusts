@@ -25,12 +25,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class MigrationAuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext)
-  extends AuditService(auditConnector) {
+class MigrationAuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext)
+    extends AuditService(auditConnector) {
 
-  def auditOrchestratorSuccess(urn: String,
-                               utr: String)
-                              (implicit hc: HeaderCarrier): Unit = {
+  def auditOrchestratorSuccess(urn: String, utr: String)(implicit hc: HeaderCarrier): Unit = {
     val request = Json.obj(
       "urn" -> urn,
       "utr" -> utr
@@ -43,10 +41,7 @@ class MigrationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
     )
   }
 
-  def auditOrchestratorFailure(urn: String,
-                               utr: String,
-                               errorReason: String)
-                              (implicit hc: HeaderCarrier): Unit = {
+  def auditOrchestratorFailure(urn: String, utr: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
     val request = Json.obj(
       "urn" -> urn,
       "utr" -> utr
@@ -59,22 +54,21 @@ class MigrationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
     )
   }
 
-  def auditTaxEnrolmentFailure(subscriptionId: String,
-                               urn: String,
-                               errorMessage: String)
-                              (implicit hc: HeaderCarrier) : Unit = {
+  def auditTaxEnrolmentFailure(subscriptionId: String, urn: String, errorMessage: String)(implicit
+    hc: HeaderCarrier
+  ): Unit =
     auditErrorResponse(
       TrustAuditing.TAX_ENROLMENT_TO_TAXABLE_FAILED,
       Json.obj("urn" -> urn),
       subscriptionId,
       errorMessage
     )
-  }
 
-  private def auditOrchestrator(event: String,
-                                request: JsValue,
-                                response: JsValue)
-                               (implicit hc: HeaderCarrier): Unit = {
+  private def auditOrchestrator(
+    event: String,
+    request: JsValue,
+    response: JsValue
+  )(implicit hc: HeaderCarrier): Unit = {
 
     val auditPayload = OrchestratorAuditEvent(
       request = request,

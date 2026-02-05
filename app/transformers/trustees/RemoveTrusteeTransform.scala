@@ -22,30 +22,27 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class RemoveTrusteeTransform(index: Option[Int],
-                                  entity: JsValue,
-                                  endDate: LocalDate,
-                                  `type`: String) extends TrusteeTransform with RemoveEntityTransform {
+case class RemoveTrusteeTransform(index: Option[Int], entity: JsValue, endDate: LocalDate, `type`: String)
+    extends TrusteeTransform with RemoveEntityTransform {
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     if (isTrusteeKnownToEtmp) {
       entity.transform(putEndDate) match {
         case JsSuccess(endedTrusteeJson, _) => addToList(input, path, endedTrusteeJson)
-        case e: JsError => e
+        case e: JsError                     => e
       }
     } else {
       JsSuccess(input)
     }
-  }
 
-  private def isTrusteeKnownToEtmp: Boolean = {
+  private def isTrusteeKnownToEtmp: Boolean =
     entity.transform((__ \ `type` \ LINE_NUMBER).json.pick).isSuccess
-  }
 
   private def putEndDate: Reads[JsObject] = {
     val entityEndPath: JsPath = __ \ `type` \ ENTITY_END
     __.json.update(entityEndPath.json.put(Json.toJson(endDate)))
   }
+
 }
 
 object RemoveTrusteeTransform {

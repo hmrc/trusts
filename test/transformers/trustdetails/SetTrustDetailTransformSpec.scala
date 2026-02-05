@@ -34,8 +34,9 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
           "when the field already exists" in {
 
-            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-express.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
+            val beforeJson =
+              JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-express.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -46,7 +47,7 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
           "when it is a new value" in {
 
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -66,8 +67,9 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
           "when the field already exists" in {
 
-            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-property.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
+            val beforeJson =
+              JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-property.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -78,7 +80,7 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
           "when it is a new value" in {
 
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -98,8 +100,9 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
           "when the field already exists" in {
 
-            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-recorded.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
+            val beforeJson =
+              JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-recorded.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -110,7 +113,7 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
           "when it is a new value" in {
 
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -130,8 +133,9 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
           "when the field already exists" in {
 
-            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-resident.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-resident.json")
+            val beforeJson =
+              JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-resident.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-resident.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -142,7 +146,7 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
           "when it is a new value" in {
 
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-resident.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-resident.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -162,8 +166,9 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
           "when the field already exists" in {
 
-            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-taxable.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
+            val beforeJson =
+              JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-taxable.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -174,7 +179,7 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
           "when it is a new value" in {
 
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
-            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
+            val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
 
             val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
@@ -185,4 +190,5 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

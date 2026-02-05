@@ -30,9 +30,8 @@ class PayloadEncodingService {
 
   def generateChecksum(payload: JsValue): String = {
     val digest = MessageDigest.getInstance("SHA-256")
-    val hash = digest.digest(Json.stringify(payload).getBytes("UTF-8"))
+    val hash   = digest.digest(Json.stringify(payload).getBytes("UTF-8"))
     hash.map("%02x".format(_)).mkString
   }
-
 
 }

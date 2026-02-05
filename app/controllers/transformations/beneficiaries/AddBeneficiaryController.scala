@@ -29,28 +29,35 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AddBeneficiaryController @Inject()(identify: IdentifierAction,
-                                         transformationService: TransformationService,
-                                         taxableMigrationService: TaxableMigrationService)
-                                        (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+class AddBeneficiaryController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
-  def addUnidentified(identifier: String): Action[JsValue] = addNewTransform[UnidentifiedType](identifier, UNIDENTIFIED_BENEFICIARY)
+  def addUnidentified(identifier: String): Action[JsValue] =
+    addNewTransform[UnidentifiedType](identifier, UNIDENTIFIED_BENEFICIARY)
 
-  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[IndividualDetailsType](identifier, INDIVIDUAL_BENEFICIARY)
+  def addIndividual(identifier: String): Action[JsValue] =
+    addNewTransform[IndividualDetailsType](identifier, INDIVIDUAL_BENEFICIARY)
 
-  def addCharity(identifier: String): Action[JsValue] = addNewTransform[BeneficiaryCharityType](identifier, CHARITY_BENEFICIARY)
+  def addCharity(identifier: String): Action[JsValue] =
+    addNewTransform[BeneficiaryCharityType](identifier, CHARITY_BENEFICIARY)
 
   def addOther(identifier: String): Action[JsValue] = addNewTransform[OtherType](identifier, OTHER_BENEFICIARY)
 
-  def addCompany(identifier: String): Action[JsValue] = addNewTransform[BeneficiaryCompanyType](identifier, COMPANY_BENEFICIARY)
+  def addCompany(identifier: String): Action[JsValue] =
+    addNewTransform[BeneficiaryCompanyType](identifier, COMPANY_BENEFICIARY)
 
-  def addTrust(identifier: String): Action[JsValue] = addNewTransform[BeneficiaryTrustType](identifier, TRUST_BENEFICIARY)
+  def addTrust(identifier: String): Action[JsValue] =
+    addNewTransform[BeneficiaryTrustType](identifier, TRUST_BENEFICIARY)
 
   def addLarge(identifier: String): Action[JsValue] = addNewTransform[LargeType](identifier, LARGE_BENEFICIARY)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AddBeneficiaryTransform(Json.toJson(value), `type`)
-  }
+
 }

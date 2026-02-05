@@ -19,7 +19,9 @@ package services.rosm
 import base.BaseSpec
 import cats.data.EitherT
 import errors.{ServerError, TrustErrors}
-import models.tax_enrolments.{SubscriptionIdSuccessResponse, TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
+import models.tax_enrolments.{
+  SubscriptionIdSuccessResponse, TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess
+}
 import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers._
 import services.TrustsService
@@ -30,9 +32,9 @@ import scala.concurrent.Future
 
 class RosmPatternServiceSpec extends BaseSpec {
 
-  private val taxable: Boolean = false
-  private val trn = "XTRN1234567"
-  private val mockTrustsService = mock[TrustsService]
+  private val taxable: Boolean         = false
+  private val trn                      = "XTRN1234567"
+  private val mockTrustsService        = mock[TrustsService]
   private val mockTaxEnrolmentsService = mock[TaxEnrolmentsService]
 
   private val SUT = new RosmPatternServiceImpl(mockTrustsService, mockTaxEnrolmentsService)
@@ -42,28 +44,36 @@ class RosmPatternServiceSpec extends BaseSpec {
     "return TaxEnrolmentSuccess" when {
       "successfully sets subscriptionId id in tax enrolments for provided trn." in {
         when(mockTrustsService.getSubscriptionId(trn))
-          .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-          thenReturn(Future.successful(TaxEnrolmentSuccess))
+          .thenReturn(
+            EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+              Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+            )
+          )
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+          .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val futureResult = SUT.setSubscriptionId(trn, taxable).value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(TaxEnrolmentSuccess)
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentSuccess)
         }
       }
     }
     "return TaxEnrolmentFailure " when {
       "tax enrolment service does not find provided subscription id." in {
         when(mockTrustsService.getSubscriptionId(trn))
-          .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+              Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+            )
+          )
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
           .thenReturn(Future.successful(TaxEnrolmentFailure))
 
         val futureResult = SUT.setSubscriptionId(trn, taxable).value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(TaxEnrolmentFailure)
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentFailure)
         }
       }
     }
@@ -71,27 +81,33 @@ class RosmPatternServiceSpec extends BaseSpec {
     "return Left(ServerError(message))" when {
       "message is nonEmpty - des is down and not able to return subscription id." in {
         when(mockTrustsService.getSubscriptionId(trn))
-          .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Left(ServerError("des is down")))))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-          thenReturn(Future.successful(TaxEnrolmentSuccess))
+          .thenReturn(
+            EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+              Future.successful(Left(ServerError("des is down")))
+            )
+          )
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+          .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val futureResult = SUT.setSubscriptionId(trn, taxable).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("des is down"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("des is down"))
         }
       }
 
       "message is an empty string" in {
         when(mockTrustsService.getSubscriptionId(trn))
-          .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Left(ServerError()))))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-          thenReturn(Future.successful(TaxEnrolmentSuccess))
+          .thenReturn(
+            EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Left(ServerError())))
+          )
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+          .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val futureResult = SUT.setSubscriptionId(trn, taxable).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError())
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError())
         }
       }
     }
@@ -104,56 +120,72 @@ class RosmPatternServiceSpec extends BaseSpec {
 
     "return TaxEnrolmentSuccess when Rosm is completed successfully" in {
       when(mockTrustsService.getSubscriptionId(trn))
-        .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
-      when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-        thenReturn(Future.successful(TaxEnrolmentSuccess))
+        .thenReturn(
+          EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+            Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+          )
+        )
+      when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+        .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-      val futureResult = SUT.enrolAndLogResult(trn, affinityGroup,taxable).value
+      val futureResult = SUT.enrolAndLogResult(trn, affinityGroup, taxable).value
 
-      whenReady(futureResult) {
-        result => result mustBe Right(TaxEnrolmentSuccess)
+      whenReady(futureResult) { result =>
+        result mustBe Right(TaxEnrolmentSuccess)
       }
     }
 
     "return TaxEnrolmentNotProcessed when user is an Agent" in {
-      val affinityGroup  = AffinityGroup.Agent
+      val affinityGroup = AffinityGroup.Agent
 
       when(mockTrustsService.getSubscriptionId(trn))
-        .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
-      when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-        thenReturn(Future.successful(TaxEnrolmentSuccess))
+        .thenReturn(
+          EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+            Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+          )
+        )
+      when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+        .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-      val futureResult = SUT.enrolAndLogResult(trn, affinityGroup,taxable).value
+      val futureResult = SUT.enrolAndLogResult(trn, affinityGroup, taxable).value
 
-      whenReady(futureResult) {
-        result => result mustBe Right(TaxEnrolmentNotProcessed)
+      whenReady(futureResult) { result =>
+        result mustBe Right(TaxEnrolmentNotProcessed)
       }
     }
 
     "return TaxEnrolmentFailure" when {
       "setSubscriptionId returns a SubscriptionIdSuccessResponse that isn't 'TaxEnrolmentSuccess'" in {
         when(mockTrustsService.getSubscriptionId(trn))
-          .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-          thenReturn(Future.successful(TaxEnrolmentFailure))
+          .thenReturn(
+            EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+              Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+            )
+          )
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+          .thenReturn(Future.successful(TaxEnrolmentFailure))
 
-        val futureResult = SUT.enrolAndLogResult(trn, affinityGroup,taxable).value
+        val futureResult = SUT.enrolAndLogResult(trn, affinityGroup, taxable).value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(TaxEnrolmentFailure)
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentFailure)
         }
       }
 
       "setSubscriptionId returns an exception is returned (recover a non fatal exception)" in {
         when(mockTrustsService.getSubscriptionId(trn))
-          .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+              Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+            )
+          )
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
           .thenReturn(Future.failed(new Exception("non fatal exception with message")))
 
-        val futureResult = SUT.enrolAndLogResult(trn, affinityGroup,taxable).value
+        val futureResult = SUT.enrolAndLogResult(trn, affinityGroup, taxable).value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(TaxEnrolmentFailure)
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentFailure)
         }
       }
     }
@@ -161,17 +193,15 @@ class RosmPatternServiceSpec extends BaseSpec {
     "return a TrustErrors when setSubscriptionId returns a TrustErrors" in {
       when(mockTrustsService.getSubscriptionId(trn))
         .thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Left(ServerError()))))
-      when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
-        thenReturn(Future.successful(TaxEnrolmentSuccess))
+      when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn))
+        .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-      val futureResult = SUT.enrolAndLogResult(trn, affinityGroup,taxable).value
+      val futureResult = SUT.enrolAndLogResult(trn, affinityGroup, taxable).value
 
-      whenReady(futureResult) {
-        result => result mustBe Left(ServerError())
+      whenReady(futureResult) { result =>
+        result mustBe Left(ServerError())
       }
     }
   }
 
 }
-
-

@@ -39,16 +39,19 @@ import scala.concurrent.Future
 class AddPropertyOrLandAssetSpec extends IntegrationTestBase {
 
   private lazy val getTrustResponse: GetTrustSuccessResponse =
-    JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes).as[GetTrustSuccessResponse]
+    JsonUtils
+      .getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes)
+      .as[GetTrustSuccessResponse]
 
-  private lazy val expectedInitialGetJson: JsValue = NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
+  private lazy val expectedInitialGetJson: JsValue =
+    NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
 
-  private lazy val expectedSubsequentGetJson: JsValue = JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/propertyorland/add-after-etmp-call.json")
+  private lazy val expectedSubsequentGetJson: JsValue =
+    JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/propertyorland/add-after-etmp-call.json")
 
   "an add property or land asset call" should {
 
-    val payload = Json.parse(
-      """
+    val payload = Json.parse("""
         |{
         |  "valueFull": 2000
         |}
@@ -60,21 +63,24 @@ class AddPropertyOrLandAssetSpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(mockTrustsConnector)
-      ).build()
+      )
+      .build()
 
     "return amended data in a subsequent 'get' call, for identifier '0123456789'" in assertMongoTest(application) { app =>
       runTest("0123456789", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
       val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(initialGetResult) mustBe OK
+      status(initialGetResult)        mustBe OK
       contentAsJson(initialGetResult) mustBe expectedInitialGetJson
 
       val addRequest = FakeRequest(POST, s"/trusts/assets/add-property-or-land/$identifier")
@@ -85,8 +91,9 @@ class AddPropertyOrLandAssetSpec extends IntegrationTestBase {
       status(addResult) mustBe OK
 
       val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(subsequentGetResult) mustBe OK
+      status(subsequentGetResult)        mustBe OK
       contentAsJson(subsequentGetResult) mustBe expectedSubsequentGetJson
     }
   }
+
 }

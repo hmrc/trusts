@@ -35,7 +35,9 @@ trait RetryHelper extends Logging {
   val factor: Int
   val initialWait: Int
 
-  def retryOnFailure(f: () => Future[RetryPolicy])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[RetryExecution] =
+  def retryOnFailure(
+    f: () => Future[RetryPolicy]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[RetryExecution] =
     retryWithBackOff(
       currentAttempt = 1,
       currentWait = initialWait,
@@ -43,48 +45,56 @@ trait RetryHelper extends Logging {
       lastExecution = RetryExecution(Seq(0), None)
     )
 
-  private def retryWithBackOff(currentAttempt: Int,
-                               currentWait: Int,
-                               f: () => Future[RetryPolicy],
-                              lastExecution: RetryExecution
-                              )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[RetryExecution] = {
+  private def retryWithBackOff(
+    currentAttempt: Int,
+    currentWait: Int,
+    f: () => Future[RetryPolicy],
+    lastExecution: RetryExecution
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[RetryExecution] =
     f.apply().flatMap {
       case result: RetryPolicy if result.retry =>
 
-          RetryHelper.calculateWaitTime(
-            maxAttempts,
-            factor,
-            currentWait,
-            currentAttempt
-          )(
-            next = { nextWait =>
-              logger.warn(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] failed, retrying after $nextWait ms, attempt $currentAttempt")
-              after(
-                duration = nextWait.milliseconds,
-                scheduler = as.scheduler,
-                context = ec,
-                value = new Callable[Future[Int]] {
-                  override def call(): Future[Int] = Future.successful(1)
-                }
-              ).flatMap { _ =>
-                val nextExecution = lastExecution.copy(ticks = lastExecution.ticks :+ nextWait, Some(result))
-                retryWithBackOff(currentAttempt + 1, nextWait, f, nextExecution)
+        RetryHelper.calculateWaitTime(
+          maxAttempts,
+          factor,
+          currentWait,
+          currentAttempt
+        )(
+          next = { nextWait =>
+            logger.warn(
+              s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] failed, retrying after $nextWait ms, attempt $currentAttempt"
+            )
+            after(
+              duration = nextWait.milliseconds,
+              scheduler = as.scheduler,
+              context = ec,
+              value = new Callable[Future[Int]] {
+                override def call(): Future[Int] = Future.successful(1)
               }
-          },
-            last = { () =>
-              logger.warn(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}")
-              Future.successful(RetryExecution(lastExecution.ticks, Some(result)))
+            ).flatMap { _ =>
+              val nextExecution = lastExecution.copy(ticks = lastExecution.ticks :+ nextWait, Some(result))
+              retryWithBackOff(currentAttempt + 1, nextWait, f, nextExecution)
             }
-          )
+          },
+          last = { () =>
+            logger.warn(
+              s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}"
+            )
+            Future.successful(RetryExecution(lastExecution.ticks, Some(result)))
+          }
+        )
       case success =>
-        logger.info(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
+        logger.info(
+          s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}"
+        )
         Future.successful(RetryExecution(lastExecution.ticks, Some(success)))
-    } recoverWith {
-      case _ =>
-        logger.error(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] attempt failed due to Future throwing a throwable")
-        Future.successful(RetryExecution(lastExecution.ticks, None))
+    } recoverWith { case _ =>
+      logger.error(
+        s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] attempt failed due to Future throwing a throwable"
+      )
+      Future.successful(RetryExecution(lastExecution.ticks, None))
     }
-  }
+
 }
 
 object RetryHelper extends Logging {
@@ -95,14 +105,16 @@ object RetryHelper extends Logging {
     def timeOfEachTick: Seq[Int] =
       if (ticks.isEmpty) {
         Nil
-      }
-      else {
+      } else {
         ticks.drop(1).scanLeft(ticks.head)((acc, x) => acc + x)
       }
+
   }
 
-  def calculateWaitTime[T](maxAttempts: Int, waitFactor: Int, currentWait: Int, currentAttempt: Int)
-                          (next: Int => Future[T], last: () => Future[T]): Future[T] = {
+  def calculateWaitTime[T](maxAttempts: Int, waitFactor: Int, currentWait: Int, currentAttempt: Int)(
+    next: Int => Future[T],
+    last: () => Future[T]
+  ): Future[T] =
     if (currentAttempt < maxAttempts) {
       val wait = Math.ceil(currentWait * waitFactor).toInt
       logger.info(s"[RetryHelper][calculateWaitTime] waiting for $wait milliseconds")
@@ -111,9 +123,9 @@ object RetryHelper extends Logging {
       logger.info(s"[RetryHelper][calculateWaitTime] no more attempts left")
       last()
     }
-  }
+
 }
 
 trait RetryPolicy {
-  val retry : Boolean
+  val retry: Boolean
 }

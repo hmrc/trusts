@@ -31,78 +31,79 @@ class SubscriptionConnectorSpec extends ConnectorSpecHelper {
 
     "return subscription Id  " when {
       "valid trn has been submitted" in {
-        val trn = "XTRN1234567"
+        val trn                       = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
         stubForGet(server, subscriptionIdEndpointUrl, OK, """{"subscriptionId": "987654321"}""")
 
         val futureResult = connector.getSubscriptionId(trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(SubscriptionIdSuccessResponse("987654321"))
+        whenReady(futureResult) { result =>
+          result mustBe Right(SubscriptionIdSuccessResponse("987654321"))
         }
       }
     }
 
     "return ServerError(message)" when {
       "invalid trn has been submitted (Bad Request)" in {
-        val trn = "invalidtrn"
+        val trn                       = "invalidtrn"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
         stubForGet(server, subscriptionIdEndpointUrl, BAD_REQUEST, Json.stringify(jsonResponse400GetSubscriptionId))
 
         val futureResult = connector.getSubscriptionId(trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Bad request"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Bad request"))
         }
       }
 
       "trn submitted has no data in des (Not Found)" in {
-        val trn = "notfoundtrn"
+        val trn                       = "notfoundtrn"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
         stubForGet(server, subscriptionIdEndpointUrl, NOT_FOUND, Json.stringify(jsonResponse404GetSubscriptionId))
 
         val futureResult = connector.getSubscriptionId(trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Not found"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Not found"))
         }
       }
 
       "des dependent service is not responding (Service Unavailable)" in {
-        val trn = "XTRN1234567"
+        val trn                       = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
         stubForGet(server, subscriptionIdEndpointUrl, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
 
         val futureResult = connector.getSubscriptionId(trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Des dependent service is down."))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Des dependent service is down."))
         }
       }
 
       "des is experiencing some problem (Internal ServerError)" in {
-        val trn = "XTRN1234567"
+        val trn                       = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
         stubForGet(server, subscriptionIdEndpointUrl, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
         val futureResult = connector.getSubscriptionId(trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError(s"Error response from des $INTERNAL_SERVER_ERROR"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"Error response from des $INTERNAL_SERVER_ERROR"))
         }
       }
 
       "unexpected error response from des" in {
-        val trn = "XTRN1234567"
+        val trn                       = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
         stubForGet(server, subscriptionIdEndpointUrl, FORBIDDEN, Json.stringify(jsonResponse500))
 
         val futureResult = connector.getSubscriptionId(trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError(s"Error response from des $FORBIDDEN"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"Error response from des $FORBIDDEN"))
         }
       }
     }
   }
+
 }

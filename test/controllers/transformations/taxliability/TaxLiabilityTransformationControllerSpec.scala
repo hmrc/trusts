@@ -39,11 +39,8 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
-  with MockitoSugar
-  with ScalaFutures
-  with GuiceOneAppPerSuite
-  with BeforeAndAfterEach {
+class TaxLiabilityTransformationControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -51,7 +48,7 @@ class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
 
   private val utr: String = "utr"
 
-  private val mockTransformationService = mock[TransformationService]
+  private val mockTransformationService   = mock[TransformationService]
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   override def beforeEach(): Unit = {
@@ -165,15 +162,17 @@ class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
-          .withBody(Json.parse(
-            """
+          .withBody(
+            Json.parse(
+              """
               |{
               |  "returns": {
               |    "foo": "bar"
               |  }
               |}
               |""".stripMargin
-          ))
+            )
+          )
           .withHeaders(CONTENT_TYPE -> "application/json")
 
         val result = controller.setYearsReturns(utr).apply(request)
@@ -183,4 +182,5 @@ class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
 
     }
   }
+
 }

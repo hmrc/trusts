@@ -48,11 +48,16 @@ class RemoveProtectorSpec extends IntegrationTestBase {
       .getJsonValueFromFile("trusts-etmp-received-multiple-protectors.json")
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
@@ -68,8 +73,9 @@ class RemoveProtectorSpec extends IntegrationTestBase {
       runTest("5174384721", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
@@ -78,8 +84,7 @@ class RemoveProtectorSpec extends IntegrationTestBase {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
-      val removeProtectorAtIndex = Json.parse(
-        """
+      val removeProtectorAtIndex = Json.parse("""
           |{
           |	"index": 0,
           |	"endDate": "2010-10-10",
@@ -94,8 +99,7 @@ class RemoveProtectorSpec extends IntegrationTestBase {
       val removeProtectorResult = route(application, removeProtectorRequest).get
       status(removeProtectorResult) mustBe OK
 
-      val removeProtectorCompanyAtIndex = Json.parse(
-        """
+      val removeProtectorCompanyAtIndex = Json.parse("""
           |{
           |	"index": 0,
           |	"endDate": "2010-10-10",
@@ -114,19 +118,18 @@ class RemoveProtectorSpec extends IntegrationTestBase {
       status(newResult) mustBe OK
 
       val protectors = (contentAsJson(newResult) \ "protectors" \ "protector").as[JsArray]
-      protectors mustBe Json.parse(
-        """
+      protectors mustBe Json.parse("""
           |[
           |]
           |""".stripMargin)
 
       val protectorCompanies = (contentAsJson(newResult) \ "protectors" \ "protectorCompany").as[JsArray]
-      protectorCompanies mustBe Json.parse(
-        """
+      protectorCompanies mustBe Json.parse("""
           |[
           |]
           |""".stripMargin)
 
     }
   }
+
 }

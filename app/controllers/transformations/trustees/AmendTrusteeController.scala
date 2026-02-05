@@ -31,41 +31,40 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AmendTrusteeController @Inject()(identify: IdentifierAction,
-                                       transformationService: TransformationService,
-                                       localDateService: LocalDateService)
-                                      (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) with TrusteeController {
+class AmendTrusteeController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  localDateService: LocalDateService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AmendTransformationController(identify, transformationService) with TrusteeController {
 
-  def amendLeadTrustee(identifier: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-
-      (validate[AmendedLeadTrusteeIndType], validate[AmendedLeadTrusteeOrgType]) match {
-        case (Some(_), _) =>
-          amendLeadIndividual(identifier)
-        case (_, Some(_)) =>
-          amendLeadBusiness(identifier)
-        case _ =>
-          logger.error(s"[AmendTrusteeController][amendLeadTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
-            s" Supplied json could not be read as a lead trustee")
-          Future.successful(BadRequest)
-      }
+  def amendLeadTrustee(identifier: String): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    (validate[AmendedLeadTrusteeIndType], validate[AmendedLeadTrusteeOrgType]) match {
+      case (Some(_), _) =>
+        amendLeadIndividual(identifier)
+      case (_, Some(_)) =>
+        amendLeadBusiness(identifier)
+      case _            =>
+        logger.error(
+          s"[AmendTrusteeController][amendLeadTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied json could not be read as a lead trustee"
+        )
+        Future.successful(BadRequest)
     }
   }
 
-  def amendTrustee(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-
-      (validate[TrusteeIndividualType], validate[TrusteeOrgType]) match {
-        case (Some(_), _) =>
-          amendIndividual(identifier, index)
-        case (_, Some(_)) =>
-          amendBusiness(identifier, index)
-        case _ =>
-          logger.error(s"[AmendTrusteeController][amendTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
-            s" Supplied json could not be read as a trustee")
-          Future.successful(BadRequest)
-      }
+  def amendTrustee(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    (validate[TrusteeIndividualType], validate[TrusteeOrgType]) match {
+      case (Some(_), _) =>
+        amendIndividual(identifier, index)
+      case (_, Some(_)) =>
+        amendBusiness(identifier, index)
+      case _            =>
+        logger.error(
+          s"[AmendTrusteeController][amendTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied json could not be read as a trustee"
+        )
+        Future.successful(BadRequest)
     }
   }
 
@@ -81,8 +80,9 @@ class AmendTrusteeController @Inject()(identify: IdentifierAction,
   def amendBusiness(identifier: String, index: Int)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     addNewTransform[TrusteeOrgType](identifier, Some(index), BUSINESS_TRUSTEE).apply(request)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AmendTrusteeTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
-  }
 
 }

@@ -21,10 +21,10 @@ import utils.Constants._
 
 trait OtherIndividualController {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) => ENTITIES \ OTHER_INDIVIDUALS \ i
-      case _ => throw new Exception(s"Index should not be None for other individual.")
+      case _       => throw new Exception(s"Index should not be None for other individual.")
     }
-  }
+
 }

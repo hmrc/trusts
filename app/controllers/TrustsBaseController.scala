@@ -30,20 +30,20 @@ class TrustsBaseController(cc: ControllerComponents) extends BackendController(c
 
   protected def noMatchResponse = """{"match": false}"""
 
-  override protected def withJsonBody[T](f: T => Future[Result])
-                                        (implicit request: Request[JsValue],
-                                         ct     : ClassTag[T],
-                                         reads: Reads[T]) : Future[Result] =
+  override protected def withJsonBody[T](
+    f: T => Future[Result]
+  )(implicit request: Request[JsValue], ct: ClassTag[T], reads: Reads[T]): Future[Result] =
     request.body.validate[T] match {
       case JsSuccess(payload, _) =>
         f(payload)
-      case JsError(errs) =>
+      case JsError(errs)         =>
         val response = handleErrorResponseByField(errs)
         Future.successful(response)
     }
 
-
-  def handleErrorResponseByField(field: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]): Result = {
+  def handleErrorResponseByField(
+    field: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]
+  ): Result = {
 
     val fields = field.map { case (key, validationError) =>
       (key.toString.stripPrefix("/"), validationError.head.message)
@@ -51,20 +51,18 @@ class TrustsBaseController(cc: ControllerComponents) extends BackendController(c
     getErrorResponse(fields.head._1, fields.head._2)
   }
 
-  def getErrorResponse(key: String, error: String): Result = {
+  def getErrorResponse(key: String, error: String): Result =
     error match {
       case "error.path.missing" =>
         invalidRequestErrorResponse
-      case _ =>
+      case _                    =>
         errors(key)
     }
-  }
 
   protected val errors: Map[String, Result] = Map(
-    "name" -> invalidNameErrorResponse,
-    "utr" -> invalidUtrErrorResponse,
+    "name"     -> invalidNameErrorResponse,
+    "utr"      -> invalidUtrErrorResponse,
     "postcode" -> invalidPostcodeErrorResponse
-
   ).withDefaultValue(invalidRequestErrorResponse)
 
 }

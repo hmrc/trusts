@@ -66,7 +66,8 @@ class RemoveAssetSpec extends IntegrationTestBase {
     val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
     status(subsequentGetResult) mustBe OK
 
-    val assetsAfterRemoval = (contentAsJson(subsequentGetResult) \ "getTrust" \ "trust" \ "assets" \ assetType).asOpt[JsObject]
+    val assetsAfterRemoval =
+      (contentAsJson(subsequentGetResult) \ "getTrust" \ "trust" \ "assets" \ assetType).asOpt[JsObject]
     assetsAfterRemoval mustBe None
   }
 
@@ -79,15 +80,17 @@ class RemoveAssetSpec extends IntegrationTestBase {
     when(mockTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
-    applicationBuilder.overrides(
-      bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-      bind[TrustsConnector].toInstance(mockTrustsConnector)
-    ).build()
+    applicationBuilder
+      .overrides(
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(mockTrustsConnector)
+      )
+      .build()
   }
 
   "Remove asset" should {
     "return amended data in a subsequent 'get' call for each asset type" in assertMongoTest(application) { app =>
-
       for (assetType <- RemoveAsset.validAssetTypes) {
         runTest(utr, app, assetType)
         runTest(urn, app, assetType)
@@ -96,4 +99,5 @@ class RemoveAssetSpec extends IntegrationTestBase {
       RemoveAsset.validAssetTypes.length mustBe 7
     }
   }
+
 }

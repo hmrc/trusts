@@ -19,8 +19,8 @@ package utils
 object Headers {
 
   val DRAFT_REGISTRATION_ID = "Draft-Registration-ID"
-  val ENVIRONMENT_HEADER = "Environment"
-  val CORRELATION_HEADER = "Correlation-Id"
-  val TRUE_USER_AGENT = "True-User-Agent"
+  val ENVIRONMENT_HEADER    = "Environment"
+  val CORRELATION_HEADER    = "Correlation-Id"
+  val TRUE_USER_AGENT       = "True-User-Agent"
 
 }

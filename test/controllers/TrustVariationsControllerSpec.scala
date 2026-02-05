@@ -19,7 +19,9 @@ package controllers
 import base.BaseSpec
 import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
-import errors.{EtmpCacheDataStaleErrorResponse, ServerError, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
+import errors.{
+  EtmpCacheDataStaleErrorResponse, ServerError, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit
+}
 import models.auditing.TrustAuditing
 import models.nonRepudiation.NRSResponse
 import models.variation.{DeclarationForApi, VariationContext, VariationSuccessResponse}
@@ -41,7 +43,8 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
+class TrustVariationsControllerSpec
+    extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 
@@ -53,11 +56,10 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
   private val responseHandler = new VariationsResponseHandler(mockAuditService)
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(mockAuditService)
-  }
 
-  private def trustVariationsController = {
+  private def trustVariationsController =
     new TrustVariationsController(
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockAuditService,
@@ -67,12 +69,11 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       Helpers.stubControllerComponents(),
       appConfig
     )
-  }
 
   ".declare" should {
 
     "submit a trust closure" in {
-      val SUT = trustVariationsController
+      val SUT         = trustVariationsController
       val declaration = DeclarationName(
         NameType("firstname", None, "Surname")
       )
@@ -80,25 +81,30 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       val declarationForApi =
         DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
 
-      when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(NRSResponse.Success("uuid")))
+      when(mockNonRepudiationService.maintain(any(), any())(any(), any()))
+        .thenReturn(Future.successful(NRSResponse.Success("uuid")))
 
       when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
-        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(
-          Right(VariationContext(Json.obj(), VariationSuccessResponse("TVN123")))
-        )))
+        .thenReturn(
+          EitherT[Future, TrustErrors, VariationContext](
+            Future.successful(
+              Right(VariationContext(Json.obj(), VariationSuccessResponse("TVN123")))
+            )
+          )
+        )
 
       val result = SUT.declare("aUTR")(
         FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
       )
 
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe Json.obj(
         "tvn" -> "TVN123"
       )
     }
 
     "return Bad Request when declaring no change and there is a form bundle number mismatch" in {
-      val SUT = trustVariationsController
+      val SUT         = trustVariationsController
       val declaration = DeclarationName(
         NameType("firstname", None, "Surname")
       )
@@ -106,17 +112,21 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       val declarationForApi = DeclarationForApi(declaration, None, None)
 
       when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
-        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(
-          Left(VariationFailureForAudit(EtmpCacheDataStaleErrorResponse, "Etmp data is stale"))
-        )))
+        .thenReturn(
+          EitherT[Future, TrustErrors, VariationContext](
+            Future.successful(
+              Left(VariationFailureForAudit(EtmpCacheDataStaleErrorResponse, "Etmp data is stale"))
+            )
+          )
+        )
 
       val result = SUT.declare("aUTR")(
         FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
       )
 
-      status(result) mustBe BAD_REQUEST
+      status(result)        mustBe BAD_REQUEST
       contentAsJson(result) mustBe Json.obj(
-        "code" -> "ETMP_DATA_STALE",
+        "code"    -> "ETMP_DATA_STALE",
         "message" -> "ETMP returned a changed form bundle number for the trust."
       )
 
@@ -151,7 +161,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
     }
 
     "return Service Unavailable when des dependent service is down" in {
-      val SUT = trustVariationsController
+      val SUT         = trustVariationsController
       val declaration = DeclarationName(
         NameType("firstname", None, "Surname")
       )
@@ -160,17 +170,21 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
 
       when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
-        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(
-          Left(VariationFailureForAudit(ServiceNotAvailableErrorResponse, "Service unavailable."))
-        )))
+        .thenReturn(
+          EitherT[Future, TrustErrors, VariationContext](
+            Future.successful(
+              Left(VariationFailureForAudit(ServiceNotAvailableErrorResponse, "Service unavailable."))
+            )
+          )
+        )
 
       val result = SUT.declare("aUTR")(
         FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
       )
 
-      status(result) mustBe SERVICE_UNAVAILABLE
+      status(result)        mustBe SERVICE_UNAVAILABLE
       contentAsJson(result) mustBe Json.obj(
-        "code" -> "SERVICE_UNAVAILABLE",
+        "code"    -> "SERVICE_UNAVAILABLE",
         "message" -> "Service unavailable."
       )
 
@@ -183,7 +197,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
     }
 
     "return an Internal Server Error when submitDeclaration returns Left(ServerError()) " in {
-      val SUT = trustVariationsController
+      val SUT         = trustVariationsController
       val declaration = DeclarationName(
         NameType("firstname", None, "Surname")
       )
@@ -191,7 +205,8 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       val declarationForApi =
         DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
 
-      when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(NRSResponse.Success("uuid")))
+      when(mockNonRepudiationService.maintain(any(), any())(any(), any()))
+        .thenReturn(Future.successful(NRSResponse.Success("uuid")))
 
       when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
         .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(Left(ServerError()))))
@@ -203,4 +218,5 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
+
 }
