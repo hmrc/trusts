@@ -25,7 +25,7 @@ import uk.gov.hmrc.itbase.IntegrationTestBase
 
 class SubmissionDraftManagementSpec extends IntegrationTestBase {
 
-  private val draftData        = Json.obj(
+  private val draftData = Json.obj(
     "field1" -> "value1",
     "field2" -> "value2"
   )
@@ -35,10 +35,10 @@ class SubmissionDraftManagementSpec extends IntegrationTestBase {
     "fieldZ" -> " new value2"
   )
 
-  private val createdAtPath    = JsPath() \ "createdAt"
-  private val dataPath         = JsPath() \ "data"
-  private val referencePath    = JsPath() \ "reference"
-  private val draftIdPath      = JsPath() \ "draftId"
+  private val createdAtPath = JsPath() \ "createdAt"
+  private val dataPath      = JsPath() \ "data"
+  private val referencePath = JsPath() \ "reference"
+  private val draftIdPath   = JsPath() \ "draftId"
 
   "working with submission drafts" should {
 

@@ -59,7 +59,7 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase with Mong
     "theAnswer" -> 6.28
   )
 
-  val cc: ControllerComponents                 = stubControllerComponents()
+  val cc: ControllerComponents = stubControllerComponents()
 
   val appWithoutSavedRegistration: Application = applicationBuilder
     .configure(Seq("features.removeSavedRegistrations" -> false): _*)
@@ -68,7 +68,7 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase with Mong
     )
     .build()
 
-  val appWithSavedRegistration: Application    = applicationBuilder
+  val appWithSavedRegistration: Application = applicationBuilder
     .configure(Seq("features.removeSavedRegistrations" -> true): _*)
     .overrides(
       bind[IdentifierAction].toInstance(new FakeIdentifierAction(cc.parsers.default, Agent))

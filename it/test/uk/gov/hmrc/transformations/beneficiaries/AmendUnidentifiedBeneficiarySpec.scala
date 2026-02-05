@@ -41,7 +41,7 @@ class AmendUnidentifiedBeneficiarySpec extends IntegrationTestBase {
   private val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  private val expectedInitialGetJson: JsValue           = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
+  private val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend unidentified beneficiary call" should {
 

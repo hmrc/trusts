@@ -44,7 +44,7 @@ class AmendLeadTrusteeSpec extends IntegrationTestBase {
   val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  val expectedInitialGetJson: JsValue           = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
+  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend lead trustee call" should {
     val newTrusteeIndInfo = Json.obj(

@@ -17,7 +17,7 @@
 package models
 
 case class RegistrationSubmissionValidationStats(
-                                                  createdAtBeyondTTLCount: Int,
-                                                  createdAtNotDateTimeCount: Int,
-                                                  noCreatedAtCount: Int,
-                                                 )
+  createdAtBeyondTTLCount: Int,
+  createdAtNotDateTimeCount: Int,
+  noCreatedAtCount: Int
+)
