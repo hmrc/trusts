@@ -41,7 +41,8 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class AddOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class AddOtherIndividualControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -64,7 +65,7 @@ class AddOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar wit
     entityEnd = None
   )
 
-  private val mockTransformationService = mock[TransformationService]
+  private val mockTransformationService   = mock[TransformationService]
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   override def beforeEach(): Unit = {
@@ -188,4 +189,5 @@ class AddOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar wit
 
     }
   }
+
 }

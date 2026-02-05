@@ -44,4 +44,5 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
     bind(classOf[RegistrationValidationJobStarter]).asEagerSingleton()
 
   }
+
 }

@@ -33,4 +33,3 @@ object TrustEnvelope {
   def fromFuture[T](t: Future[T])(implicit ec: ExecutionContext): TrustEnvelope[T] = EitherT.right(t)
 
 }
-

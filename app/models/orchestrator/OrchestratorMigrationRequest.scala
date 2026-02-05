@@ -23,5 +23,3 @@ case class OrchestratorMigrationRequest(urn: String, utr: String)
 object OrchestratorMigrationRequest {
   implicit val format: OFormat[OrchestratorMigrationRequest] = Json.format[OrchestratorMigrationRequest]
 }
-
-

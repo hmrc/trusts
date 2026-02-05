@@ -41,8 +41,8 @@ import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
-  with GuiceOneAppPerSuite {
+class TrustDetailsSubmissionDraftControllerSpec
+    extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures with GuiceOneAppPerSuite {
 
   private val currentDateTime: Instant =
     LocalDateTime.of(1999, 3, 14, 13, 33).toInstant(ZoneOffset.UTC)
@@ -51,8 +51,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  private lazy val mockSubmissionDraft = Json.parse(
-    """
+  private lazy val mockSubmissionDraft = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -137,10 +137,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
-  private lazy val whenTrustSetupAtNewPath = Json.parse(
-    """
+  private lazy val whenTrustSetupAtNewPath = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -163,10 +164,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
-  private lazy val mockSubmissionDraftNoData = Json.parse(
-    """
+  private lazy val mockSubmissionDraftNoData = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -182,7 +184,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
   private object TimeServiceStub extends TimeService {
     override def now: Instant = currentDateTime
@@ -191,7 +194,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   ".getTrustTaxable" should {
 
     "respond with OK and true when trust is taxable" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -201,8 +204,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
         Helpers.stubControllerComponents()
       )
 
-      val cache = Json.parse(
-        """
+      val cache = Json
+        .parse("""
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -220,10 +223,13 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |    },
           |    "inProgress" : true
           |}
-          |""".stripMargin).as[RegistrationSubmissionDraft]
+          |""".stripMargin)
+        .as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache))))
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -231,12 +237,12 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe JsBoolean(true)
     }
 
     "respond with OK and false when trust is non taxable" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -246,8 +252,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
         Helpers.stubControllerComponents()
       )
 
-      val cache = Json.parse(
-        """
+      val cache = Json
+        .parse("""
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -265,10 +271,13 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |    },
           |    "inProgress" : true
           |}
-          |""".stripMargin).as[RegistrationSubmissionDraft]
+          |""".stripMargin)
+        .as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache))))
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -276,7 +285,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe JsBoolean(false)
     }
   }
@@ -284,7 +293,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   ".getTrustName" should {
 
     "respond with OK and trust name when answered as part of trust matching" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -294,8 +303,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
         Helpers.stubControllerComponents()
       )
 
-      val cache = Json.parse(
-        """
+      val cache = Json
+        .parse("""
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -315,10 +324,13 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |    },
           |    "inProgress" : true
           |}
-          |""".stripMargin).as[RegistrationSubmissionDraft]
+          |""".stripMargin)
+        .as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache))))
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -326,19 +338,18 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           | "trustName": "Trust Name Matching"
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "response with OK and trust name when answered as part of trust details" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -348,8 +359,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
         Helpers.stubControllerComponents()
       )
 
-      val cache = Json.parse(
-        """
+      val cache = Json
+        .parse("""
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -366,10 +377,13 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |    },
           |    "inProgress" : true
           |}
-          |""".stripMargin).as[RegistrationSubmissionDraft]
+          |""".stripMargin)
+        .as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache))))
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -377,19 +391,18 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           | "trustName": "Trust Name Details"
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -410,7 +423,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with NotFound when no start date in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -421,7 +434,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -431,7 +448,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with InternalServerError when repository returns an exception from Mongo" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -442,9 +459,13 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(
-          Left(ServerError("operation failed due to exception from Mongo"))
-        )))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(
+              Left(ServerError("operation failed due to exception from Mongo"))
+            )
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -458,7 +479,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   ".getCorrespondenceAddress" should {
 
     "respond with OK with the correspondence address" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -469,7 +490,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraft)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraft)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -477,8 +502,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           | "line1": "Address line1",
           | "line2": "Address line2",
@@ -487,12 +511,12 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -513,7 +537,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with NotFound when no correspondence address in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -524,7 +548,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -538,7 +566,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   ".getTrustUtr" should {
 
     "respond with OK and trust utr when answered as part of trust matching" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -548,8 +576,8 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
         Helpers.stubControllerComponents()
       )
 
-      val cache = Json.parse(
-        """
+      val cache = Json
+        .parse("""
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -569,10 +597,13 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |    },
           |    "inProgress" : true
           |}
-          |""".stripMargin).as[RegistrationSubmissionDraft]
+          |""".stripMargin)
+        .as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache))))
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -582,12 +613,12 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       val expectedDraftJson = JsString("1234567890")
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -608,7 +639,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with NotFound when no trust utr in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -619,7 +650,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -633,7 +668,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   ".getWhenTrustSetup" should {
 
     "respond with OK with the start date at the new path" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -644,7 +679,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(whenTrustSetupAtNewPath)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(whenTrustSetupAtNewPath)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -652,19 +691,18 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           | "startDate": "2015-04-06"
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -685,7 +723,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with NotFound when no start date in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrustDetailsSubmissionDraftController(
@@ -696,7 +734,11 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 

@@ -28,43 +28,62 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TransformationRepositoryImpl @Inject()(
-                                              mongo: MongoComponent,
-                                              config: AppConfig
-                                            )(implicit ec: ExecutionContext) extends PlayMongoRepository[ComposedDeltaTransform](
-  mongoComponent = mongo,
-  collectionName = "transforms",
-  domainFormat = ComposedDeltaTransform.format,
-  indexes = Seq(
-    IndexModel(
-      Indexes.ascending("updatedAt"),
-      IndexOptions().name("transformation-data-updated-at-index").expireAfter(config.ttlInSeconds, TimeUnit.SECONDS).unique(false)
-    ),
-    IndexModel(
-      Indexes.ascending("id"),
-      IndexOptions().name("id-index").unique(false)
+class TransformationRepositoryImpl @Inject() (
+  mongo: MongoComponent,
+  config: AppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[ComposedDeltaTransform](
+      mongoComponent = mongo,
+      collectionName = "transforms",
+      domainFormat = ComposedDeltaTransform.format,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("updatedAt"),
+          IndexOptions()
+            .name("transformation-data-updated-at-index")
+            .expireAfter(config.ttlInSeconds, TimeUnit.SECONDS)
+            .unique(false)
+        ),
+        IndexModel(
+          Indexes.ascending("id"),
+          IndexOptions().name("id-index").unique(false)
+        )
+      ),
+      replaceIndexes = config.dropIndexesEnabled
     )
-  ),
-  replaceIndexes = config.dropIndexesEnabled
-) with RepositoryHelper[ComposedDeltaTransform] with TransformationRepository {
-  override implicit val executionContext: ExecutionContext = ec
-  override val className: String = "TransformationRepositoryImpl"
-  override val key: String = "transforms"
+    with RepositoryHelper[ComposedDeltaTransform]
+    with TransformationRepository {
+  implicit override val executionContext: ExecutionContext = ec
+  override val className: String                           = "TransformationRepositoryImpl"
+  override val key: String                                 = "transforms"
 
-  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[ComposedDeltaTransform]] = {
+  override def get(
+    identifier: String,
+    internalId: String,
+    sessionId: String
+  ): TrustEnvelope[Option[ComposedDeltaTransform]] =
     getOpt(identifier, internalId, sessionId)
-  }
 
-  override def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): TrustEnvelope[Boolean] = {
+  override def set(
+    identifier: String,
+    internalId: String,
+    sessionId: String,
+    transforms: ComposedDeltaTransform
+  ): TrustEnvelope[Boolean] =
     upsert(identifier, internalId, sessionId, transforms)
-  }
+
 }
 
 trait TransformationRepository {
 
   def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[ComposedDeltaTransform]]
 
-  def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): TrustEnvelope[Boolean]
+  def set(
+    identifier: String,
+    internalId: String,
+    sessionId: String,
+    transforms: ComposedDeltaTransform
+  ): TrustEnvelope[Boolean]
 
   def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean]
 }

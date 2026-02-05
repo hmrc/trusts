@@ -48,11 +48,16 @@ class SetPropertySpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
@@ -68,8 +73,9 @@ class SetPropertySpec extends IntegrationTestBase {
       runTest("5174384721", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
@@ -96,4 +102,5 @@ class SetPropertySpec extends IntegrationTestBase {
 
     }
   }
+
 }

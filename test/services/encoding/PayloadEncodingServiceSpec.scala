@@ -114,4 +114,5 @@ class PayloadEncodingServiceSpec extends BaseSpec with JsonFixtures with Matcher
 
     }
   }
+
 }

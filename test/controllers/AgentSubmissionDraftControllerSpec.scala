@@ -41,8 +41,8 @@ import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
-  with GuiceOneAppPerSuite {
+class AgentSubmissionDraftControllerSpec
+    extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures with GuiceOneAppPerSuite {
 
   private val currentDateTime: Instant =
     LocalDateTime.of(1999, 3, 14, 13, 33).toInstant(ZoneOffset.UTC)
@@ -51,8 +51,8 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  private lazy val mockSubmissionDraftAgentDetails = Json.parse(
-    """
+  private lazy val mockSubmissionDraftAgentDetails = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -78,10 +78,11 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
-  private lazy val mockSubmissionDraftNoData = Json.parse(
-    """
+  private lazy val mockSubmissionDraftNoData = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -97,8 +98,8 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
-
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
   private object TimeServiceStub extends TimeService {
     override def now: Instant = currentDateTime
@@ -107,7 +108,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
   ".getAgentAddress" should {
 
     "respond with OK with the agent address" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new AgentSubmissionDraftController(
@@ -118,7 +119,11 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftAgentDetails)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftAgentDetails)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -126,8 +131,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           | "line1": "Agent address line1",
           | "line2": "Agent address line2",
@@ -136,12 +140,12 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new AgentSubmissionDraftController(
@@ -162,7 +166,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
     }
 
     "respond with NotFound when no agent address in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new AgentSubmissionDraftController(
@@ -173,7 +177,11 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -186,7 +194,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
   ".getClientReference" should {
 
     "respond with OK with the client reference" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new AgentSubmissionDraftController(
@@ -197,7 +205,11 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftAgentDetails)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftAgentDetails)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -205,17 +217,16 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |"client-ref"
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new AgentSubmissionDraftController(
@@ -236,7 +247,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
     }
 
     "respond with NotFound when no client reference in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new AgentSubmissionDraftController(
@@ -247,7 +258,11 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 

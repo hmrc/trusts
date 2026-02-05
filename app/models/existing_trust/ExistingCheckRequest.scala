@@ -25,9 +25,9 @@ case class ExistingCheckRequest(name: String, postcode: Option[String] = None, u
 object ExistingCheckRequest {
 
   private def validationError(msg: String) = JsonValidationError(msg)
-  private val utrValidationRegEx = """^[0-9]{10}$""".r
-  private val postcodeRegEx ="""^[a-zA-Z]{1,2}[0-9][0-9a-zA-Z]?\s?[0-9][a-zA-Z]{2}$""".r
-  private val nameRegEx = """^[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
+  private val utrValidationRegEx           = """^[0-9]{10}$""".r
+  private val postcodeRegEx                = """^[a-zA-Z]{1,2}[0-9][0-9a-zA-Z]?\s?[0-9][a-zA-Z]{2}$""".r
+  private val nameRegEx                    = """^[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
 
   private val utrValidation: Reads[String] =
     Reads.StringReads.filter(validationError("Invalid UTR"))(
@@ -44,15 +44,11 @@ object ExistingCheckRequest {
       nameRegEx.findFirstIn(_).isDefined
     )
 
-
   implicit val writes: Writes[ExistingCheckRequest] = (
     (JsPath \ "name").write[String] and
       (JsPath \ "postcode").writeNullable[String] and
       (JsPath \ "sa-utr").write[String]
-    ) (c => (
-    c.name,
-    c.postcode,
-    c.utr))
+  )(c => (c.name, c.postcode, c.utr))
 
   implicit val reads: Reads[ExistingCheckRequest] = (
     (JsPath \ "name").read[String](nameValidation) and
@@ -61,6 +57,3 @@ object ExistingCheckRequest {
   )(ExistingCheckRequest.apply _)
 
 }
-
-
-

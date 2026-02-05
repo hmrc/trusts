@@ -38,14 +38,17 @@ import scala.concurrent.Future
 
 class AmendUnidentifiedBeneficiarySpec extends IntegrationTestBase {
 
-  private val getTrustResponse: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+  private val getTrustResponse: GetTrustSuccessResponse =
+    JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
   private val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend unidentified beneficiary call" should {
 
     val newDescription = "Updated description"
 
-    val expectedGetAfterAmendBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-unidentified-beneficiary.json")
+    val expectedGetAfterAmendBeneficiaryJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-unidentified-beneficiary.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
     when(stubbedTrustsConnector.getTrustInfo(any()))
@@ -53,7 +56,8 @@ class AmendUnidentifiedBeneficiarySpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
@@ -62,13 +66,14 @@ class AmendUnidentifiedBeneficiarySpec extends IntegrationTestBase {
       runTest("5174384721", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
       val amendRequest = FakeRequest(POST, s"/trusts/beneficiaries/amend-unidentified/$identifier/0")
@@ -79,8 +84,9 @@ class AmendUnidentifiedBeneficiarySpec extends IntegrationTestBase {
       status(amendResult) mustBe OK
 
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+      status(newResult)        mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAmendBeneficiaryJson
     }
   }
+
 }

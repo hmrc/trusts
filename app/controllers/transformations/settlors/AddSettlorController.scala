@@ -29,19 +29,21 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AddSettlorController @Inject()(identify: IdentifierAction,
-                                     transformationService: TransformationService,
-                                     taxableMigrationService: TaxableMigrationService)
-                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+class AddSettlorController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
-  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[SettlorIndividual](identifier, INDIVIDUAL_SETTLOR)
+  def addIndividual(identifier: String): Action[JsValue] =
+    addNewTransform[SettlorIndividual](identifier, INDIVIDUAL_SETTLOR)
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[SettlorCompany](identifier, BUSINESS_SETTLOR)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AddSettlorTransform(Json.toJson(value), `type`)
-  }
 
 }

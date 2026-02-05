@@ -28,14 +28,15 @@ import transformers.remove.{Remove, RemoveProtector}
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveProtectorController @Inject()(identify: IdentifierAction,
-                                          transformationService: TransformationService)
-                                         (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) with ProtectorController {
+class RemoveProtectorController @Inject() (identify: IdentifierAction, transformationService: TransformationService)(
+  implicit
+  ec: ExecutionContext,
+  cc: ControllerComponents
+) extends RemoveTransformationController(identify, transformationService) with ProtectorController {
 
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveProtector](identifier)
 
-  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
+  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform =
     RemoveProtectorTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
-  }
+
 }

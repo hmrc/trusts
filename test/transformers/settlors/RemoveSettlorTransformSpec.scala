@@ -47,8 +47,7 @@ class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with Mock
 
     if (withLineNo) {
       b.deepMerge(Json.obj("lineNo" -> 12))
-    }
-    else b
+    } else b
   }
 
   private def buildInputJson(settlorType: String, settlorData: Seq[JsValue]) = {
@@ -61,83 +60,110 @@ class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with Mock
   }
 
   "Remove Settlor Transforms should round trip through JSON as part of Composed Transform" in {
-    val OUT = ComposedDeltaTransform(Seq(
-      RemoveSettlorTransform(Some(56), settlorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "settlor"),
-      RemoveSettlorTransform(Some(12), settlorJson("Foo"), LocalDate.of(2317, 12, 21), "settlorCompany")
-    ))
+    val OUT = ComposedDeltaTransform(
+      Seq(
+        RemoveSettlorTransform(Some(56), settlorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "settlor"),
+        RemoveSettlorTransform(Some(12), settlorJson("Foo"), LocalDate.of(2317, 12, 21), "settlorCompany")
+      )
+    )
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
       case JsSuccess(result, _) => result mustBe OUT
-      case _ => fail("Transform failed")
+      case _                    => fail("Transform failed")
     }
   }
 
   "the remove individual settlor normal transform must" - {
     "remove an individual settlor from the list that is returned to the frontend" in {
-      val inputJson = buildInputJson("settlor", Seq(
-        settlorJson("One"),
-        settlorJson("Two"),
-        settlorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "settlor",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Two"),
+          settlorJson("Three")
+        )
+      )
 
-      val expectedOutput = buildInputJson("settlor", Seq(
-        settlorJson("One"),
-        settlorJson("Three")
-      ))
+      val expectedOutput = buildInputJson(
+        "settlor",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "settlor")))
+      val OUT =
+        ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "settlor")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
-        case JsError(errors) => fail(s"Transform failed: $errors")
+        case JsError(errors)     => fail(s"Transform failed: $errors")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("settlor", Seq(
-        settlorJson("One"),
-        settlorJson("Two"),
-        settlorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "settlor",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Two"),
+          settlorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "settlor")))
+      val OUT =
+        ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "settlor")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("settlor", Seq(
-        settlorJson("One"),
-        settlorJson("Two"),
-        settlorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "settlor",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Two"),
+          settlorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "settlor")))
+      val OUT =
+        ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "settlor")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "remove the section if the last settlor in that section is removed" in {
-      val inputJson = buildInputJson("settlor", Seq(
-        settlorJson("One")
-      ))
+      val inputJson = buildInputJson(
+        "settlor",
+        Seq(
+          settlorJson("One")
+        )
+      )
 
       val transforms = Seq(
-        RemoveSettlorTransform(Some(0), settlorJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "settlor")
+        RemoveSettlorTransform(
+          Some(0),
+          settlorJson("One", None, withLineNo = false),
+          LocalDate.of(2018, 4, 21),
+          "settlor"
+        )
       )
 
       val OUT = ComposedDeltaTransform(transforms)
 
       OUT.applyTransform(inputJson) match {
-        case JsSuccess(value, _) => value.transform(
-          (JsPath() \ "details" \ "trust" \ "entities" \ "settlors" \ "settlor").json.pick).isError mustBe true
-        case _ => fail("Transform failed")
+        case JsSuccess(value, _) =>
+          value
+            .transform((JsPath() \ "details" \ "trust" \ "entities" \ "settlors" \ "settlor").json.pick)
+            .isError mustBe true
+        case _                   => fail("Transform failed")
       }
     }
 
@@ -145,62 +171,86 @@ class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with Mock
 
   "the remove business settlor declaration transform must" - {
     "set an end date on a business settlor from the list that is sent to ETMP" in {
-      val inputJson = buildInputJson("settlorCompany", Seq(
-        settlorJson("One"),
-        settlorJson("Two"),
-        settlorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "settlorCompany",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Two"),
+          settlorJson("Three")
+        )
+      )
 
-      val expectedOutput = buildInputJson("settlorCompany", Seq(
-        settlorJson("One"),
-        settlorJson("Three"),
-        settlorJson("Two", Some(LocalDate.of(2018, 4, 21)))
+      val expectedOutput = buildInputJson(
+        "settlorCompany",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Three"),
+          settlorJson("Two", Some(LocalDate.of(2018, 4, 21)))
+        )
+      )
 
-      ))
-
-      val repo = mock[TransformationRepository]
+      val repo          = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
-      val auditService = mock[AuditService]
-      val transforms = Seq(RemoveSettlorTransform(Some(1), settlorJson("Two"), LocalDate.of(2018, 4, 21), "settlorCompany"))
+      val auditService  = mock[AuditService]
+      val transforms    =
+        Seq(RemoveSettlorTransform(Some(1), settlorJson("Two"), LocalDate.of(2018, 4, 21), "settlorCompany"))
       when(repo.get(any(), any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(transforms))))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](
+            Future.successful(Right(Some(ComposedDeltaTransform(transforms))))
+          )
+        )
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 
-      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).value.futureValue match {
+      SUT
+        .applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier())
+        .value
+        .futureValue match {
         case Right(JsSuccess(value, _)) => value mustBe expectedOutput
-        case _ => fail("Transform failed")
+        case _                          => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("settlorCompany", Seq(
-        settlorJson("One"),
-        settlorJson("Two"),
-        settlorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "settlorCompany",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Two"),
+          settlorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "settlorCompany")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveSettlorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "settlorCompany"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("settlorCompany", Seq(
-        settlorJson("One"),
-        settlorJson("Two"),
-        settlorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "settlorCompany",
+        Seq(
+          settlorJson("One"),
+          settlorJson("Two"),
+          settlorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveSettlorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "settlorCompany")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveSettlorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "settlorCompany"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
   }
+
 }

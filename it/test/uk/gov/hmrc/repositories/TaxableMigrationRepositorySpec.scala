@@ -26,8 +26,8 @@ class TaxableMigrationRepositorySpec extends IntegrationTestBase {
 
   "TaxableMigrationRepository" should {
 
-    "be able to store and retrieve a boolean" in assertMongoTest(createApplication)({ (app) =>
-      val repository = app.injector.instanceOf[TaxableMigrationRepositoryImpl]
+    "be able to store and retrieve a boolean" in assertMongoTest(createApplication) { app =>
+      val repository         = app.injector.instanceOf[TaxableMigrationRepositoryImpl]
       val migratingToTaxable = true
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", migratingToTaxable)
@@ -36,24 +36,26 @@ class TaxableMigrationRepositorySpec extends IntegrationTestBase {
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
 
       retrieved.value.futureValue mustBe Right(Some(migratingToTaxable))
-    })
+    }
 
-    "be able to store and retrieve a payload with correct date time format" in assertMongoTest(createApplication)({ app =>
-      val repository = app.injector.instanceOf[TaxableMigrationRepositoryImpl]
-      val migratingToTaxable = true
+    "be able to store and retrieve a payload with correct date time format" in assertMongoTest(createApplication) {
+      app =>
+        val repository         = app.injector.instanceOf[TaxableMigrationRepositoryImpl]
+        val migratingToTaxable = true
 
-      val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", migratingToTaxable)
-      storedOk.value.futureValue mustBe Right(true)
+        val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", migratingToTaxable)
+        storedOk.value.futureValue mustBe Right(true)
 
-      val query = `type`("updatedAt", BsonType.DATE_TIME)
-      val documents = repository.collection.countDocuments(query).toFuture().futureValue.toInt
+        val query     = `type`("updatedAt", BsonType.DATE_TIME)
+        val documents = repository.collection.countDocuments(query).toFuture().futureValue.toInt
 
-      // Verify at least one document exists with updatedAt as datetime
-      documents must be > 0
+        // Verify at least one document exists with updatedAt as datetime
+        documents must be > 0
 
-      // Optional: Check if our specific document has the correct format
-      val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
-      retrieved.value.futureValue mustBe Right(Some(migratingToTaxable))
-    })
+        // Optional: Check if our specific document has the correct format
+        val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
+        retrieved.value.futureValue mustBe Right(Some(migratingToTaxable))
+    }
   }
+
 }

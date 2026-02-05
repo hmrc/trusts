@@ -24,13 +24,13 @@ trait Assets[T <: Asset[T]] extends Entities[T]
 
 object Assets {
 
-  def transform(response: JsValue): Reads[JsObject] = {
+  def transform(response: JsValue): Reads[JsObject] =
     AssetMonetaryAmount.transform(response) andThen
-    PropertyLandAsset.transform(response) andThen
-    SharesAsset.transform(response) andThen
-    BusinessAsset.transform(response) andThen
-    PartnershipAsset.transform(response) andThen
-    OtherAsset.transform(response) andThen
-    NonEEABusiness.transform(response)
-  }
+      PropertyLandAsset.transform(response) andThen
+      SharesAsset.transform(response)       andThen
+      BusinessAsset.transform(response)     andThen
+      PartnershipAsset.transform(response)  andThen
+      OtherAsset.transform(response)        andThen
+      NonEEABusiness.transform(response)
+
 }

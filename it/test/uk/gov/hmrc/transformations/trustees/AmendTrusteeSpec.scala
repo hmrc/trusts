@@ -21,7 +21,9 @@ import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.NameType
-import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse}
+import models.get_trust.{
+  DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse
+}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion
@@ -40,7 +42,9 @@ import scala.concurrent.Future
 
 class AmendTrusteeSpec extends IntegrationTestBase {
 
-  val getTrustResponse: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+  val getTrustResponse: GetTrustSuccessResponse =
+    JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend trustee call" should {
@@ -64,7 +68,8 @@ class AmendTrusteeSpec extends IntegrationTestBase {
       entityStart = LocalDate.of(1998, 2, 12)
     )
 
-    val expectedGetAfterAmendTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-trustee.json")
+    val expectedGetAfterAmendTrusteeJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-trustee.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
     when(stubbedTrustsConnector.getTrustInfo(any()))
@@ -72,22 +77,23 @@ class AmendTrusteeSpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 
-    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)({ (app) =>
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)(app =>
       runTest("5174384721", app)
-    })
+    )
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)({ (app) =>
-      runTest("0123456789ABCDE", app)
-    })
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)(
+      app => runTest("0123456789ABCDE", app)
+    )
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
       val amendRequest = FakeRequest(POST, s"/trusts/trustees/amend/$identifier/0")
@@ -98,9 +104,10 @@ class AmendTrusteeSpec extends IntegrationTestBase {
       status(amendResult) mustBe OK
 
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+      status(newResult)        mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAmendTrusteeJson
 
     }
   }
+
 }

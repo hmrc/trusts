@@ -30,47 +30,47 @@ import javax.inject.{Inject, Singleton}
 import config.AppConfig
 
 @Singleton
-class RegistrationValidationJobStarter @Inject()(system: ActorSystem,
-                                                 config: AppConfig,
-                                                 submissionRepository: RegistrationSubmissionRepository
-                                                )(implicit ec: ExecutionContext)  {
+class RegistrationValidationJobStarter @Inject() (
+  system: ActorSystem,
+  config: AppConfig,
+  submissionRepository: RegistrationSubmissionRepository
+)(implicit ec: ExecutionContext) {
 
   system.actorOf(
     Props(RegistrationSubmissionValidationJob(config, submissionRepository)),
     "registration-submission-validation"
   )
+
 }
 
+case class RegistrationSubmissionValidationJob(
+  config: AppConfig,
+  submissionRepository: RegistrationSubmissionRepository
+)(implicit ec: ExecutionContext)
+    extends Actor with ActorLogging with Logging {
 
-case class RegistrationSubmissionValidationJob(config: AppConfig,
-                                               submissionRepository: RegistrationSubmissionRepository)
-                                              (implicit ec: ExecutionContext)
-  extends Actor
-    with ActorLogging
-    with Logging{
-
-
-  override def preStart(): Unit = {
+  override def preStart(): Unit =
     context.system.scheduler.scheduleOnce(
       delay = config.registrationValidationInterval,
       receiver = self,
       message = "runAggregation"
     )
+
+  override def receive: Receive = { case "runAggregation" =>
+    submissionRepository
+      .countRecordsWithMissingOrIncorrectCreatedAt()
+      .value
+      .pipeTo(self)
+      .map {
+        case Right(validationResults: RegistrationSubmissionValidationStats) =>
+          logger.info(
+            s"[RegistrationSubmissionValidationJob][receive] createdAt beyond TTL record count:" +
+              s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
+              s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}"
+          )
+        case Left(e: TrustErrors)                                            =>
+          logger.info(s"[RegistrationSubmissionValidationJob][receive] $e")
+      }
   }
 
-  override def receive: Receive = {
-    case "runAggregation" =>
-      submissionRepository
-        .countRecordsWithMissingOrIncorrectCreatedAt()
-        .value
-        .pipeTo(self)
-        .map{
-          case Right(validationResults: RegistrationSubmissionValidationStats) =>
-          logger.info(s"[RegistrationSubmissionValidationJob][receive] createdAt beyond TTL record count:" +
-            s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
-              s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}")
-          case Left(e: TrustErrors) =>
-            logger.info(s"[RegistrationSubmissionValidationJob][receive] $e")
-        }
-  }
 }

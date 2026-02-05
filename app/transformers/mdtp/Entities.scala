@@ -24,23 +24,21 @@ trait Entities[T <: Entity[T]] {
 
   val path: JsPath
 
-  def transform(response: JsValue)(implicit rds: Reads[T]): Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        putNewValue(path, JsArray())
-      },
-      entities => {
-        val updatedEntities = JsArray(entities.as[List[T]].map {
-          entity => updateEntity(entity)
-        })
+  def transform(response: JsValue)(implicit rds: Reads[T]): Reads[JsObject] =
+    response
+      .transform(path.json.pick)
+      .fold(
+        _ => putNewValue(path, JsArray()),
+        entities => {
+          val updatedEntities = JsArray(entities.as[List[T]].map { entity =>
+            updateEntity(entity)
+          })
 
-        prunePathAndPutNewValue(path, updatedEntities)
-      }
-    )
-  }
+          prunePathAndPutNewValue(path, updatedEntities)
+        }
+      )
 
-  def updateEntity(entity: T): JsValue = {
+  def updateEntity(entity: T): JsValue =
     Json.toJson(entity)(entity.writeToMaintain)
-  }
 
 }

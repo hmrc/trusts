@@ -32,8 +32,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArg empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -52,8 +51,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArg not empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -75,8 +73,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArgs empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -95,8 +92,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArgs not empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -119,4 +115,5 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
       }
     }
   }
+
 }

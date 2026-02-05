@@ -28,14 +28,15 @@ import transformers.settlors.RemoveSettlorTransform
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveSettlorController @Inject()(identify: IdentifierAction,
-                                        transformationService: TransformationService)
-                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) with SettlorController {
+class RemoveSettlorController @Inject() (identify: IdentifierAction, transformationService: TransformationService)(
+  implicit
+  ec: ExecutionContext,
+  cc: ControllerComponents
+) extends RemoveTransformationController(identify, transformationService) with SettlorController {
 
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveSettlor](identifier)
 
-  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
+  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform =
     RemoveSettlorTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
-  }
+
 }

@@ -21,10 +21,8 @@ import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveBeneficiaryTransform(index: Option[Int],
-                                      entity: JsValue,
-                                      endDate: LocalDate,
-                                      `type`: String) extends BeneficiaryTransform with RemoveEntityTransform
+case class RemoveBeneficiaryTransform(index: Option[Int], entity: JsValue, endDate: LocalDate, `type`: String)
+    extends BeneficiaryTransform with RemoveEntityTransform
 
 object RemoveBeneficiaryTransform {
 

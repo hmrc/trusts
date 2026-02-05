@@ -27,9 +27,12 @@ object SearchKey extends Enumerable.Implicits {
   case object URN extends WithName("urn") with SearchKey
 
   val values: Set[SearchKey] = Set(
-    TRN, UTR, URN
+    TRN,
+    UTR,
+    URN
   )
 
   implicit val enumerable: Enumerable[SearchKey] =
     Enumerable(values.toSeq.map(v => v.toString -> v): _*)
+
 }

@@ -43,11 +43,11 @@ import scala.util.matching.Regex
 
 class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach {
 
-  private val mockConnector = mock[NonRepudiationConnector]
-  private val mockTimeService = mock[TimeService]
+  private val mockConnector              = mock[NonRepudiationConnector]
+  private val mockTimeService            = mock[TimeService]
   private val mockPayloadEncodingService = mock[PayloadEncodingService]
-  private val retryHelper = injector.instanceOf[RetryHelper]
-  private val mockNrsAuditService = mock[NRSAuditService]
+  private val retryHelper                = injector.instanceOf[RetryHelper]
+  private val mockNrsAuditService        = mock[NRSAuditService]
 
   private val (year2021, num5, num12, num18) = (2021, 5, 12, 18)
 
@@ -59,7 +59,13 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     reset(mockPayloadEncodingService)
   }
 
-  private val SUT = new NonRepudiationService(mockConnector, mockTimeService, mockPayloadEncodingService, retryHelper, mockNrsAuditService)
+  private val SUT = new NonRepudiationService(
+    mockConnector,
+    mockTimeService,
+    mockPayloadEncodingService,
+    retryHelper,
+    mockNrsAuditService
+  )
 
   doNothing().when(mockNrsAuditService).audit(any())(any())
 
@@ -77,7 +83,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     None
   )
 
-  override implicit lazy val hc: HeaderCarrier = HeaderCarrier(
+  implicit override lazy val hc: HeaderCarrier = HeaderCarrier(
     authorization = Some(Authorization("Bearer 12345")),
     deviceID = Some("deviceId"),
     trueClientPort = Some("ClientPort"),
@@ -105,16 +111,23 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val payLoad = Json.toJson(registrationRequest)
 
       val fakeRequestWithHeaders = fakeRequest
-        .withHeaders(play.api.mvc.Headers(
-          ("user-agent", "to be removed"),
-          ("User-Agent", "to be removed"),
-          ("True-User-Agent", "true agent to be kept"),
-          ("true-user-agent", "to be removed")
-        ))
+        .withHeaders(
+          play.api.mvc.Headers(
+            ("user-agent", "to be removed"),
+            ("User-Agent", "to be removed"),
+            ("True-User-Agent", "true agent to be kept"),
+            ("true-user-agent", "to be removed")
+          )
+        )
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequestWithHeaders, internalId = "internalId", sessionId = "sessionId",
-          affinityGroup = AffinityGroup.Agent, credentialData = credential)
+        IdentifierRequest(
+          fakeRequestWithHeaders,
+          internalId = "internalId",
+          sessionId = "sessionId",
+          affinityGroup = AffinityGroup.Agent,
+          credentialData = credential
+        )
 
       val trn = "ABTRUST12345678"
 
@@ -133,7 +146,6 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val fResult = SUT.register(trn, payLoad)
 
       whenReady(fResult) { _ =>
-
         payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
           """
             |{
@@ -151,44 +163,50 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val payLoad = Json.toJson(registrationRequest)
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
+        IdentifierRequest(
+          fakeRequest,
+          internalId = "internalId",
+          sessionId = "sessionId",
+          affinityGroup = AffinityGroup.Agent,
+          credentialData = credential
+        )
 
       val identityDataJson = Json.obj(
-        "internalId" -> "internalId",
+        "internalId"    -> "internalId",
         "affinityGroup" -> "Agent",
-        "deviceId" -> "deviceId",
-        "clientIP" -> "ClientIP",
-        "clientPort" -> "ClientPort",
-        "sessionId" -> "SessionID",
-        "requestId" -> "RequestID",
-        "credential" -> Json.obj(
+        "deviceId"      -> "deviceId",
+        "clientIP"      -> "ClientIP",
+        "clientPort"    -> "ClientPort",
+        "sessionId"     -> "SessionID",
+        "requestId"     -> "RequestID",
+        "credential"    -> Json.obj(
           "groupIdentifier" -> "groupIdentifier",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00Z",
+          "loginTimes"      -> Json.obj(
+            "currentLogin"  -> "2020-10-10T00:00:00Z",
             "previousLogin" -> "2020-10-05T00:00:00Z"
           ),
-          "provider" -> Json.obj(
-            "providerId" -> "12345",
+          "provider"        -> Json.obj(
+            "providerId"   -> "12345",
             "providerType" -> "governmentGateway"
           ),
-          "email" -> "client@email.com"
+          "email"           -> "client@email.com"
         ),
-        "declaration" -> Json.obj(
-          "firstName" -> "John",
+        "declaration"   -> Json.obj(
+          "firstName"  -> "John",
           "middleName" -> "William",
-          "lastName" -> "O'Connor"
+          "lastName"   -> "O'Connor"
         ),
-        "agentDetails" -> Json.obj(
-          "arn" -> "AARN1234567",
-          "agentName" -> "Mr . xys abcde",
-          "agentAddress" -> Json.obj(
-            "line1" -> "line1",
-            "line2" -> "line2",
+        "agentDetails"  -> Json.obj(
+          "arn"                  -> "AARN1234567",
+          "agentName"            -> "Mr . xys abcde",
+          "agentAddress"         -> Json.obj(
+            "line1"    -> "line1",
+            "line2"    -> "line2",
             "postCode" -> "TF3 2BX",
-            "country" -> "GB"
+            "country"  -> "GB"
           ),
           "agentTelephoneNumber" -> "07912180120",
-          "clientReference" -> "clientReference"
+          "clientReference"      -> "clientReference"
         )
       )
 
@@ -209,14 +227,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val fResult = SUT.register(trn, payLoad)
 
       whenReady(fResult) { result =>
-        result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-        payloadCaptor.getValue.payload mustBe "encodedPayload"
-        payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-        payloadCaptor.getValue.metadata.businessId mustBe "trs"
-        payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-        payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
-        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-        payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+        result                                                    mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        payloadCaptor.getValue.payload                            mustBe "encodedPayload"
+        payloadCaptor.getValue.metadata.payloadSha256Checksum     mustBe "payloadChecksum"
+        payloadCaptor.getValue.metadata.businessId                mustBe "trs"
+        payloadCaptor.getValue.metadata.userAuthToken             mustBe "Bearer 12345"
+        payloadCaptor.getValue.metadata.notableEvent              mustBe NotableEvent.TrsRegistration
+        payloadCaptor.getValue.metadata.payloadContentType        mustBe "application/json"
+        payloadCaptor.getValue.metadata.searchKeys                mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
 
         payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
@@ -239,32 +257,37 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val payLoadWithoutAgentDetails = Json.toJson(registrationRequest).as[JsObject] - "agentDetails"
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId",
-          affinityGroup = AffinityGroup.Organisation, credentialData = credentialNotPopulated)
+        IdentifierRequest(
+          fakeRequest,
+          internalId = "internalId",
+          sessionId = "sessionId",
+          affinityGroup = AffinityGroup.Organisation,
+          credentialData = credentialNotPopulated
+        )
 
       val identityData = Json.obj(
-        "internalId" -> "internalId",
+        "internalId"    -> "internalId",
         "affinityGroup" -> "Organisation",
-        "deviceId" -> "deviceId",
-        "clientIP" -> "ClientIP",
-        "clientPort" -> "ClientPort",
-        "sessionId" -> "SessionID",
-        "requestId" -> "RequestID",
-        "credential" -> Json.obj(
-          "email" -> "No email",
-          "loginTimes" -> Json.obj(
+        "deviceId"      -> "deviceId",
+        "clientIP"      -> "ClientIP",
+        "clientPort"    -> "ClientPort",
+        "sessionId"     -> "SessionID",
+        "requestId"     -> "RequestID",
+        "credential"    -> Json.obj(
+          "email"           -> "No email",
+          "loginTimes"      -> Json.obj(
             "currentLogin" -> "2020-10-10T00:00:00Z"
           ),
           "groupIdentifier" -> "No group identifier",
-          "provider" -> Json.obj(
-            "providerId" -> "No provider id",
+          "provider"        -> Json.obj(
+            "providerId"   -> "No provider id",
             "providerType" -> "No provider type"
           )
         ),
-        "declaration" -> Json.obj(
-          "firstName" -> "John",
+        "declaration"   -> Json.obj(
+          "firstName"  -> "John",
           "middleName" -> "William",
-          "lastName" -> "O'Connor"
+          "lastName"   -> "O'Connor"
         )
       )
 
@@ -284,14 +307,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
       val fResult = SUT.register(trn, payLoadWithoutAgentDetails)
       whenReady(fResult) { result =>
-        result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-        payloadCaptor.getValue.payload mustBe "encodedPayload"
-        payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-        payloadCaptor.getValue.metadata.businessId mustBe "trs"
-        payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-        payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
-        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-        payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+        result                                                    mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        payloadCaptor.getValue.payload                            mustBe "encodedPayload"
+        payloadCaptor.getValue.metadata.payloadSha256Checksum     mustBe "payloadChecksum"
+        payloadCaptor.getValue.metadata.businessId                mustBe "trs"
+        payloadCaptor.getValue.metadata.userAuthToken             mustBe "Bearer 12345"
+        payloadCaptor.getValue.metadata.notableEvent              mustBe NotableEvent.TrsRegistration
+        payloadCaptor.getValue.metadata.payloadContentType        mustBe "application/json"
+        payloadCaptor.getValue.metadata.searchKeys                mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
 
         payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
@@ -319,39 +342,34 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val payLoad = trustVariationsRequest
 
         val identityData = Json.obj(
-          "internalId" -> "internalId",
+          "internalId"    -> "internalId",
           "affinityGroup" -> "Agent",
-          "deviceId" -> "deviceId",
-          "clientIP" -> "ClientIP",
-          "clientPort" -> "ClientPort",
-          "sessionId" -> "SessionID",
-          "requestId" -> "RequestID",
-          "credential" -> Json.obj(
-            "email" -> "client@email.com",
-            "loginTimes" -> Json.obj(
-              "currentLogin" -> "2020-10-10T00:00:00Z",
+          "deviceId"      -> "deviceId",
+          "clientIP"      -> "ClientIP",
+          "clientPort"    -> "ClientPort",
+          "sessionId"     -> "SessionID",
+          "requestId"     -> "RequestID",
+          "credential"    -> Json.obj(
+            "email"           -> "client@email.com",
+            "loginTimes"      -> Json.obj(
+              "currentLogin"  -> "2020-10-10T00:00:00Z",
               "previousLogin" -> "2020-10-05T00:00:00Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "provider" -> Json.obj(
-              "providerId" -> "12345",
+            "provider"        -> Json.obj(
+              "providerId"   -> "12345",
               "providerType" -> "governmentGateway"
             )
           ),
-          "declaration" -> Json.obj(
-            "firstName" -> "Abram",
-            "middleName" -> "Joe",
-            "lastName" -> "James"),
-          "agentDetails" -> Json.obj(
-            "arn" -> "AARN1234567",
-            "agentName" -> "Mr. xys abcde",
-            "agentAddress" -> Json.obj(
-              "line1" -> "line1",
-              "line2" -> "line2",
-              "postCode" -> "TF3 2BX",
-              "country" -> "GB"),
+          "declaration"   -> Json.obj("firstName" -> "Abram", "middleName" -> "Joe", "lastName" -> "James"),
+          "agentDetails"  -> Json.obj(
+            "arn"                  -> "AARN1234567",
+            "agentName"            -> "Mr. xys abcde",
+            "agentAddress"         -> Json
+              .obj("line1" -> "line1", "line2" -> "line2", "postCode" -> "TF3 2BX", "country" -> "GB"),
             "agentTelephoneNumber" -> "07912180120",
-            "clientReference" -> "clientReference")
+            "clientReference"      -> "clientReference"
+          )
         )
 
         val utr = "1234567890"
@@ -371,14 +389,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val fResult = SUT.maintain(utr, payLoad)
 
         whenReady(fResult) { result =>
-          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-          payloadCaptor.getValue.payload mustBe "encodedPayload"
-          payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-          payloadCaptor.getValue.metadata.businessId mustBe "trs"
-          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsUpdateTaxable
-          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
+          result                                                    mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload                            mustBe "encodedPayload"
+          payloadCaptor.getValue.metadata.payloadSha256Checksum     mustBe "payloadChecksum"
+          payloadCaptor.getValue.metadata.businessId                mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken             mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent              mustBe NotableEvent.TrsUpdateTaxable
+          payloadCaptor.getValue.metadata.payloadContentType        mustBe "application/json"
+          payloadCaptor.getValue.metadata.searchKeys                mustBe SearchKeys(SearchKey.UTR, utr)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
 
           payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
@@ -405,41 +423,36 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val payLoad = trustVariationsRequest
 
         val identityData = Json.obj(
-          "internalId" -> "internalId",
+          "internalId"    -> "internalId",
           "affinityGroup" -> "Agent",
-          "deviceId" -> "deviceId",
-          "clientIP" -> "ClientIP",
-          "clientPort" -> "ClientPort",
-          "sessionId" -> "SessionID",
-          "requestId" -> "RequestID",
-          "credential" -> Json.obj(
-            "email" -> "client@email.com",
-            "loginTimes" -> Json.obj(
-              "currentLogin" -> "2020-10-10T00:00:00Z",
+          "deviceId"      -> "deviceId",
+          "clientIP"      -> "ClientIP",
+          "clientPort"    -> "ClientPort",
+          "sessionId"     -> "SessionID",
+          "requestId"     -> "RequestID",
+          "credential"    -> Json.obj(
+            "email"           -> "client@email.com",
+            "loginTimes"      -> Json.obj(
+              "currentLogin"  -> "2020-10-10T00:00:00Z",
               "previousLogin" -> "2020-10-05T00:00:00Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "provider" -> Json.obj(
-              "providerId" -> "12345",
+            "provider"        -> Json.obj(
+              "providerId"   -> "12345",
               "providerType" -> "governmentGateway"
             )
           ),
-          "declaration" -> Json.obj(
-            "firstName" -> "Abram",
-            "middleName" -> "Joe",
-            "lastName" -> "James"),
-          "agentDetails" -> Json.obj(
-            "arn" -> "AARN1234567",
-            "agentName" -> "Mr. xys abcde",
-            "agentAddress" -> Json.obj(
-              "line1" -> "line1",
-              "line2" -> "line2",
-              "postCode" -> "TF3 2BX",
-              "country" -> "GB"),
+          "declaration"   -> Json.obj("firstName" -> "Abram", "middleName" -> "Joe", "lastName" -> "James"),
+          "agentDetails"  -> Json.obj(
+            "arn"                  -> "AARN1234567",
+            "agentName"            -> "Mr. xys abcde",
+            "agentAddress"         -> Json
+              .obj("line1" -> "line1", "line2" -> "line2", "postCode" -> "TF3 2BX", "country" -> "GB"),
             "agentTelephoneNumber" -> "07912180120",
-            "clientReference" -> "clientReference")
+            "clientReference"      -> "clientReference"
+          )
         )
-        val urn = "NTTRUST12345678"
+        val urn          = "NTTRUST12345678"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
@@ -456,14 +469,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val fResult = SUT.maintain(urn, payLoad)
 
         whenReady(fResult) { result =>
-          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-          payloadCaptor.getValue.payload mustBe "encodedPayload"
-          payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-          payloadCaptor.getValue.metadata.businessId mustBe "trs"
-          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsUpdateNonTaxable
-          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
+          result                                                    mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload                            mustBe "encodedPayload"
+          payloadCaptor.getValue.metadata.payloadSha256Checksum     mustBe "payloadChecksum"
+          payloadCaptor.getValue.metadata.businessId                mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken             mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent              mustBe NotableEvent.TrsUpdateNonTaxable
+          payloadCaptor.getValue.metadata.payloadContentType        mustBe "application/json"
+          payloadCaptor.getValue.metadata.searchKeys                mustBe SearchKeys(SearchKey.URN, urn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
 
           payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
@@ -497,42 +510,43 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         )
 
         implicit val request: IdentifierRequest[JsValue] =
-          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
+          IdentifierRequest(
+            fakeRequest,
+            internalId = "internalId",
+            sessionId = "sessionId",
+            affinityGroup = AffinityGroup.Agent,
+            credentialData = credential
+          )
 
         val identityData = Json.obj(
-          "internalId" -> "internalId",
+          "internalId"    -> "internalId",
           "affinityGroup" -> "Agent",
-          "deviceId" -> "deviceId",
-          "clientIP" -> "xForwardedForIpAddress",
-          "clientPort" -> "No Client Port",
-          "sessionId" -> "SessionID",
-          "requestId" -> "RequestID",
-          "credential" -> Json.obj(
-            "email" -> "client@email.com",
-            "loginTimes" -> Json.obj(
-              "currentLogin" -> "2020-10-10T00:00:00Z",
+          "deviceId"      -> "deviceId",
+          "clientIP"      -> "xForwardedForIpAddress",
+          "clientPort"    -> "No Client Port",
+          "sessionId"     -> "SessionID",
+          "requestId"     -> "RequestID",
+          "credential"    -> Json.obj(
+            "email"           -> "client@email.com",
+            "loginTimes"      -> Json.obj(
+              "currentLogin"  -> "2020-10-10T00:00:00Z",
               "previousLogin" -> "2020-10-05T00:00:00Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "provider" -> Json.obj(
-              "providerId" -> "12345",
+            "provider"        -> Json.obj(
+              "providerId"   -> "12345",
               "providerType" -> "governmentGateway"
             )
           ),
-          "declaration" -> Json.obj(
-            "firstName" -> "John",
-            "middleName" -> "William",
-            "lastName" -> "O'Connor"),
-          "agentDetails" -> Json.obj(
-            "arn" -> "AARN1234567",
-            "agentName" -> "Mr . xys abcde",
-            "agentAddress" -> Json.obj(
-              "line1" -> "line1",
-              "line2" -> "line2",
-              "postCode" -> "TF3 2BX",
-              "country" -> "GB"),
+          "declaration"   -> Json.obj("firstName" -> "John", "middleName" -> "William", "lastName" -> "O'Connor"),
+          "agentDetails"  -> Json.obj(
+            "arn"                  -> "AARN1234567",
+            "agentName"            -> "Mr . xys abcde",
+            "agentAddress"         -> Json
+              .obj("line1" -> "line1", "line2" -> "line2", "postCode" -> "TF3 2BX", "country" -> "GB"),
             "agentTelephoneNumber" -> "07912180120",
-            "clientReference" -> "clientReference")
+            "clientReference"      -> "clientReference"
+          )
         )
 
         val trn = "ABTRUST12345678"
@@ -551,14 +565,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
         val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
         whenReady(fResult) { result =>
-          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-          payloadCaptor.getValue.payload mustBe "encodedPayload"
-          payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-          payloadCaptor.getValue.metadata.businessId mustBe "trs"
-          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
-          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+          result                                                    mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload                            mustBe "encodedPayload"
+          payloadCaptor.getValue.metadata.payloadSha256Checksum     mustBe "payloadChecksum"
+          payloadCaptor.getValue.metadata.businessId                mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken             mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent              mustBe NotableEvent.TrsRegistration
+          payloadCaptor.getValue.metadata.payloadContentType        mustBe "application/json"
+          payloadCaptor.getValue.metadata.searchKeys                mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
 
           payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
@@ -589,42 +603,43 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         )
 
         implicit val request: IdentifierRequest[JsValue] =
-          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
+          IdentifierRequest(
+            fakeRequest,
+            internalId = "internalId",
+            sessionId = "sessionId",
+            affinityGroup = AffinityGroup.Agent,
+            credentialData = credential
+          )
 
         val identityData = Json.obj(
-          "internalId" -> "internalId",
+          "internalId"    -> "internalId",
           "affinityGroup" -> "Agent",
-          "deviceId" -> "deviceId",
-          "clientIP" -> "xForwardedForIpAddress",
-          "clientPort" -> "No Client Port",
-          "sessionId" -> "SessionID",
-          "requestId" -> "RequestID",
-          "credential" -> Json.obj(
-            "email" -> "client@email.com",
-            "loginTimes" -> Json.obj(
-              "currentLogin" -> "2020-10-10T00:00:00Z",
+          "deviceId"      -> "deviceId",
+          "clientIP"      -> "xForwardedForIpAddress",
+          "clientPort"    -> "No Client Port",
+          "sessionId"     -> "SessionID",
+          "requestId"     -> "RequestID",
+          "credential"    -> Json.obj(
+            "email"           -> "client@email.com",
+            "loginTimes"      -> Json.obj(
+              "currentLogin"  -> "2020-10-10T00:00:00Z",
               "previousLogin" -> "2020-10-05T00:00:00Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "provider" -> Json.obj(
-              "providerId" -> "12345",
+            "provider"        -> Json.obj(
+              "providerId"   -> "12345",
               "providerType" -> "governmentGateway"
             )
           ),
-          "declaration" -> Json.obj(
-            "firstName" -> "John",
-            "middleName" -> "William",
-            "lastName" -> "O'Connor"),
-          "agentDetails" -> Json.obj(
-            "arn" -> "AARN1234567",
-            "agentName" -> "Mr . xys abcde",
-            "agentAddress" -> Json.obj(
-              "line1" -> "line1",
-              "line2" -> "line2",
-              "postCode" -> "TF3 2BX",
-              "country" -> "GB"),
+          "declaration"   -> Json.obj("firstName" -> "John", "middleName" -> "William", "lastName" -> "O'Connor"),
+          "agentDetails"  -> Json.obj(
+            "arn"                  -> "AARN1234567",
+            "agentName"            -> "Mr . xys abcde",
+            "agentAddress"         -> Json
+              .obj("line1" -> "line1", "line2" -> "line2", "postCode" -> "TF3 2BX", "country" -> "GB"),
             "agentTelephoneNumber" -> "07912180120",
-            "clientReference" -> "clientReference")
+            "clientReference"      -> "clientReference"
+          )
         )
 
         val trn = "ABTRUST12345678"
@@ -643,14 +658,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
         val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
         whenReady(fResult) { result =>
-          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-          payloadCaptor.getValue.payload mustBe "encodedPayload"
-          payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-          payloadCaptor.getValue.metadata.businessId mustBe "trs"
-          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
-          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+          result                                                    mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload                            mustBe "encodedPayload"
+          payloadCaptor.getValue.metadata.payloadSha256Checksum     mustBe "payloadChecksum"
+          payloadCaptor.getValue.metadata.businessId                mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken             mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent              mustBe NotableEvent.TrsRegistration
+          payloadCaptor.getValue.metadata.payloadContentType        mustBe "application/json"
+          payloadCaptor.getValue.metadata.searchKeys                mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
 
           payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
@@ -672,10 +687,9 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     ".getDeclaration" must {
       "successfully get declaration name for a registration" in {
         val payLoad = trustVariationsRequest
-        val result = SUT.getDeclaration(payLoad)
+        val result  = SUT.getDeclaration(payLoad)
 
-        result mustBe Json.parse(
-          """{
+        result mustBe Json.parse("""{
             |          "firstName": "Abram",
             |          "middleName": "Joe",
             |          "lastName": "James"
@@ -686,10 +700,9 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     ".getAgentDetails" must {
       "successfully get Agent Details for a registration when they exist" in {
         val payLoad = trustVariationsRequest
-        val result = SUT.getAgentDetails(payLoad)
+        val result  = SUT.getAgentDetails(payLoad)
 
-        result mustBe Some(Json.parse(
-          """{"arn":"AARN1234567",
+        result mustBe Some(Json.parse("""{"arn":"AARN1234567",
             |"agentName":"Mr. xys abcde",
             |"agentAddress":{
             |"line1":"line1",
@@ -703,11 +716,11 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
       "return a None when no Agent Details exist for a registration" in {
         val payLoad = Json.obj()
-        val result = SUT.getAgentDetails(payLoad)
+        val result  = SUT.getAgentDetails(payLoad)
 
         result mustBe None
       }
     }
   }
-}
 
+}

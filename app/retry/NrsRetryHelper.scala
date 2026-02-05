@@ -20,8 +20,8 @@ import config.AppConfig
 
 import javax.inject.Inject
 
-class NrsRetryHelper @Inject()(appConfig: AppConfig) extends RetryHelper {
+class NrsRetryHelper @Inject() (appConfig: AppConfig) extends RetryHelper {
   val maxAttempts: Int = appConfig.nrsTotalAttempts
-  val factor: Int = appConfig.nrsRetryWaitFactor
+  val factor: Int      = appConfig.nrsRetryWaitFactor
   val initialWait: Int = appConfig.nrsRetryWaitMs
 }

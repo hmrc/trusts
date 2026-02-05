@@ -7,7 +7,7 @@ val appName = "trusts"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+  .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies(),
@@ -16,7 +16,10 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(CodeCoverageSettings())
 
-lazy val it = project.in(file("it"))
+lazy val it = project
+  .in(file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
   .settings(itSettings(true))
+
+addCommandAlias("scalafmtAll", "all scalafmtSbt scalafmt Test/scalafmt it/Test/scalafmt")

@@ -28,7 +28,8 @@ object LocalDateTimeFormatter {
   private val formatter = DateTimeFormatter.ofPattern(dateTimePattern)
 
   implicit val dateTimeReads: Reads[LocalDateTime] =
-    JsPath.read[String]
+    JsPath
+      .read[String]
       .map(date => LocalDateTime.parse(date, formatter))
 
   implicit val dateTimeWrites: Writes[LocalDateTime] =

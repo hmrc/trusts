@@ -31,33 +31,45 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
-                                                     transformationService: TransformationService,
-                                                     taxableMigrationService: TaxableMigrationService)
-                                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+class TrustDetailsTransformationController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
-  def setExpress(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, EXPRESS)
-  def setResident(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_RESIDENT)
-  def setTaxable(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, TAXABLE)
-  def setProperty(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_PROPERTY)
-  def setRecorded(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, RECORDED)
+  def setExpress(identifier: String): Action[JsValue]    = addNewTransform[Boolean](identifier, EXPRESS)
+  def setResident(identifier: String): Action[JsValue]   = addNewTransform[Boolean](identifier, UK_RESIDENT)
+  def setTaxable(identifier: String): Action[JsValue]    = addNewTransform[Boolean](identifier, TAXABLE)
+  def setProperty(identifier: String): Action[JsValue]   = addNewTransform[Boolean](identifier, UK_PROPERTY)
+  def setRecorded(identifier: String): Action[JsValue]   = addNewTransform[Boolean](identifier, RECORDED)
   def setUKRelation(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_RELATION)
-  def setSchedule3aExempt(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, SCHEDULE_3A_EXEMPT)
+
+  def setSchedule3aExempt(identifier: String): Action[JsValue] =
+    addNewTransform[Boolean](identifier, SCHEDULE_3A_EXEMPT)
 
   def setLawCountry(identifier: String): Action[JsValue] = addNewTransform[String](identifier, LAW_COUNTRY)
-  def setAdministrationCountry(identifier: String): Action[JsValue] = addNewTransform[String](identifier, ADMINISTRATION_COUNTRY)
-  def setTypeOfTrust(identifier: String): Action[JsValue] = addNewTransform[String](identifier, TYPE_OF_TRUST)
+
+  def setAdministrationCountry(identifier: String): Action[JsValue] =
+    addNewTransform[String](identifier, ADMINISTRATION_COUNTRY)
+
+  def setTypeOfTrust(identifier: String): Action[JsValue]     = addNewTransform[String](identifier, TYPE_OF_TRUST)
   def setDeedOfVariation(identifier: String): Action[JsValue] = addNewTransform[String](identifier, DEED_OF_VARIATION)
-  def setInterVivos(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, INTER_VIVOS)
-  def setEfrbsStartDate(identifier: String): Action[JsValue] = addNewTransform[LocalDate](identifier, EFRBS_START_DATE)
-  def setResidentialStatus(identifier: String): Action[JsValue] = addNewTransform[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
+  def setInterVivos(identifier: String): Action[JsValue]      = addNewTransform[Boolean](identifier, INTER_VIVOS)
+  def setEfrbsStartDate(identifier: String): Action[JsValue]  = addNewTransform[LocalDate](identifier, EFRBS_START_DATE)
 
-  def setMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransform[MigratingTrustDetails](identifier, addMultipleTransforms = true)
-  def setNonMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransform[NonMigratingTrustDetails](identifier, addMultipleTransforms = true)
+  def setResidentialStatus(identifier: String): Action[JsValue] =
+    addNewTransform[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  def setMigratingTrustDetails(identifier: String): Action[JsValue] =
+    addNewTransform[MigratingTrustDetails](identifier, addMultipleTransforms = true)
+
+  def setNonMigratingTrustDetails(identifier: String): Action[JsValue] =
+    addNewTransform[NonMigratingTrustDetails](identifier, addMultipleTransforms = true)
+
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     SetTrustDetailTransform(Json.toJson(value), `type`)
-  }
+
 }

@@ -21,21 +21,23 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendAssetTransform(index: Option[Int],
-                               amended: JsValue,
-                               original: JsValue,
-                               endDate: LocalDate,
-                               `type`: String) extends AssetTransform with AmendEntityTransform {
+case class AmendAssetTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends AssetTransform with AmendEntityTransform {
 
   override val endDateField: String = nonEeaBusinessEndDateField
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     if (isNonEeaBusiness) {
       endEntity(input, path, original, endDate, endDateField)
     } else {
       JsSuccess(input)
     }
-  }
+
 }
 
 object AmendAssetTransform {

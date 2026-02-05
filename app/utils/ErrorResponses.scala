@@ -39,7 +39,9 @@ object ErrorResponses {
     BadRequest(doErrorResponse("BAD_REQUEST", "Provided request is invalid."))
 
   def invalidCorrelationIdErrorResponse: Result =
-    InternalServerError(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
+    InternalServerError(
+      doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId.")
+    )
 
   def duplicateSubmissionErrorResponse: Result =
     Conflict(doErrorResponse("DUPLICATE_SUBMISSION", "Duplicate Correlation Id was submitted."))
@@ -52,4 +54,5 @@ object ErrorResponses {
 
   def etmpDataStaleErrorResponse: Result =
     BadRequest(doErrorResponse("ETMP_DATA_STALE", "ETMP returned a changed form bundle number for the trust."))
+
 }

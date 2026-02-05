@@ -27,6 +27,3 @@ object AddOtherIndividualTransform {
 
   implicit val format: Format[AddOtherIndividualTransform] = Json.format[AddOtherIndividualTransform]
 }
-
-
-

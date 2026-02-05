@@ -41,7 +41,8 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class AddProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class AddProtectorControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -51,7 +52,7 @@ class AddProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
   private val invalidBody: JsValue = Json.parse("{}")
 
-  private val mockTransformationService = mock[TransformationService]
+  private val mockTransformationService   = mock[TransformationService]
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   override def beforeEach(): Unit = {
@@ -249,4 +250,5 @@ class AddProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       }
     }
   }
+
 }

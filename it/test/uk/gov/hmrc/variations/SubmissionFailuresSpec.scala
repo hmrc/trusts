@@ -39,13 +39,13 @@ import scala.concurrent.Future
 
 class SubmissionFailuresSpec extends ConnectorSpecHelper {
 
-  val utr = "5174384721"
+  val utr        = "5174384721"
   val internalId = "internalId"
 
   "submit a successful variation" in {
 
     val stubbedCacheRepository = mock[CacheRepository]
-    val stubbedAuditService = mock[AuditService]
+    val stubbedAuditService    = mock[AuditService]
 
     val declaration = DeclarationForApi(
       DeclarationName(NameType("First", None, "Last")),
@@ -53,16 +53,22 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper {
       None
     )
 
-    lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
+    lazy val get5MLDTrustNonTaxableResponse: String =
+      getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
     when(stubbedCacheRepository.get(eqTo(utr), any(), any()))
-      .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(Some(Json.parse(get5MLDTrustNonTaxableResponse))))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, Option[JsValue]](
+          Future.successful(Right(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
+        )
+      )
 
     stubForGet(server, s"/trusts/registration/UTR/$utr", INTERNAL_SERVER_ERROR, "")
 
     def application = applicationBuilder()
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[AuditService].toInstance(stubbedAuditService),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )

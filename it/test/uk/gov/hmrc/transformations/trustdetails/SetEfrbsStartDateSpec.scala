@@ -48,13 +48,19 @@ class SetEfrbsStartDateSpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-      ).build()
+      )
+      .build()
 
     def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
@@ -67,8 +73,9 @@ class SetEfrbsStartDateSpec extends IntegrationTestBase {
       runTest("0123456789", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
@@ -86,7 +93,8 @@ class SetEfrbsStartDateSpec extends IntegrationTestBase {
       val setValueResponse = route(application, setValueRequest).get
       status(setValueResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
+      val subsequentGetResult =
+        route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val detail = (contentAsJson(subsequentGetResult) \ "efrbsStartDate").as[JsValue]
@@ -94,4 +102,5 @@ class SetEfrbsStartDateSpec extends IntegrationTestBase {
 
     }
   }
+
 }

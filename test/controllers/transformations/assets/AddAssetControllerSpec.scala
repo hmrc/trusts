@@ -41,18 +41,19 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class AddAssetControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
+  private val utr: String  = "utr"
   private val amount: Long = 1000L
 
   private val invalidBody: JsValue = Json.parse("{}")
 
-  private val mockTransformationService = mock[TransformationService]
+  private val mockTransformationService   = mock[TransformationService]
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   override def beforeEach(): Unit = {
@@ -505,4 +506,5 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
       }
     }
   }
+
 }

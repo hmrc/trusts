@@ -47,8 +47,7 @@ class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with Mo
 
     if (withLineNo) {
       b.deepMerge(Json.obj("lineNo" -> 12))
-    }
-    else b
+    } else b
   }
 
   private def buildInputJson(protectorType: String, protectorData: Seq[JsValue]) = {
@@ -61,14 +60,16 @@ class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with Mo
   }
 
   "Remove Protector Transforms should round trip through JSON as part of Composed Transform" in {
-    val OUT = ComposedDeltaTransform(Seq(
-      RemoveProtectorTransform(Some(56), protectorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "protector"),
-      RemoveProtectorTransform(Some(12), protectorJson("Foo"), LocalDate.of(2317, 12, 21), "protectorCompany")
-    ))
+    val OUT = ComposedDeltaTransform(
+      Seq(
+        RemoveProtectorTransform(Some(56), protectorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "protector"),
+        RemoveProtectorTransform(Some(12), protectorJson("Foo"), LocalDate.of(2317, 12, 21), "protectorCompany")
+      )
+    )
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
       case JsSuccess(result, _) => result mustBe OUT
-      case _ => fail("Transform failed")
+      case _                    => fail("Transform failed")
     }
   }
 
@@ -76,70 +77,98 @@ class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with Mo
 
     "remove an individual protector from the list that is returned to the frontend" in {
 
-      val inputJson = buildInputJson("protector", Seq(
-        protectorJson("One"),
-        protectorJson("Two"),
-        protectorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "protector",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Two"),
+          protectorJson("Three")
+        )
+      )
 
-      val expectedOutput = buildInputJson("protector", Seq(
-        protectorJson("One"),
-        protectorJson("Three")
-      ))
+      val expectedOutput = buildInputJson(
+        "protector",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveProtectorTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "protector"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
-        case JsError(errors) => fail(s"Transform failed: $errors")
+        case JsError(errors)     => fail(s"Transform failed: $errors")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("protector", Seq(
-        protectorJson("One"),
-        protectorJson("Two"),
-        protectorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "protector",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Two"),
+          protectorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveProtectorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "protector"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("protector", Seq(
-        protectorJson("One"),
-        protectorJson("Two"),
-        protectorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "protector",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Two"),
+          protectorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveProtectorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "protector"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "remove the section if the last protector in that section is removed" in {
-      val inputJson = buildInputJson("protector", Seq(
-        protectorJson("One")
-      ))
+      val inputJson = buildInputJson(
+        "protector",
+        Seq(
+          protectorJson("One")
+        )
+      )
 
       val transforms = Seq(
-        RemoveProtectorTransform(Some(0), protectorJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "protector")
+        RemoveProtectorTransform(
+          Some(0),
+          protectorJson("One", None, withLineNo = false),
+          LocalDate.of(2018, 4, 21),
+          "protector"
+        )
       )
 
       val OUT = ComposedDeltaTransform(transforms)
 
       OUT.applyTransform(inputJson) match {
-        case JsSuccess(value, _) => value.transform(
-          (JsPath() \ "details" \ "trust" \ "entities" \ "protectors" \ "protector").json.pick).isError mustBe true
-        case _ => fail("Transform failed")
+        case JsSuccess(value, _) =>
+          value
+            .transform((JsPath() \ "details" \ "trust" \ "entities" \ "protectors" \ "protector").json.pick)
+            .isError mustBe true
+        case _                   => fail("Transform failed")
       }
     }
 
@@ -149,62 +178,86 @@ class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with Mo
 
     "set an end date on a business protector from the list that is sent to ETMP" in {
 
-      val inputJson = buildInputJson("protectorCompany", Seq(
-        protectorJson("One"),
-        protectorJson("Two"),
-        protectorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "protectorCompany",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Two"),
+          protectorJson("Three")
+        )
+      )
 
-      val expectedOutput = buildInputJson("protectorCompany", Seq(
-        protectorJson("One"),
-        protectorJson("Three"),
-        protectorJson("Two", Some(LocalDate.of(2018, 4, 21)))
+      val expectedOutput = buildInputJson(
+        "protectorCompany",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Three"),
+          protectorJson("Two", Some(LocalDate.of(2018, 4, 21)))
+        )
+      )
 
-      ))
-
-      val repo = mock[TransformationRepository]
+      val repo          = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
-      val auditService = mock[AuditService]
-      val transforms = Seq(RemoveProtectorTransform(Some(1), protectorJson("Two"), LocalDate.of(2018, 4, 21), "protectorCompany"))
+      val auditService  = mock[AuditService]
+      val transforms    =
+        Seq(RemoveProtectorTransform(Some(1), protectorJson("Two"), LocalDate.of(2018, 4, 21), "protectorCompany"))
       when(repo.get(any(), any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(transforms))))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](
+            Future.successful(Right(Some(ComposedDeltaTransform(transforms))))
+          )
+        )
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 
-      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).value.futureValue match {
+      SUT
+        .applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier())
+        .value
+        .futureValue match {
         case Right(JsSuccess(value, _)) => value mustBe expectedOutput
-        case _ => fail("Transform failed")
+        case _                          => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("protectorCompany", Seq(
-        protectorJson("One"),
-        protectorJson("Two"),
-        protectorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "protectorCompany",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Two"),
+          protectorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveProtectorTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("protectorCompany", Seq(
-        protectorJson("One"),
-        protectorJson("Two"),
-        protectorJson("Three")
-      ))
+      val inputJson = buildInputJson(
+        "protectorCompany",
+        Seq(
+          protectorJson("One"),
+          protectorJson("Two"),
+          protectorJson("Three")
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany")))
+      val OUT = ComposedDeltaTransform(
+        Seq(RemoveProtectorTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany"))
+      )
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
   }
+
 }

@@ -24,47 +24,57 @@ import scala.language.implicitConversions
 
 sealed trait TaxEnrolmentsSubscriptionsResponse
 
-case class TaxEnrolmentsSubscriptionsSuccessResponse(subscriptionId: String, utr: String, state: String) extends TaxEnrolmentsSubscriptionsResponse
+case class TaxEnrolmentsSubscriptionsSuccessResponse(subscriptionId: String, utr: String, state: String)
+    extends TaxEnrolmentsSubscriptionsResponse
+
 case class TaxEnrolmentsSubscriptionsFailureResponse(message: String) extends TaxEnrolmentsSubscriptionsResponse
 
 object TaxEnrolmentsSubscriptionsResponse extends Logging {
 
-  implicit def httpReads(subscriptionId: String): HttpReads[TaxEnrolmentsSubscriptionsResponse] = (_: String, _: String, response: HttpResponse) => {
-    response.status match {
-      case OK =>
-        parseOkResponse(response, subscriptionId)
-      case BAD_REQUEST =>
-        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Bad Request response from des ")
-        TaxEnrolmentsSubscriptionsFailureResponse("Bad request")
-      case NOT_FOUND =>
-        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Not found response from des")
-        TaxEnrolmentsSubscriptionsFailureResponse("Not found")
-      case SERVICE_UNAVAILABLE =>
-        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Service unavailable response from des.")
-        TaxEnrolmentsSubscriptionsFailureResponse("Des service is down.")
-      case status =>
-        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Error response from des : $status")
-        TaxEnrolmentsSubscriptionsFailureResponse(s"Error response from des $status")
-    }
-  }
+  implicit def httpReads(subscriptionId: String): HttpReads[TaxEnrolmentsSubscriptionsResponse] =
+    (_: String, _: String, response: HttpResponse) =>
+      response.status match {
+        case OK                  =>
+          parseOkResponse(response, subscriptionId)
+        case BAD_REQUEST         =>
+          logger.error(
+            s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Bad Request response from des "
+          )
+          TaxEnrolmentsSubscriptionsFailureResponse("Bad request")
+        case NOT_FOUND           =>
+          logger.error(
+            s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Not found response from des"
+          )
+          TaxEnrolmentsSubscriptionsFailureResponse("Not found")
+        case SERVICE_UNAVAILABLE =>
+          logger.error(
+            s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Service unavailable response from des."
+          )
+          TaxEnrolmentsSubscriptionsFailureResponse("Des service is down.")
+        case status              =>
+          logger.error(
+            s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Error response from des : $status"
+          )
+          TaxEnrolmentsSubscriptionsFailureResponse(s"Error response from des $status")
+      }
 
   case class SubscriptionIdentifier(key: String, value: String)
 
   private def parseOkResponse(response: HttpResponse, subscriptionId: String): TaxEnrolmentsSubscriptionsResponse = {
-    val optState = (response.json \ "state").asOpt[String]
+    val optState    = (response.json \ "state").asOpt[String]
     val identifiers = (response.json \ "identifiers").as[List[SubscriptionIdentifier]]
-    val optUtr = identifiers.find(_.key == "SAUTR").map(_.value)
+    val optUtr      = identifiers.find(_.key == "SAUTR").map(_.value)
     (optState, optUtr) match {
       case (Some(state), Some(utr)) => TaxEnrolmentsSubscriptionsSuccessResponse(subscriptionId, utr, state)
-      case (None, Some(utr)) =>
+      case (None, Some(utr))        =>
         val message = s"[SubscriptionId: $subscriptionId, UTR: $utr] InvalidDataErrorResponse - No State supplied"
         logger.error(s"[TaxEnrolmentsSubscriptionsResponse][parseOkResponse]$message")
         TaxEnrolmentsSubscriptionsFailureResponse(message)
-      case (Some(_), None) =>
+      case (Some(_), None)          =>
         val message = s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No UTR supplied"
         logger.error(s"[TaxEnrolmentsSubscriptionsResponse][parseOkResponse]$message")
         TaxEnrolmentsSubscriptionsFailureResponse(message)
-      case _ =>
+      case _                        =>
         val message = s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No State or UTR supplied"
         logger.error(s"[TaxEnrolmentsSubscriptionsResponse][parseOkResponse]$message")
         TaxEnrolmentsSubscriptionsFailureResponse(message)
@@ -74,4 +84,5 @@ object TaxEnrolmentsSubscriptionsResponse extends Logging {
   object SubscriptionIdentifier {
     implicit val formats: Format[SubscriptionIdentifier] = Json.format[SubscriptionIdentifier]
   }
+
 }

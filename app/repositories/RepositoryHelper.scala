@@ -40,17 +40,24 @@ trait RepositoryHelper[T] extends Logging {
   val className: String
   val key: String
 
-  def getOpt(identifier: String, internalId: String, sessionId: String)(implicit rds: Reads[T]): TrustEnvelope[Option[T]] = EitherT {
+  def getOpt(identifier: String, internalId: String, sessionId: String)(implicit
+    rds: Reads[T]
+  ): TrustEnvelope[Option[T]] = EitherT {
     logger.info(s"getOpt... start $identifier, $internalId, $sessionId")
-    collection.find[BsonDocument](selector(identifier, internalId, sessionId))
+    collection
+      .find[BsonDocument](selector(identifier, internalId, sessionId))
       .headOption()
       .map { optBsonDocument =>
-        Right(optBsonDocument.map {
-          bsonDocument =>
-            Json.parse(bsonDocument.toJson).as[JsObject]
-        }.flatMap(json => (json \ key).asOpt[T]))
-      }.recover {
-        case e: MongoException =>
+        Right(
+          optBsonDocument
+            .map { bsonDocument =>
+              Json.parse(bsonDocument.toJson).as[JsObject]
+            }
+            .flatMap(json => (json \ key).asOpt[T])
+        )
+      }
+      .recover {
+        case e: MongoException    =>
           logger.error(s"[$className][getOpt] failed to fetch from $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
         case exception: Exception =>
@@ -60,11 +67,12 @@ trait RepositoryHelper[T] extends Logging {
   }
 
   def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean] = EitherT {
-    collection.deleteOne(selector(identifier, internalId, sessionId))
+    collection
+      .deleteOne(selector(identifier, internalId, sessionId))
       .toFutureOption()
-      .map { deleteResult => Right(deleteResult.exists(_.wasAcknowledged()))
-      }.recover {
-        case e: MongoException =>
+      .map(deleteResult => Right(deleteResult.exists(_.wasAcknowledged())))
+      .recover {
+        case e: MongoException    =>
           logger.error(s"[$className][resetCache] failed to delete one from $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
         case exception: Exception =>
@@ -73,7 +81,9 @@ trait RepositoryHelper[T] extends Logging {
       }
   }
 
-  def upsert(identifier: String, internalId: String, sessionId: String, data: T)(implicit wts: Writes[T]): TrustEnvelope[Boolean] = EitherT {
+  def upsert(identifier: String, internalId: String, sessionId: String, data: T)(implicit
+    wts: Writes[T]
+  ): TrustEnvelope[Boolean] = EitherT {
     val modifier = combine(
       set("id", toBson(createKey(identifier, internalId, sessionId))),
       set("updatedAt", BsonDateTime(Instant.now().toEpochMilli)),
@@ -82,12 +92,14 @@ trait RepositoryHelper[T] extends Logging {
 
     val updateOptions = new UpdateOptions().upsert(true)
 
-    collection.updateOne(selector(identifier, internalId, sessionId), modifier, updateOptions)
+    collection
+      .updateOne(selector(identifier, internalId, sessionId), modifier, updateOptions)
       .toFutureOption()
-      .map {
-        updateResult => Right(updateResult.isDefined)
-      }.recover {
-        case e: MongoException =>
+      .map { updateResult =>
+        Right(updateResult.isDefined)
+      }
+      .recover {
+        case e: MongoException    =>
           logger.error(s"[$className][upsert] failed to update $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
         case exception: Exception =>
@@ -99,5 +111,7 @@ trait RepositoryHelper[T] extends Logging {
   private def selector(identifier: String, internalId: String, sessionId: String): Bson =
     equal("id", createKey(identifier, internalId, sessionId))
 
-  private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
+  private def createKey(identifier: String, internalId: String, sessionId: String): String =
+    s"$identifier-$internalId-$sessionId"
+
 }

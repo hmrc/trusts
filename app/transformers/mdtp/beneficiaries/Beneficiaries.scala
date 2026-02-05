@@ -24,14 +24,13 @@ trait Beneficiaries[T <: Beneficiary[T]] extends Entities[T]
 
 object Beneficiaries {
 
-  def transform(response: JsValue): Reads[JsObject] = {
-    Individual.transform(response) andThen
-    Company.transform(response) andThen
-    Trust.transform(response) andThen
-    Charity.transform(response) andThen
-    ClassOfBeneficiaries.transform(response) andThen
-    EmploymentRelated.transform(response) andThen
-    Other.transform(response)
-  }
+  def transform(response: JsValue): Reads[JsObject] =
+    Individual.transform(response)             andThen
+      Company.transform(response)              andThen
+      Trust.transform(response)                andThen
+      Charity.transform(response)              andThen
+      ClassOfBeneficiaries.transform(response) andThen
+      EmploymentRelated.transform(response)    andThen
+      Other.transform(response)
 
 }

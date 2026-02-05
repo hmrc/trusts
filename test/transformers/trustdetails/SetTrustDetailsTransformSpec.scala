@@ -29,8 +29,9 @@ class SetTrustDetailsTransformSpec extends AnyFreeSpec {
       "before declaration" - {
         "merge the old details with the new details" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-non-migration.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-non-migration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-non-migration.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-non-migration.json")
 
           val newTrustDetails = Json.parse(
             """
@@ -55,7 +56,7 @@ class SetTrustDetailsTransformSpec extends AnyFreeSpec {
         "merge the old details with the new details" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-migration.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-migration.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-migration.json")
 
           val newTrustDetails = Json.parse(
             """
@@ -86,4 +87,5 @@ class SetTrustDetailsTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

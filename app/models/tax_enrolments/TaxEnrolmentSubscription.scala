@@ -18,10 +18,8 @@ package models.tax_enrolments
 
 import play.api.libs.json.{Json, OFormat}
 
-
 case class TaxEnrolmentSubscription(serviceName: String, callback: String, etmpId: String)
 
 object TaxEnrolmentSubscription {
   implicit val format: OFormat[TaxEnrolmentSubscription] = Json.format[TaxEnrolmentSubscription]
 }
-

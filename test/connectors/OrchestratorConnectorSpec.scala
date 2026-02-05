@@ -35,24 +35,27 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
     val utr = "123456789"
 
     val request: OrchestratorMigrationRequest = OrchestratorMigrationRequest(urn, utr)
-    val requestBody = Json.stringify(Json.toJson(request))
+    val requestBody                           = Json.stringify(Json.toJson(request))
 
-    "return OrchestratorToTaxableSuccessResponse" when {
-
+    "return OrchestratorToTaxableSuccessResponse" when
       Seq(OK, NO_CONTENT, ACCEPTED).foreach { status =>
         s"tax enrolments successfully subscribed to provided subscription id (status: $status)" in {
           val responseBody = """{"success": "true"}"""
-          stubForHeaderlessPost(server, "/trusts-enrolment-orchestrator/orchestration-process", requestBody, status, responseBody)
+          stubForHeaderlessPost(
+            server,
+            "/trusts-enrolment-orchestrator/orchestration-process",
+            requestBody,
+            status,
+            responseBody
+          )
 
           val futureResult = connector.migrateToTaxable(urn, utr).value
 
-          whenReady(futureResult) {
-            result => result mustBe Right(OrchestratorToTaxableSuccessResponse())
+          whenReady(futureResult) { result =>
+            result mustBe Right(OrchestratorToTaxableSuccessResponse())
           }
         }
       }
-    }
-
 
     "return ServerError(message)" when {
       "tax enrolments returns BadRequest " in {
@@ -63,8 +66,8 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.migrateToTaxable(urn, utr).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Bad request"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Bad request"))
         }
       }
 
@@ -76,8 +79,8 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.migrateToTaxable(urn, utr).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Error response from orchestrator: 500"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Error response from orchestrator: 500"))
         }
       }
     }

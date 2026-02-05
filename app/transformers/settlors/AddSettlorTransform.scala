@@ -20,8 +20,7 @@ import play.api.libs.json._
 import transformers.AddEntityTransform
 import utils.Constants.{COMPANY_TIME, COMPANY_TYPE}
 
-case class AddSettlorTransform(entity: JsValue,
-                              `type`: String) extends SettlorTransform with AddEntityTransform {
+case class AddSettlorTransform(entity: JsValue, `type`: String) extends SettlorTransform with AddEntityTransform {
 
   override val trustTypeDependentFields: Seq[String] = Seq(COMPANY_TYPE, COMPANY_TIME)
 }

@@ -28,35 +28,40 @@ import utils.Session
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class TaxableMigrationController @Inject()(
-                                            identify: IdentifierAction,
-                                            taxableMigrationService: TaxableMigrationService,
-                                            cc: ControllerComponents
-                                          )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
+class TaxableMigrationController @Inject() (
+  identify: IdentifierAction,
+  taxableMigrationService: TaxableMigrationService,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends TrustsBaseController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
   def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { implicit request =>
     taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId, Session.id(hc)).value.map {
-      case Left(_) => InternalServerError
+      case Left(_)      => InternalServerError
       case Right(value) => Ok(Json.toJson(TaxableMigrationFlag(value)))
     }
   }
 
-  def setTaxableMigrationFlag(identifier: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request =>
-      request.body.validate[Boolean] match {
-        case JsSuccess(migratingToTaxable, _) =>
-          taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, Session.id(hc), migratingToTaxable).value.map {
+  def setTaxableMigrationFlag(identifier: String): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    request.body.validate[Boolean] match {
+      case JsSuccess(migratingToTaxable, _) =>
+        taxableMigrationService
+          .setTaxableMigrationFlag(identifier, request.internalId, Session.id(hc), migratingToTaxable)
+          .value
+          .map {
             case Right(_) => Ok
-            case Left(_) =>
-              logger.warn(s"[$className][setTaxableMigrationFlag] an error occurred, failed to set taxable migration flag.")
+            case Left(_)  =>
+              logger.warn(
+                s"[$className][setTaxableMigrationFlag] an error occurred, failed to set taxable migration flag."
+              )
               InternalServerError
           }
-        case JsError(errors) =>
-          logger.warn(s"[$className][setTaxableMigrationFlag] failed to validate request body: $errors")
-          Future.successful(BadRequest)
-      }
+      case JsError(errors)                  =>
+        logger.warn(s"[$className][setTaxableMigrationFlag] failed to validate request body: $errors")
+        Future.successful(BadRequest)
+    }
   }
 
 }

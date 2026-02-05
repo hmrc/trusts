@@ -21,10 +21,10 @@ import utils.Constants._
 
 trait BeneficiaryController {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) => ENTITIES \ BENEFICIARIES \ `type` \ i
-      case _ => throw new Exception(s"Index should not be None for beneficiary type ${`type`}.")
+      case _       => throw new Exception(s"Index should not be None for beneficiary type ${`type`}.")
     }
-  }
+
 }

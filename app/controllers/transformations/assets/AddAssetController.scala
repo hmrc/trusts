@@ -29,28 +29,33 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AddAssetController @Inject()(identify: IdentifierAction,
-                                   transformationService: TransformationService,
-                                   taxableMigrationService: TaxableMigrationService)
-                                  (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+class AddAssetController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
   def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmountType](identifier, MONEY_ASSET)
 
-  def addPropertyOrLand(identifier: String): Action[JsValue] = addNewTransform[PropertyLandType](identifier, PROPERTY_OR_LAND_ASSET)
+  def addPropertyOrLand(identifier: String): Action[JsValue] =
+    addNewTransform[PropertyLandType](identifier, PROPERTY_OR_LAND_ASSET)
 
   def addShares(identifier: String): Action[JsValue] = addNewTransform[SharesType](identifier, SHARES_ASSET)
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, BUSINESS_ASSET)
 
-  def addPartnership(identifier: String): Action[JsValue] = addNewTransform[PartnershipType](identifier, PARTNERSHIP_ASSET)
+  def addPartnership(identifier: String): Action[JsValue] =
+    addNewTransform[PartnershipType](identifier, PARTNERSHIP_ASSET)
 
   def addOther(identifier: String): Action[JsValue] = addNewTransform[OtherAssetType](identifier, OTHER_ASSET)
 
-  def addNonEeaBusiness(identifier: String): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, NON_EEA_BUSINESS_ASSET)
+  def addNonEeaBusiness(identifier: String): Action[JsValue] =
+    addNewTransform[NonEEABusinessType](identifier, NON_EEA_BUSINESS_ASSET)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AddAssetTransform(Json.toJson(value), `type`)
-  }
+
 }

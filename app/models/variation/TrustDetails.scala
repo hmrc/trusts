@@ -21,29 +21,33 @@ import play.api.libs.json.{Format, Json}
 
 import java.time.LocalDate
 
-case class NonMigratingTrustDetails(trustUKProperty: Boolean,
-                                    trustRecorded: Boolean,
-                                    trustUKRelation: Option[Boolean],
-                                    trustUKResident: Boolean,
-                                    schedule3aExempt: Option[Boolean] = None)
+case class NonMigratingTrustDetails(
+  trustUKProperty: Boolean,
+  trustRecorded: Boolean,
+  trustUKRelation: Option[Boolean],
+  trustUKResident: Boolean,
+  schedule3aExempt: Option[Boolean] = None
+)
 
 object NonMigratingTrustDetails {
   implicit val format: Format[NonMigratingTrustDetails] = Json.format[NonMigratingTrustDetails]
 }
 
-case class MigratingTrustDetails(lawCountry: Option[String],
-                                 administrationCountry: String,
-                                 residentialStatus: ResidentialStatusType,
-                                 trustUKProperty: Boolean,
-                                 trustRecorded: Boolean,
-                                 trustUKRelation: Option[Boolean],
-                                 trustUKResident: Boolean,
-                                 typeOfTrust: String,
-                                 deedOfVariation: Option[String],
-                                 interVivos: Option[Boolean],
-                                 efrbsStartDate: Option[LocalDate],
-                                 settlorsUkBased: Option[Boolean] = None,
-                                 schedule3aExempt: Option[Boolean] = None)
+case class MigratingTrustDetails(
+  lawCountry: Option[String],
+  administrationCountry: String,
+  residentialStatus: ResidentialStatusType,
+  trustUKProperty: Boolean,
+  trustRecorded: Boolean,
+  trustUKRelation: Option[Boolean],
+  trustUKResident: Boolean,
+  typeOfTrust: String,
+  deedOfVariation: Option[String],
+  interVivos: Option[Boolean],
+  efrbsStartDate: Option[LocalDate],
+  settlorsUkBased: Option[Boolean] = None,
+  schedule3aExempt: Option[Boolean] = None
+)
 
 object MigratingTrustDetails {
   implicit val format: Format[MigratingTrustDetails] = Json.format[MigratingTrustDetails]

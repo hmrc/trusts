@@ -30,22 +30,27 @@ import play.api.Application
 import play.api.inject.{Injector, bind}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.stubControllerComponents
-import repositories.{CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl, TransformationRepositoryImpl}
+import repositories.{
+  CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl,
+  TransformationRepositoryImpl
+}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
-class IntegrationTestBase extends AnyWordSpec
-  with GuiceOneServerPerSuite
-  with ScalaFutures
-  with MockitoSugar
-  with Matchers
-  with BeforeAndAfterEach
-  with EitherValues {
+class IntegrationTestBase
+    extends AnyWordSpec
+    with GuiceOneServerPerSuite
+    with ScalaFutures
+    with MockitoSugar
+    with Matchers
+    with BeforeAndAfterEach
+    with EitherValues {
 
-  implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
+  implicit val defaultPatience: PatienceConfig =
+    PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
@@ -54,7 +59,8 @@ class IntegrationTestBase extends AnyWordSpec
   lazy val createApplication: Application = applicationBuilder
     .overrides(
       bind[IdentifierAction].toInstance(new FakeIdentifierAction(cc.parsers.default, Agent))
-    ).build()
+    )
+    .build()
 
   def injector: Injector = createApplication.injector
 
@@ -62,10 +68,12 @@ class IntegrationTestBase extends AnyWordSpec
 
   def applicationBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
-      .configure(Seq(
-        "metrics.enabled" -> false,
-        "auditing.enabled" -> false
-      ): _*)
+      .configure(
+        Seq(
+          "metrics.enabled"  -> false,
+          "auditing.enabled" -> false
+        ): _*
+      )
 
   def cleanDatabase(application: Application): Unit = {
     val dbs = Seq(
@@ -75,16 +83,15 @@ class IntegrationTestBase extends AnyWordSpec
       application.injector.instanceOf[TransformationRepositoryImpl]
     )
 
-    val cleanDbs = dbs.forall(db =>
-      Await.result(db.collection.deleteMany(BsonDocument()).toFuture(), 10.seconds).wasAcknowledged()
-    )
+    val cleanDbs =
+      dbs.forall(db => Await.result(db.collection.deleteMany(BsonDocument()).toFuture(), 10.seconds).wasAcknowledged())
 
     assert(cleanDbs, "Mongo DB was not cleaned properly or something went wrong!")
   }
 
   def assertMongoTest(application: Application)(block: Application => Assertion): Assertion = {
-      cleanDatabase(application)
-      block(application)
+    cleanDatabase(application)
+    block(application)
   }
 
   def await[A](future: Future[A]): A = Await.result(future, 10.seconds)

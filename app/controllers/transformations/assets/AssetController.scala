@@ -21,10 +21,10 @@ import utils.Constants._
 
 trait AssetController {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) => TRUST \ ASSETS \ `type` \ i
-      case _ => throw new Exception(s"Index should not be None for asset type ${`type`}.")
+      case _       => throw new Exception(s"Index should not be None for asset type ${`type`}.")
     }
-  }
+
 }

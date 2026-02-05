@@ -48,11 +48,16 @@ class RemoveSettlorSpec extends IntegrationTestBase {
       .getJsonValueFromFile("trusts-etmp-received-multiple-settlors.json")
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
@@ -68,8 +73,9 @@ class RemoveSettlorSpec extends IntegrationTestBase {
       runTest("5174384721", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
@@ -78,8 +84,7 @@ class RemoveSettlorSpec extends IntegrationTestBase {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
-      val removeSettlorAtIndex = Json.parse(
-        """
+      val removeSettlorAtIndex = Json.parse("""
           |{
           |	"index": 0,
           |	"endDate": "2010-10-10",
@@ -94,8 +99,7 @@ class RemoveSettlorSpec extends IntegrationTestBase {
       val removeSettlorResult = route(application, removeSettlorRequest).get
       status(removeSettlorResult) mustBe OK
 
-      val removeSettlorCompanyAtIndex = Json.parse(
-        """
+      val removeSettlorCompanyAtIndex = Json.parse("""
           |{
           |	"index": 0,
           |	"endDate": "2010-10-10",
@@ -114,19 +118,18 @@ class RemoveSettlorSpec extends IntegrationTestBase {
       status(newResult) mustBe OK
 
       val settlors = (contentAsJson(newResult) \ "settlors" \ "settlor").as[JsArray]
-      settlors mustBe Json.parse(
-        """
+      settlors mustBe Json.parse("""
           |[
           |]
           |""".stripMargin)
 
       val settlorCompanies = (contentAsJson(newResult) \ "settlors" \ "settlorCompany").as[JsArray]
-      settlorCompanies mustBe Json.parse(
-        """
+      settlorCompanies mustBe Json.parse("""
           |[
           |]
           |""".stripMargin)
 
     }
   }
+
 }

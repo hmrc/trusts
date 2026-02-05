@@ -32,37 +32,37 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
 
   "the declaration transformer should" - {
 
-    val declaration = DeclarationName(NameType("First", None, "Last"))
+    val declaration       = DeclarationName(NameType("First", None, "Last"))
     val declarationForApi = DeclarationForApi(declaration, None, None)
 
     "transform json successfully for an org lead trustee" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "transform json successfully for an individual lead trustee" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "transform json successfully for a lead trustee when the trustee has changed" in {
-      val originalJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val originalJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val originalResponse = originalJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
 
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-individual.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-individual.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
+      val afterJson   = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
       val transformer = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, submissionDate)
@@ -79,30 +79,30 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       )
 
       val declarationForApi = DeclarationForApi(declaration, Some(agentDetails), None)
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
-      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-agent-details.json")
-      val transformer = new DeclarationTransformer
+      val beforeJson        = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val trustResponse     = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson         = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-agent-details.json")
+      val transformer       = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "transform json successfully when no trustees" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "remove trustees field if trustees list is empty" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-empty-trustees.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-empty-trustees.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
@@ -111,30 +111,30 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
     "transform json successfully when closing trust" in {
       val declarationForApi = DeclarationForApi(declaration, None, Some(LocalDate.parse("2019-02-03")))
 
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-end-date.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-end-date.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "add a submission date if 5mld and not received one at playback" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-years-returns.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-years-returns.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "override the submission date if 5mld and received one at playback" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-submission-date.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-submission-date.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
@@ -142,34 +142,34 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
 
     "amend share assets" - {
       "transform json successfully to remove the extra fields from the share assets" in {
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-share-assets-extra-fields.json")
+        val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-share-assets-extra-fields.json")
         val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-share-assets-extra-fields-removed.json")
-        val transformer = new DeclarationTransformer
+        val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-share-assets-extra-fields-removed.json")
+        val transformer   = new DeclarationTransformer
 
         val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
         result.asOpt.value \\ "shares" mustBe afterJson \\ "shares"
-        result.asOpt.value mustBe afterJson
+        result.asOpt.value             mustBe afterJson
       }
 
       "ensure the transform doesn't break if we have no share assets but are doing a transform" in {
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-no-share-assets.json")
+        val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-no-share-assets.json")
         val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-no-share-assets.json")
-        val transformer = new DeclarationTransformer
+        val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-no-share-assets.json")
+        val transformer   = new DeclarationTransformer
 
         val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
         result.asOpt.value \\ "shares" mustBe afterJson \\ "shares"
-        result.asOpt.value mustBe afterJson
+        result.asOpt.value             mustBe afterJson
       }
     }
 
     "amend trust details" - {
       "transform json successfully to remove extra field from trust details" in {
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-settlors-uk-based.json")
+        val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-settlors-uk-based.json")
         val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-settlors-uk-based-removed.json")
-        val transformer = new DeclarationTransformer
+        val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-settlors-uk-based-removed.json")
+        val transformer   = new DeclarationTransformer
 
         val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
         result.asOpt.value mustBe afterJson
@@ -177,24 +177,25 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
     }
 
     "remove detailsType fields" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-details-type.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-details-type.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-details-type-removed.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-details-type-removed.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
     "transform json successfully when invalid trust details" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-invalid-trust-details.json")
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-invalid-trust-details.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-valid-trust-details.json")
-      val transformer = new DeclarationTransformer
+      val afterJson     = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-valid-trust-details.json")
+      val transformer   = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
   }
+
 }

@@ -22,13 +22,13 @@ object JsonWithoutNulls {
 
   implicit class JsonWithoutNullValues(json: JsValue) {
 
-    def withoutNulls : JsValue = json match {
+    def withoutNulls: JsValue = json match {
       case JsObject(fields) =>
         JsObject(fields.flatMap {
-          case (_, JsNull) => None
+          case (_, JsNull)               => None
           case notNullField @ (_, value) => Some(notNullField)
         })
-      case other => other
+      case other            => other
     }
 
   }

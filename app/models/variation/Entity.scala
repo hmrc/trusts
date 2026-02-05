@@ -33,6 +33,6 @@ trait MigrationEntity[T] extends Entity[T] {
   val entityEnd: Option[LocalDate]
   def hasEndDate: Boolean = entityEnd.isDefined
 
-  def canBeIgnored: Boolean = hasEndDate
+  def canBeIgnored: Boolean                                                = hasEndDate
   def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean = true
 }

@@ -31,25 +31,25 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PromoteTrusteeController @Inject()(identify: IdentifierAction,
-                                         transformationService: TransformationService,
-                                         localDateService: LocalDateService)
-                                        (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) with TrusteeController {
+class PromoteTrusteeController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  localDateService: LocalDateService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AmendTransformationController(identify, transformationService) with TrusteeController {
 
-  def promote(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-
-      (validate[AmendedLeadTrusteeIndType], validate[AmendedLeadTrusteeOrgType]) match {
-        case (Some(_), _) =>
-          promoteIndividual(identifier, index)
-        case (_, Some(_)) =>
-          promoteBusiness(identifier, index)
-        case _ =>
-          logger.error(s"[PromoteTrusteeController][promote][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
-            s" Supplied json could not be read as an amended lead trustee")
-          Future.successful(BadRequest)
-      }
+  def promote(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    (validate[AmendedLeadTrusteeIndType], validate[AmendedLeadTrusteeOrgType]) match {
+      case (Some(_), _) =>
+        promoteIndividual(identifier, index)
+      case (_, Some(_)) =>
+        promoteBusiness(identifier, index)
+      case _            =>
+        logger.error(
+          s"[PromoteTrusteeController][promote][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied json could not be read as an amended lead trustee"
+        )
+        Future.successful(BadRequest)
     }
   }
 
@@ -59,8 +59,9 @@ class PromoteTrusteeController @Inject()(identify: IdentifierAction,
   def promoteBusiness(identifier: String, index: Int)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     addNewTransform[AmendedLeadTrusteeOrgType](identifier, Some(index), BUSINESS_TRUSTEE).apply(request)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     PromoteTrusteeTransform(index, Json.toJson(amended), original, localDateService.now, `type`, isTaxable)
-  }
 
 }
