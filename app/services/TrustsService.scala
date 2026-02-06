@@ -18,7 +18,7 @@ package services
 
 import cats.data.EitherT
 import connector.{SubscriptionConnector, TrustsConnector}
-import errors.{InternalServerErrorResponse, ServerError, VariationFailureForAudit}
+import errors.{BadRequestErrorResponse, InternalServerErrorResponse, ServerError, VariationFailureForAudit}
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
@@ -129,9 +129,12 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
   }
 
   def trustVariation(trustVariation: JsValue): TrustEnvelope[VariationSuccessResponse] = EitherT {
-    trustsConnector.trustVariation(trustVariation: JsValue).value.map {
-      case Left(ServerError(message)) if message.nonEmpty => Left(VariationFailureForAudit(InternalServerErrorResponse, message))
-      case value => value
+    trustsConnector.trustVariation(trustVariation).value.map {
+      case Left(VariationFailureForAudit(BadRequestErrorResponse, message)) =>
+        Left(VariationFailureForAudit(BadRequestErrorResponse, message))
+      case Left(VariationFailureForAudit(_, message)) if message.nonEmpty =>
+        Left(VariationFailureForAudit(InternalServerErrorResponse, message))
+      case other => other
     }
   }
 }

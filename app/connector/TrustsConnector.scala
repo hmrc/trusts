@@ -18,7 +18,7 @@ package connector
 
 import cats.data.EitherT
 import config.AppConfig
-import errors.VariationFailureForAudit
+import errors.{BadRequestErrorResponse, VariationFailureForAudit}
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.GetTrustResponse
@@ -27,7 +27,7 @@ import models.variation.{VariationFailureResponse, VariationResponse, VariationS
 import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier,  StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import utils.Constants._
 import utils.Session
 import utils.TrustEnvelope.TrustEnvelope
@@ -137,10 +137,16 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
       .execute[VariationResponse]
       .map {
       case response: VariationSuccessResponse => Right(response)
+
       case response: VariationFailureResponse =>
         logger.warn(s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
-          s"trust variation failed with status: ${response.status}, with message: ${response.message}")
-        Left(VariationFailureForAudit(response.errorType, response.message))
+          s"trust variation failed with status: ${response.status}, with message: ${response.message}" + "================ "+ response.errorType)
+        response.errorType match {
+          case BadRequestErrorResponse =>
+            Left(VariationFailureForAudit(BadRequestErrorResponse, response.message))
+          case other =>
+            Left(VariationFailureForAudit(other, response.message))
+        }
     }.recover {
       case ex =>
         Left(handleError(ex, "trustVariation", trustVariationsEndpoint))

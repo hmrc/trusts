@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.IdentifierAction
-import errors.VariationFailureForAudit
+import errors.{BadRequestErrorResponse, VariationFailureForAudit}
 import models.auditing.TrustAuditing
 import models.variation.DeclarationForApi
 import play.api.Logging
@@ -63,6 +63,12 @@ class TrustVariationsController @Inject()(
         declarationForApi => {
           variationService.submitDeclaration(identifier, request.internalId, Session.id(hc), declarationForApi).value.map {
             case Left(variationFailure: VariationFailureForAudit) =>
+              variationFailure.reason match {
+                case BadRequestErrorResponse =>
+                  VariationFailureForAudit(BadRequestErrorResponse, variationFailure.message)
+                case other =>
+                  VariationFailureForAudit(other, variationFailure.message)
+              }
               responseHandler.recoverErrorResponse(variationFailure, TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
             case Left(_) =>
               logger.warn(s"[$className][declare][Session ID: ${request.sessionId}][UTR/URN: $identifier] failed to submit declaration")
