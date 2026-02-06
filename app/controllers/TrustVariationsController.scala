@@ -32,21 +32,23 @@ import utils.{Session, ValidationUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrustVariationsController @Inject()(
-                                           identify: IdentifierAction,
-                                           auditService: AuditService,
-                                           variationService: VariationService,
-                                           responseHandler: VariationsResponseHandler,
-                                           nonRepudiationService: NonRepudiationService,
-                                           cc: ControllerComponents,
-                                           appConfig: AppConfig
-                                         )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+class TrustVariationsController @Inject() (
+  identify: IdentifierAction,
+  auditService: AuditService,
+  variationService: VariationService,
+  responseHandler: VariationsResponseHandler,
+  nonRepudiationService: NonRepudiationService,
+  cc: ControllerComponents,
+  appConfig: AppConfig
+)(implicit ec: ExecutionContext)
+    extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def declare(identifier: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-      request.body.validate[DeclarationForApi].fold(
+  def declare(identifier: String): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    request.body
+      .validate[DeclarationForApi]
+      .fold(
         errors => {
 
           auditService.audit(
@@ -56,8 +58,10 @@ class TrustVariationsController @Inject()(
             Json.toJson(Json.obj())
           )
 
-          logger.error(s"[$className][declare][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
-            s" unable to parse json as DeclarationForApi, $errors")
+          logger.error(
+            s"[$className][declare][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+              s" unable to parse json as DeclarationForApi, $errors"
+          )
           Future.successful(BadRequest)
         },
         declarationForApi => {
@@ -75,13 +79,12 @@ class TrustVariationsController @Inject()(
               InternalServerError
             case Right(context) =>
 
-              if (appConfig.nonRepudiate) {
-                nonRepudiationService.maintain(identifier, context.payload)
-              }
-              Ok(Json.toJson(context.result))
-          }
-        }
+                if (appConfig.nonRepudiate) {
+                  nonRepudiationService.maintain(identifier, context.payload)
+                }
+                Ok(Json.toJson(context.result))
+            }
       )
-    }
   }
+
 }
