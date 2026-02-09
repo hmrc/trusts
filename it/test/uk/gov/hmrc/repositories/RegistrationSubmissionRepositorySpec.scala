@@ -133,7 +133,7 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase with Mong
       repository.getDraft("draftId1", "InternalId2").value.futureValue mustBe Right(Some(state3))
       repository.getDraft("draftId3", "InternalId").value.futureValue  mustBe Right(Some(state4))
 
-      repository.getRecentDrafts("InternalId", Agent).value.futureValue mustBe Right(Seq(state1))
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue mustBe Right(Seq(state2, state1))
     }
 
     "be able to remove drafts no longer being used" in assertMongoTest(createApplication) { app =>
