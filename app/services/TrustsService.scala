@@ -147,9 +147,9 @@ class TrustsService @Inject() (
     trustsConnector.trustVariation(trustVariation).value.map {
       case Left(VariationFailureForAudit(BadRequestErrorResponse, message)) =>
         Left(VariationFailureForAudit(BadRequestErrorResponse, message))
-      case Left(VariationFailureForAudit(_, message)) if message.nonEmpty =>
+      case Left(VariationFailureForAudit(_, message)) if message.nonEmpty   =>
         Left(VariationFailureForAudit(InternalServerErrorResponse, message))
-      case other => other
+      case other                                                            => other
     }
   }
 

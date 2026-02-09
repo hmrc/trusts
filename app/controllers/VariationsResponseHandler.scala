@@ -86,7 +86,9 @@ class VariationsResponseHandler @Inject() (auditService: AuditService) extends L
         etmpDataStaleErrorResponse
 
       case BadRequestErrorResponse =>
-        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] BadRequestErrorResponse returned")
+        logger.error(
+          s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] BadRequestErrorResponse returned"
+        )
         auditService.auditErrorResponse(
           auditType,
           request.body,

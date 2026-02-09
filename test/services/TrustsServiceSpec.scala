@@ -566,7 +566,7 @@ class TrustsServiceSpec extends BaseSpec {
           SUT.trustVariation(trustVariationsRequest).value
 
         whenReady(futureResult) { result =>
-          result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "Duplicate submission"))
+          result mustBe Left(ServerError("Duplicate submission"))
         }
       }
     }
