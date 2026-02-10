@@ -153,8 +153,8 @@ class TrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit
         case response: VariationFailureResponse =>
           logger.warn(
             s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
-              s"trust variation failed with status: ${response.status}, with message: ${response.message}" + "================ " + response.errorType
-          )
+              s"trust variation failed with status: ${response.status}, with message: ${response.message} with errorType: ${response.errorType}")
+
           response.errorType match {
             case BadRequestErrorResponse =>
               Left(VariationFailureForAudit(BadRequestErrorResponse, response.message))
