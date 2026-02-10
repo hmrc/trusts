@@ -80,8 +80,7 @@ case class RegistrationSubmissionValidationJob(
         submissionRepository
           .countRecordsWithMissingOrIncorrectCreatedAt()
           .value
-          .pipeTo(self)
-          .map {
+          .andThen(_.map {
             case Right(validationResults: RegistrationSubmissionValidationStats) =>
               logger.info(
                 s"[RegistrationSubmissionValidationJob][receive] createdAt beyond TTL record count:" +
@@ -90,7 +89,7 @@ case class RegistrationSubmissionValidationJob(
               )
             case Left(e: TrustErrors) =>
               logger.info(s"[RegistrationSubmissionValidationJob][receive] $e")
-          }
+          })
       )
   }
 
