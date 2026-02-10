@@ -26,18 +26,32 @@ import org.apache.pekko.pattern.pipe
 import play.api.Logging
 
 import javax.inject.{Inject, Singleton}
-
 import config.AppConfig
+import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
+import uk.gov.hmrc.mongo.lock.{LockService, MongoLockRepository}
+
+import java.time.LocalDateTime
+import scala.concurrent.duration.{Duration, MINUTES}
 
 @Singleton
 class RegistrationValidationJobStarter @Inject() (
   system: ActorSystem,
   config: AppConfig,
-  submissionRepository: RegistrationSubmissionRepository
+  submissionRepository: RegistrationSubmissionRepository,
+  mongoComponent: MongoComponent
 )(implicit ec: ExecutionContext) {
 
+  private val lockService: LockService = LockService(
+    new MongoLockRepository(
+      mongoComponent = mongoComponent,
+      timestampSupport = new CurrentTimestampSupport
+    ),
+    lockId = s"registration-submission-validation-job-${LocalDateTime.now()}",
+    ttl = Duration.create(2, MINUTES)
+  )
+
   system.actorOf(
-    Props(RegistrationSubmissionValidationJob(config, submissionRepository)),
+    Props(RegistrationSubmissionValidationJob(config, submissionRepository, lockService)),
     "registration-submission-validation"
   )
 
@@ -45,7 +59,8 @@ class RegistrationValidationJobStarter @Inject() (
 
 case class RegistrationSubmissionValidationJob(
   config: AppConfig,
-  submissionRepository: RegistrationSubmissionRepository
+  submissionRepository: RegistrationSubmissionRepository,
+  lockService: LockService
 )(implicit ec: ExecutionContext)
     extends Actor with ActorLogging with Logging {
 
@@ -56,21 +71,26 @@ case class RegistrationSubmissionValidationJob(
       message = "runAggregation"
     )
 
-  override def receive: Receive = { case "runAggregation" =>
-    submissionRepository
-      .countRecordsWithMissingOrIncorrectCreatedAt()
-      .value
-      .pipeTo(self)
-      .map {
-        case Right(validationResults: RegistrationSubmissionValidationStats) =>
-          logger.info(
-            s"[RegistrationSubmissionValidationJob][receive] createdAt beyond TTL record count:" +
-              s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
-              s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}"
-          )
-        case Left(e: TrustErrors)                                            =>
-          logger.info(s"[RegistrationSubmissionValidationJob][receive] $e")
-      }
+  override def receive: Receive = {
+    case "runAggregation" =>
+
+      logger.info(s"[RegistrationSubmissionValidationJob] Running job with lock id: ${lockService.lockId}")
+
+      lockService.withLock(
+        submissionRepository
+          .countRecordsWithMissingOrIncorrectCreatedAt()
+          .value
+          .andThen(_.map {
+            case Right(validationResults: RegistrationSubmissionValidationStats) =>
+              logger.info(
+                s"[RegistrationSubmissionValidationJob][receive] createdAt beyond TTL record count:" +
+                  s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
+                  s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}"
+              )
+            case Left(e: TrustErrors) =>
+              logger.info(s"[RegistrationSubmissionValidationJob][receive] $e")
+          })
+      )
   }
 
 }
