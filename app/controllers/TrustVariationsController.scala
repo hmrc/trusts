@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.IdentifierAction
-import errors.{BadRequestErrorResponse, VariationFailureForAudit}
+import errors.VariationFailureForAudit
 import models.auditing.TrustAuditing
 import models.variation.DeclarationForApi
 import play.api.Logging
