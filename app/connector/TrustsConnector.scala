@@ -18,7 +18,7 @@ package connector
 
 import cats.data.EitherT
 import config.AppConfig
-import errors.{BadRequestErrorResponse, VariationFailureForAudit}
+import errors.VariationFailureForAudit
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.GetTrustResponse
@@ -155,12 +155,7 @@ class TrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit
             s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
               s"trust variation failed with status: ${response.status}, with message: ${response.message} with errorType: ${response.errorType}")
 
-          response.errorType match {
-            case BadRequestErrorResponse =>
-              Left(VariationFailureForAudit(BadRequestErrorResponse, response.message))
-            case other                   =>
-              Left(VariationFailureForAudit(other, response.message))
-          }
+          Left(VariationFailureForAudit(response.errorType, response.message))
       }
       .recover { case ex =>
         Left(handleError(ex, "trustVariation", trustVariationsEndpoint))
