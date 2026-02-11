@@ -21,8 +21,7 @@ import models.RegistrationSubmissionValidationStats
 import org.apache.pekko.actor._
 import repositories.RegistrationSubmissionRepository
 
-import scala.concurrent.ExecutionContext
-import org.apache.pekko.pattern.pipe
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.Logging
 
 import javax.inject.{Inject, Singleton}
@@ -30,7 +29,6 @@ import config.AppConfig
 import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
 import uk.gov.hmrc.mongo.lock.{LockService, MongoLockRepository}
 
-import java.time.LocalDateTime
 import scala.concurrent.duration.{Duration, MINUTES}
 
 @Singleton
@@ -38,15 +36,14 @@ class RegistrationValidationJobStarter @Inject() (
   system: ActorSystem,
   config: AppConfig,
   submissionRepository: RegistrationSubmissionRepository,
-  mongoComponent: MongoComponent
-)(implicit ec: ExecutionContext) {
+  mongoComponent: MongoComponent)(implicit ec: ExecutionContext) {
 
   private val lockService: LockService = LockService(
-    new MongoLockRepository(
+    lockRepository = new MongoLockRepository(
       mongoComponent = mongoComponent,
       timestampSupport = new CurrentTimestampSupport
     ),
-    lockId = s"registration-submission-validation-job-${LocalDateTime.now()}",
+    lockId = "registration-submission-validation-job",
     ttl = Duration.create(2, MINUTES)
   )
 
@@ -73,24 +70,63 @@ case class RegistrationSubmissionValidationJob(
 
   override def receive: Receive = {
     case "runAggregation" =>
+      val ownerId: String = "registration-submission-validation-owner"
+      val lockId: String = lockService.lockId
+      lockService.lockRepository.isLocked(lockId, ownerId)
+        .flatMap{(alreadyRunningAggregation: Boolean) =>
+          if (alreadyRunningAggregation){
+            logger.info("[RegistrationSubmissionValidationJob][receive] Lock in place not running aggregation")
+            Future.successful(None)
+          } else {
+            acquireLockAndRunJob(ownerId, lockId).flatMap {
+              case Some(eitherErrorOrValidationResults: Either[TrustErrors, RegistrationSubmissionValidationStats]) =>
+                logResults(eitherErrorOrValidationResults)
+              case None =>
+                logger.info("[RegistrationSubmissionValidationJob][receive] Could not acquire lock")
+                Future.successful(None)
+            }
+          }
+      }
+  }
 
-      logger.info(s"[RegistrationSubmissionValidationJob] Running job with lock id: ${lockService.lockId}")
+  private def acquireLockAndRunJob(ownerId: String, lockId: String): Future[Option[Either[TrustErrors, RegistrationSubmissionValidationStats]]] = {
+    val lockRepository = lockService.lockRepository
+    (for {
+      acquired: Boolean <- lockRepository.takeLock(lockId, ownerId, lockService.ttl).map(_.isDefined)
+      result: Option[Either[TrustErrors, RegistrationSubmissionValidationStats]] <- if (acquired) {
+        logger.info(s"[RegistrationSubmissionValidationJob][acquireLockAndRunJob] Running job with lock id: $lockId, owner " +
+          s"id: $ownerId")
+        runRegistrationSubmissionValidationJob
+          .flatMap(value => lockRepository.releaseLock(lockId, ownerId).map(_ => Some(value)))
+      }
+      else {
+        Future.successful(None)
+      }
+    } yield result
+      ).recoverWith {
+      case ex => lockRepository.releaseLock(lockId, ownerId).flatMap(_ => Future.failed(ex))
+    }
+  }
 
-      lockService.withLock(
-        submissionRepository
-          .countRecordsWithMissingOrIncorrectCreatedAt()
-          .value
-          .andThen(_.map {
-            case Right(validationResults: RegistrationSubmissionValidationStats) =>
-              logger.info(
-                s"[RegistrationSubmissionValidationJob][receive] createdAt beyond TTL record count:" +
-                  s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
-                  s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}"
-              )
-            case Left(e: TrustErrors) =>
-              logger.info(s"[RegistrationSubmissionValidationJob][receive] $e")
-          })
-      )
+  private def runRegistrationSubmissionValidationJob: Future[Either[TrustErrors, RegistrationSubmissionValidationStats]] =
+    submissionRepository
+      .countRecordsWithMissingOrIncorrectCreatedAt()
+      .value
+
+
+  def logResults(eitherErrorOrValidationResults: Either[TrustErrors, RegistrationSubmissionValidationStats]) = {
+    eitherErrorOrValidationResults match {
+      case Right(validationResults: RegistrationSubmissionValidationStats) =>
+        logger.info(
+          s"[RegistrationSubmissionValidationJob][runRegistrationSubmissionValidationJob] createdAt beyond TTL record count:" +
+            s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
+            s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}"
+        )
+        Future.successful(None)
+      case Left(e: TrustErrors) =>
+        logger.info(s"[RegistrationSubmissionValidationJob][runRegistrationSubmissionValidationJob] $e")
+        Future.successful(None)
+    }
   }
 
 }
