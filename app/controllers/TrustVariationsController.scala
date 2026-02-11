@@ -70,12 +70,6 @@ class TrustVariationsController @Inject() (
             .value
             .map {
               case Left(variationFailure: VariationFailureForAudit) =>
-                variationFailure.reason match {
-                  case BadRequestErrorResponse =>
-                    VariationFailureForAudit(BadRequestErrorResponse, variationFailure.message)
-                  case other                   =>
-                    VariationFailureForAudit(other, variationFailure.message)
-                }
                 responseHandler.recoverErrorResponse(variationFailure, TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
               case Left(_)                                          =>
                 logger.warn(
