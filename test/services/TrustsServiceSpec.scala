@@ -19,7 +19,7 @@ package services
 import base.BaseSpec
 import cats.data.EitherT
 import connector.{SubscriptionConnector, TrustsConnector}
-import errors.{ServerError, TrustErrors, VariationFailureForAudit}
+import errors.{BadRequestErrorResponse, ServerError, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckResponse._
 import models.existing_trust._
 import models.get_trust._
@@ -566,7 +566,7 @@ class TrustsServiceSpec extends BaseSpec {
           SUT.trustVariation(trustVariationsRequest).value
 
         whenReady(futureResult) { result =>
-          result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "Duplicate submission"))
+          result mustBe Left(ServerError("Duplicate submission"))
         }
       }
     }
@@ -586,6 +586,47 @@ class TrustsServiceSpec extends BaseSpec {
 
       }
     }
+
+    "return BadRequestErrorResponse()" when {
+      "connector returns BadRequestErrorResponse, where message is an empty string" in new TrustsServiceFixture {
+
+        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest))
+          .thenReturn(
+            EitherT[Future, TrustErrors, VariationSuccessResponse](
+              Future.successful(Left(VariationFailureForAudit(BadRequestErrorResponse, "")))
+            )
+          )
+
+        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] =
+          SUT.trustVariation(trustVariationsRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(VariationFailureForAudit(BadRequestErrorResponse, ""))
+        }
+
+      }
+    }
+
+    "return InternalServerErrorResponse()" when {
+      "connector returns InternalServerErrorResponse, where message is an empty string" in new TrustsServiceFixture {
+
+        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest))
+          .thenReturn(
+            EitherT[Future, TrustErrors, VariationSuccessResponse](
+              Future.successful(Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "error")))
+            )
+          )
+
+        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] =
+          SUT.trustVariation(trustVariationsRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "error"))
+        }
+
+      }
+    }
+
   }
 
 }

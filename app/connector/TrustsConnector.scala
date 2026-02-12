@@ -149,11 +149,13 @@ class TrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit
       .execute[VariationResponse]
       .map {
         case response: VariationSuccessResponse => Right(response)
+
         case response: VariationFailureResponse =>
           logger.warn(
             s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
-              s"trust variation failed with status: ${response.status}, with message: ${response.message}"
+              s"trust variation failed with status: ${response.status}, with message: ${response.message} with errorType: ${response.errorType}"
           )
+
           Left(VariationFailureForAudit(response.errorType, response.message))
       }
       .recover { case ex =>
