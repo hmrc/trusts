@@ -99,6 +99,10 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
   val nrsRetryWaitFactor = configuration.get[Int]("nrs-orchestrator.retryWaitFactor")
   val nrsTotalAttempts   = configuration.get[Int]("nrs-orchestrator.totalAttempts")
 
+  val registrationValidationJobEnabled: Boolean = configuration
+    .getOptional[Boolean]("mongodb.registration.validation.enabled")
+    .getOrElse(false)
+
   val registrationValidationInterval: FiniteDuration = Duration.apply(
     configuration.get[Int]("mongodb.registration.validation.interval"),
     TimeUnit.MINUTES

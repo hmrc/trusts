@@ -72,20 +72,25 @@ case class RegistrationSubmissionValidationJob(
     case "runAggregation" =>
       val ownerId: String = "registration-submission-validation-owner"
       val lockId: String = lockService.lockId
-      lockService.lockRepository.isLocked(lockId, ownerId)
-        .flatMap{(alreadyRunningAggregation: Boolean) =>
-          if (alreadyRunningAggregation){
-            logger.info("[RegistrationSubmissionValidationJob][receive] Lock in place not running aggregation")
-            Future.successful(None)
-          } else {
-            acquireLockAndRunJob(ownerId, lockId).flatMap {
-              case Some(eitherErrorOrValidationResults: Either[TrustErrors, RegistrationSubmissionValidationStats]) =>
-                logResults(eitherErrorOrValidationResults)
-              case None =>
-                logger.info("[RegistrationSubmissionValidationJob][receive] Could not acquire lock")
-                Future.successful(None)
+      if (config.registrationValidationJobEnabled) {
+        lockService.lockRepository.isLocked(lockId, ownerId)
+          .flatMap { (alreadyRunningAggregation: Boolean) =>
+            if (alreadyRunningAggregation) {
+              logger.info("[RegistrationSubmissionValidationJob][receive] Lock in place not running aggregation")
+              Future.successful(None)
+            } else {
+              acquireLockAndRunJob(ownerId, lockId).flatMap {
+                case Some(eitherErrorOrValidationResults: Either[TrustErrors, RegistrationSubmissionValidationStats]) =>
+                  logResults(eitherErrorOrValidationResults)
+                case None =>
+                  logger.info("[RegistrationSubmissionValidationJob][receive] Could not acquire lock")
+                  Future.successful(None)
+              }
             }
           }
+      }
+      else {
+        logger.info("[RegistrationSubmissionValidationJob][receive] RegistrationSubmissionValidationJob not enabled")
       }
   }
 
