@@ -234,95 +234,22 @@ class RegistrationSubmissionRepositoryImpl @Inject() (
 
   override def countRecordsWithMissingOrIncorrectCreatedAt(): TrustEnvelope[RegistrationSubmissionValidationStats] =
     EitherT {
-      val existsFilter: Document = Document(
-        "$ne" -> BsonArray(
-          Document("$type" -> "$createdAt"),
-          "missing"
-        )
-      )
-
-      val oldCreatedAtFilter: Document = Document(
-        "$and" -> BsonArray(
-          Document(
-            "$lt" -> BsonArray(
-              "$createdAt",
-              BsonDateTime(Instant.now().minus(28, ChronoUnit.DAYS).toEpochMilli)
-            )
-          ),
-          existsFilter,
-          Document(
-            "$eq" -> BsonArray(
-              Document("$type" -> "$createdAt"),
-              "date"
-            )
-          )
-        )
-      )
-
-      val incorrectTypeFilter: Document = Document(
-        "$and" -> BsonArray(
-          Document(
-            "$ne" -> BsonArray(
-              Document("$type" -> "$createdAt"),
-              "date"
-            )
-          ),
-          existsFilter
-        )
-      )
-
-      val noCreatedAtFilter: Document = Document(
-        "$eq" -> BsonArray(
-          Document("$type" -> "$createdAt"),
-          "missing"
-        )
-      )
-
-      def aggregationSum(aggregationName: String, aggregationDoc: Document): BsonField =
-        Accumulators.sum(
-          aggregationName,
-          Document(
-            "$cond" -> BsonArray(
-              aggregationDoc,
-              BsonInt32(1),
-              BsonInt32(0)
-            )
-          )
-        )
-
-      val pipeline: Seq[Bson] = Seq(
-        Aggregates.group(
-          "IncorrectCreatedAt",
-          aggregationSum("createdAtBeyondTTLCount", oldCreatedAtFilter),
-          aggregationSum("createdAtNotDateTimeCount", incorrectTypeFilter),
-          aggregationSum("docsWithNoCreatedAtFieldCount", noCreatedAtFilter)
-        )
-      )
-
-      def getValueFromDocumentMap(key: String)(docMap: Map[String, BsonValue]) =
-        docMap.get(key) match {
-          case Some(value) => value.asInt32().getValue
-          case None        => 0
-        }
-
-      collection
-        .aggregate[Document](
-          pipeline = pipeline
-        )
-        .toFuture()
-        .map { (docs: Seq[Document]) =>
-          val docMap: Map[String, BsonValue] = docs.headOption.getOrElse(Iterable.empty).toMap
+      val registrationSubmissionValidationStats = for {
+        numberOfDocuments: Long <- collection.countDocuments().toFuture()
+        numberOfDocumentsWithinTTL: Long <- collection.countDocuments(
+          filter = Filters.gt("createdAt", BsonDateTime(Instant.now().minus(28, ChronoUnit.DAYS).toEpochMilli))
+        ).toFuture()
+      } yield
+        Right(
           RegistrationSubmissionValidationStats(
-            createdAtBeyondTTLCount = getValueFromDocumentMap("createdAtBeyondTTLCount")(docMap),
-            createdAtNotDateTimeCount = getValueFromDocumentMap("createdAtNotDateTimeCount")(docMap),
-            noCreatedAtCount = getValueFromDocumentMap("docsWithNoCreatedAtFieldCount")(docMap)
+            numberOfDocuments,
+            numberOfDocumentsWithinTTL
           )
-        }
-        .map((t: RegistrationSubmissionValidationStats) => Right(t))
-        .recover { case e: MongoException =>
-          logger.error(s"[$className][countRecordsBeyondTTL] Failed get records older then 28 DAYS, ${e.getMessage}")
-          Left(ServerError(e.getMessage))
-        }
-    }
+        )
 
+      registrationSubmissionValidationStats.recover { case e: MongoException =>
+        logger.error(s"[$className][countRecordsBeyondTTL] Failed get records older then 28 DAYS, ${e.getMessage}")
+        Left(ServerError(e.getMessage))
+      }
+    }
 }
