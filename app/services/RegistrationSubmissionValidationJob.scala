@@ -123,9 +123,8 @@ case class RegistrationSubmissionValidationJob(
     eitherErrorOrValidationResults match {
       case Right(validationResults: RegistrationSubmissionValidationStats) =>
         logger.info(
-          s"[RegistrationSubmissionValidationJob][runRegistrationSubmissionValidationJob] createdAt beyond TTL record count:" +
-            s" ${validationResults.createdAtBeyondTTLCount}, createdAt not a Date record count: " +
-            s"${validationResults.createdAtNotDateTimeCount}, no createdAt record count: ${validationResults.noCreatedAtCount}"
+          s"[RegistrationSubmissionValidationJob][runRegistrationSubmissionValidationJob] number of documents count:" +
+            s" ${validationResults.numberOfDocuments}, number of documents within TTL count: ${validationResults.numberOfDocumentsWithinTTL}"
         )
         Future.successful(None)
       case Left(e: TrustErrors) =>
