@@ -19,7 +19,6 @@ package repositories
 import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
-import models.RegistrationSubmissionValidationStats
 import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
 import org.mongodb.scala.bson._
 import org.mongodb.scala.bson.conversions.Bson
@@ -51,8 +50,6 @@ trait RegistrationSubmissionRepository {
   def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean]
 
   def removeAllDrafts(): TrustEnvelope[Boolean]
-
-  def countRecordsWithMissingOrIncorrectCreatedAt(): TrustEnvelope[RegistrationSubmissionValidationStats]
 
 }
 
@@ -231,25 +228,4 @@ class RegistrationSubmissionRepositoryImpl @Inject() (
       Future.successful(Right(true))
     }
   }
-
-  override def countRecordsWithMissingOrIncorrectCreatedAt(): TrustEnvelope[RegistrationSubmissionValidationStats] =
-    EitherT {
-      val registrationSubmissionValidationStats = for {
-        numberOfDocuments: Long <- collection.countDocuments().toFuture()
-        numberOfDocumentsWithinTTL: Long <- collection.countDocuments(
-          filter = Filters.gt("createdAt", BsonDateTime(Instant.now().minus(28, ChronoUnit.DAYS).toEpochMilli))
-        ).toFuture()
-      } yield
-        Right(
-          RegistrationSubmissionValidationStats(
-            numberOfDocuments,
-            numberOfDocumentsWithinTTL
-          )
-        )
-
-      registrationSubmissionValidationStats.recover { case e: MongoException =>
-        logger.error(s"[$className][countRecordsBeyondTTL] Failed get records older then 28 DAYS, ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-      }
-    }
 }

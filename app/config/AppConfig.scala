@@ -20,9 +20,6 @@ import javax.inject.{Inject, Singleton}
 import play.api.{Configuration, Logging}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.{Duration, FiniteDuration}
-
 @Singleton
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
@@ -98,15 +95,6 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
   val nrsRetryWaitMs     = configuration.get[Int]("nrs-orchestrator.retryWaitMs")
   val nrsRetryWaitFactor = configuration.get[Int]("nrs-orchestrator.retryWaitFactor")
   val nrsTotalAttempts   = configuration.get[Int]("nrs-orchestrator.totalAttempts")
-
-  val registrationValidationJobEnabled: Boolean = configuration
-    .getOptional[Boolean]("mongodb.registration.validation.enabled")
-    .getOrElse(false)
-
-  val registrationValidationInterval: FiniteDuration = Duration.apply(
-    configuration.get[Int]("mongodb.registration.validation.interval"),
-    TimeUnit.MINUTES
-  )
 
   logger.info(s"""=============== FEATURE FLAGS ===============
                  |            nonRepudiate = $nonRepudiate
