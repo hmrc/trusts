@@ -22,7 +22,6 @@ import controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
 import play.api.{Configuration, Environment}
 import repositories._
 import retry.{NrsRetryHelper, RetryHelper}
-import services.RegistrationValidationJobStarter
 import services.rosm.{RosmPatternService, RosmPatternServiceImpl, TaxEnrolmentsService, TaxEnrolmentsServiceImpl}
 
 class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
@@ -41,7 +40,6 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
     bind(classOf[RosmPatternService]).to(classOf[RosmPatternServiceImpl]).asEagerSingleton()
 
     bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
-    bind(classOf[RegistrationValidationJobStarter]).asEagerSingleton()
 
   }
 
