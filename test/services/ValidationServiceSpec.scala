@@ -129,7 +129,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
           .validate[Registration](trustWithoutBeneficiary)
           .swap
           .value
-          .filter(_.message == "object has missing required properties ([\"beneficiary\"])")
+          .filter(err => err.message.contains("required property") && err.message.contains("beneficiary"))
         errorList.size mustBe 1
       }
 
