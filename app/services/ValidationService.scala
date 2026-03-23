@@ -97,7 +97,8 @@ class Validator(schema: Schema, mapper: ObjectMapper) extends Logging {
         val loc = err.getInstanceLocation.toString
         TrustsValidationError(msg, loc)
       }
-    logger.debug(s"[Validator][getValidationErrors] validationErrors in validate :  $validationErrors")
+    val locations = validationErrors.map(e=> s"${e.location} -> ${e.message}")
+    logger.error(s"[Validator][getValidationErrors] validationErrors failed at locations :  $locations")
     println("validationErrors" + validationErrors)
     validationErrors
   }
