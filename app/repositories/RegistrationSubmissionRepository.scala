@@ -20,8 +20,6 @@ import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
 import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
-import org.mongodb.scala.bson._
-import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.Filters.{and, empty, equal}
 import org.mongodb.scala.model._
@@ -33,10 +31,8 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
 
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {
@@ -53,6 +49,7 @@ trait RegistrationSubmissionRepository {
 
 }
 
+@Singleton
 class RegistrationSubmissionRepositoryImpl @Inject() (
   mongoComponent: MongoComponent,
   config: AppConfig
