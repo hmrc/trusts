@@ -228,4 +228,5 @@ class RegistrationSubmissionRepositoryImpl @Inject() (
       Future.successful(Right(true))
     }
   }
+
 }

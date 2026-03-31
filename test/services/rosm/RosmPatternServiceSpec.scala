@@ -19,11 +19,8 @@ package services.rosm
 import base.BaseSpec
 import cats.data.EitherT
 import errors.{ServerError, TrustErrors}
-import models.tax_enrolments.{
-  SubscriptionIdSuccessResponse, TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess
-}
+import models.tax_enrolments.{SubscriptionIdSuccessResponse, TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
 import org.mockito.Mockito.when
-import org.scalatest.matchers.must.Matchers._
 import services.TrustsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 

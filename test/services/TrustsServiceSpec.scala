@@ -28,7 +28,6 @@ import models.tax_enrolments.SubscriptionIdSuccessResponse
 import models.variation.VariationSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{times, verify, verifyNoMoreInteractions, when}
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import repositories.CacheRepositoryImpl
 import utils.JsonUtils

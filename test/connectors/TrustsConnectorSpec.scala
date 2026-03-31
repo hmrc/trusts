@@ -24,7 +24,6 @@ import models.existing_trust.ExistingCheckResponse._
 import models.get_trust._
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
-import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Reads}
 import utils.NonTaxable5MLDFixtures

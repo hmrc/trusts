@@ -18,7 +18,6 @@ package models.nonRepudiation
 
 import base.BaseSpec
 import models.requests.CredentialData
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes

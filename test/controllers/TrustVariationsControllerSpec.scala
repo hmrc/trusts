@@ -19,9 +19,7 @@ package controllers
 import base.BaseSpec
 import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
-import errors.{
-  EtmpCacheDataStaleErrorResponse, ServerError, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit
-}
+import errors._
 import models.auditing.TrustAuditing
 import models.nonRepudiation.NRSResponse
 import models.variation.{DeclarationForApi, VariationContext, VariationSuccessResponse}
@@ -29,7 +27,6 @@ import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.Json
 import play.api.test.Helpers._

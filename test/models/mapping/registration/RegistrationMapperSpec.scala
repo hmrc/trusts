@@ -18,7 +18,6 @@ package models.mapping.registration
 
 import base.BaseSpec
 import models.Trust
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.DataExamples
 

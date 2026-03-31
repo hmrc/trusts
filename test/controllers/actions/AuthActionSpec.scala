@@ -18,7 +18,6 @@ package controllers.actions
 
 import base.BaseSpec
 import com.google.inject.Inject
-import org.scalatest.matchers.must.Matchers._
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual

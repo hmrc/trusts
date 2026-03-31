@@ -18,7 +18,6 @@ package models.variation
 
 import base.BaseSpec
 import models.AddressType
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 
 import java.time.LocalDate

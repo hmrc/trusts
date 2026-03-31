@@ -23,7 +23,6 @@ import errors._
 import models.tax_enrolments._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.matchers.must.Matchers._
 import repositories.TaxableMigrationRepository
 import services.auditing.MigrationAuditService
 import uk.gov.hmrc.http.HeaderCarrier

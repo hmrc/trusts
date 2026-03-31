@@ -19,7 +19,6 @@ package services
 import base.BaseSpec
 import models.existing_trust.ExistingCheckRequest
 import models.{Assets, Registration}
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{Assertion, EitherValues}
 import utils.{DataExamples, JsonUtils}
 

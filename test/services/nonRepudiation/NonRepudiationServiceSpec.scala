@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito.{doNothing, reset, when}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import retry.RetryHelper
 import services.auditing.NRSAuditService
@@ -34,8 +33,8 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures
-import java.time.Month._
 
+import java.time.Month._
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

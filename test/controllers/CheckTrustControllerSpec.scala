@@ -24,7 +24,6 @@ import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, Matched, 
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
