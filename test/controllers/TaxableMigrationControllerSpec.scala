@@ -24,7 +24,6 @@ import models.taxable_migration.TaxableMigrationFlag
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsBoolean, JsNull, Json}
 import play.api.test.Helpers._

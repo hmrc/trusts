@@ -23,7 +23,6 @@ import errors.{ServerError, TrustErrors}
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.matchers.must.Matchers._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

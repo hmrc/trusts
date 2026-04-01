@@ -26,8 +26,8 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import java.time.Month._
 
+import java.time.Month._
 import java.time.{Instant, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 

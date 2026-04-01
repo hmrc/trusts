@@ -18,7 +18,6 @@ package models.registration
 
 import base.BaseSpec
 import models.registration.RegistrationSubmission.AnswerRow
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 
 class RegistrationSubmissionDraftSpec extends BaseSpec {

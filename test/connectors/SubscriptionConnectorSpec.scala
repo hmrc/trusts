@@ -19,7 +19,6 @@ package connectors
 import connector.SubscriptionConnector
 import errors.ServerError
 import models.tax_enrolments.SubscriptionIdSuccessResponse
-import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.Json
 

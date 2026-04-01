@@ -18,7 +18,6 @@ package utils
 
 import base.BaseSpec
 import models.Registration
-import org.scalatest.matchers.must.Matchers._
 
 class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
 

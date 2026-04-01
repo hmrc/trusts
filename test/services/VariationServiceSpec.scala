@@ -17,9 +17,7 @@
 package services
 
 import cats.data.EitherT
-import errors.{
-  EtmpCacheDataStaleErrorResponse, InternalServerErrorResponse, ServerError, TrustErrors, VariationFailureForAudit
-}
+import errors._
 import models.get_trust.{GetTrustResponse, ResourceNotFoundResponse, ResponseHeader, TrustProcessedResponse}
 import models.tax_enrolments.{TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
 import models.variation.{DeclarationForApi, VariationContext, VariationSuccessResponse}

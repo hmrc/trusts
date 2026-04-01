@@ -18,7 +18,6 @@ package utils
 
 import base.BaseSpec
 import models.{Registration, TrustDetailsType, TrustEntitiesType}
-import org.scalatest.matchers.must.Matchers._
 
 import java.time.LocalDate
 

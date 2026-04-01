@@ -19,7 +19,6 @@ package controllers
 import base.BaseSpec
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.verify
-import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers
