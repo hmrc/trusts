@@ -23,7 +23,9 @@ import errors.{ServerError, TrustErrors}
 import models._
 import models.nonRepudiation.NRSResponse
 import models.registration._
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
+import models.tax_enrolments.{
+  TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess
+}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -283,7 +285,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         status(result) mustBe BAD_REQUEST
 
         val output = contentAsJson(result)
-        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "code").as[String]    mustBe "BAD_REQUEST"
         (output \ "message").as[String] mustBe "Provided request is invalid."
 
         verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
@@ -302,7 +304,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           default5mldDataService
         )
 
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestMissingSettlorDataJson)))
+        val result =
+          SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestMissingSettlorDataJson)))
 
         status(result) mustBe BAD_REQUEST
 
