@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,11 @@ trait AmendEntityTransform extends DeltaTransform with AmendableTransform {
   val path: JsPath
   val endDateField: String = ENTITY_END
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     amendAtPosition(input, path, index, Json.toJson(amended))
-  }
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     endEntity(input, path, original, endDate, endDateField)
-  }
 
   val etmpFields: Seq[String] = Seq(LINE_NUMBER, BP_MATCH_STATUS)
 }

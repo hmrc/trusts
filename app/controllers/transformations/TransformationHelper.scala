@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,12 @@ trait TransformationHelper {
 
   def findJson(json: JsValue, `type`: String, index: Option[Int]): TrustEnvelope[JsObject] = EitherT {
     val p = path(`type`, index)
-    json.transform(p.json.pick).fold(
-      _ => Future.successful(Left(ServerError(s"Could not locate json at $p"))),
-      value => Future.successful(Right(value.as[JsObject]))
-    )
+    json
+      .transform(p.json.pick)
+      .fold(
+        _ => Future.successful(Left(ServerError(s"Could not locate json at $p"))),
+        value => Future.successful(Right(value.as[JsObject]))
+      )
   }
 
 }
@@ -43,7 +45,7 @@ object TransformationHelper {
   def isTrustTaxable(json: JsObject): TrustEnvelope[Boolean] = EitherT {
     json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
       case JsSuccess(JsBoolean(value), _) => Future.successful(Right(value))
-      case _ => Future.successful(Right(true))
+      case _                              => Future.successful(Right(true))
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package models.variation
 
 import base.BaseSpec
 import models.AddressType
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 
 import java.time.LocalDate
@@ -36,8 +35,7 @@ class AssetsSpec extends BaseSpec {
         endDate = Some(LocalDate.of(2021, 1, 5))
       )
 
-      val result = Json.parse(
-        """
+      val result = Json.parse("""
           | {
           |   "lineNo": "1",
           |   "orgName": "Panda care Ltd",
@@ -69,8 +67,7 @@ class AssetsSpec extends BaseSpec {
         endDate = Some(LocalDate.of(2021, 1, 5))
       )
 
-      val result = Json.parse(
-        """
+      val result = Json.parse("""
           | {
           |   "orgName": "Panda care Ltd",
           |   "address": {
@@ -91,4 +88,5 @@ class AssetsSpec extends BaseSpec {
 
     }
   }
+
 }

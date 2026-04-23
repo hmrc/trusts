@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import errors.{ServerError, TrustErrors}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
@@ -34,26 +33,25 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
+class TransformationControllerSpec
+    extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 
   private val mockTransformationService = mock[TransformationService]
 
   private val identifier: String = "utr"
-  private val sessionId: String = Session.id(hc)
+  private val sessionId: String  = Session.id(hc)
 
-  private def transformationController = {
+  private def transformationController =
     new TransformationController(
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockTransformationService,
       Helpers.stubControllerComponents()
     )
-  }
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(mockTransformationService)
-  }
 
   "TransformationController" when {
 
@@ -76,9 +74,13 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
           when(mockTransformationService.removeAllTransformations(any(), any(), any()))
-            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(
-              Left(ServerError("operation failed due to exception from Mongo"))
-            )))
+            .thenReturn(
+              EitherT[Future, TrustErrors, Boolean](
+                Future.successful(
+                  Left(ServerError("operation failed due to exception from Mongo"))
+                )
+              )
+            )
 
           val request = FakeRequest(DELETE, "path")
 
@@ -152,4 +154,5 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       }
     }
   }
+
 }

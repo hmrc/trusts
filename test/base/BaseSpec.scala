@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package base
 
 import config.AppConfig
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfter, Inside}
 import org.scalatestplus.mockito.MockitoSugar
@@ -31,13 +32,15 @@ import utils._
 
 import java.util.UUID
 
-class BaseSpec extends AnyWordSpec
-  with ScalaFutures
-  with MockitoSugar
-  with JsonFixtures
-  with BeforeAndAfter
-  with GuiceOneServerPerSuite
-  with Inside {
+class BaseSpec
+    extends AnyWordSpec
+    with ScalaFutures
+    with MockitoSugar
+    with JsonFixtures
+    with BeforeAndAfter
+    with Matchers
+    with GuiceOneServerPerSuite
+    with Inside {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
@@ -47,19 +50,18 @@ class BaseSpec extends AnyWordSpec
 
   def appConfig: AppConfig = injector.instanceOf[AppConfig]
 
-  def applicationBuilder(): GuiceApplicationBuilder = {
+  def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
         Seq(
-          "metrics.enabled" -> false,
-          "auditing.enabled" -> false,
-          "nrs.retryWaitMs" -> 10,
-          "nrs.retryWaitFactor" -> 1,
-          "nrs.totalAttempts" -> 10,
-          "features.nonRepudiate" -> true
+          "metrics.enabled"                  -> false,
+          "auditing.enabled"                 -> false,
+          "nrs-orchestrator.retryWaitMs"     -> 10,
+          "nrs-orchestrator.retryWaitFactor" -> 1,
+          "nrs-orchestrator.totalAttempts"   -> 10,
+          "features.nonRepudiate"            -> true
         ): _*
       )
-  }
 
   val parsers = stubControllerComponents().parsers.defaultBodyParser
 
@@ -69,7 +71,7 @@ class BaseSpec extends AnyWordSpec
     .withHeaders(Headers.TRUE_USER_AGENT -> "Mozilla")
     .withBody(Json.parse("{}"))
 
-  def postRequestWithPayload(payload: JsValue, withDraftId: Boolean = true): FakeRequest[JsValue] = {
+  def postRequestWithPayload(payload: JsValue, withDraftId: Boolean = true): FakeRequest[JsValue] =
     if (withDraftId) {
       FakeRequest("POST", "/trusts/register")
         .withHeaders(CONTENT_TYPE -> "application/json")
@@ -80,11 +82,5 @@ class BaseSpec extends AnyWordSpec
         .withHeaders(CONTENT_TYPE -> "application/json")
         .withBody(payload)
     }
-  }
+
 }
-
-
-
-
-
-

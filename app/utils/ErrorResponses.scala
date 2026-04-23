@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,9 @@ object ErrorResponses {
     BadRequest(doErrorResponse("BAD_REQUEST", "Provided request is invalid."))
 
   def invalidCorrelationIdErrorResponse: Result =
-    InternalServerError(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
+    InternalServerError(
+      doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId.")
+    )
 
   def duplicateSubmissionErrorResponse: Result =
     Conflict(doErrorResponse("DUPLICATE_SUBMISSION", "Duplicate Correlation Id was submitted."))
@@ -52,4 +54,5 @@ object ErrorResponses {
 
   def etmpDataStaleErrorResponse: Result =
     BadRequest(doErrorResponse("ETMP_DATA_STALE", "ETMP returned a changed form bundle number for the trust."))
+
 }

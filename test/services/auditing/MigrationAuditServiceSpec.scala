@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class MigrationAuditServiceSpec extends BaseSpec {
 
     "send Success message" when {
       val connector = mock[AuditConnector]
-      val service = new MigrationAuditService(connector)
+      val service   = new MigrationAuditService(connector)
 
       val urn = "NTTRUST00000001"
       val utr = "123456789"
@@ -50,12 +50,13 @@ class MigrationAuditServiceSpec extends BaseSpec {
 
       verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
         equalTo("OrchestratorNonTaxableTrustToTaxableSuccess"),
-        equalTo(expectedAuditData))(any(), any(), any())
+        equalTo(expectedAuditData)
+      )(any(), any(), any())
     }
 
     "send Failure message" when {
       val connector = mock[AuditConnector]
-      val service = new MigrationAuditService(connector)
+      val service   = new MigrationAuditService(connector)
 
       val urn = "NTTRUST00000001"
       val utr = "123456789"
@@ -74,7 +75,9 @@ class MigrationAuditServiceSpec extends BaseSpec {
 
       verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
         equalTo("OrchestratorNonTaxableTrustToTaxableFailed"),
-        equalTo(expectedAuditData))(any(), any(), any())
+        equalTo(expectedAuditData)
+      )(any(), any(), any())
     }
   }
+
 }

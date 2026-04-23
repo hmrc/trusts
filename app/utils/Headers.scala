@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package utils
 object Headers {
 
   val DRAFT_REGISTRATION_ID = "Draft-Registration-ID"
-  val ENVIRONMENT_HEADER = "Environment"
-  val CORRELATION_HEADER = "Correlation-Id"
-  val TRUE_USER_AGENT = "True-User-Agent"
+  val ENVIRONMENT_HEADER    = "Environment"
+  val CORRELATION_HEADER    = "Correlation-Id"
+  val TRUE_USER_AGENT       = "True-User-Agent"
 
 }

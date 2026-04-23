@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import utils.JsonOps.{JsValueOps, putNewValue}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) extends Logging {
+class AmendSubmissionDataService @Inject() (localDateService: LocalDateService) extends Logging {
 
   def applyRulesAndAddSubmissionDate(json: JsValue): JsValue = {
     val amendedJson = json.applyRules
@@ -33,9 +33,12 @@ class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) e
     } match {
       case JsSuccess(value, _) =>
         value
-      case JsError(errors) =>
-        logger.error(s"[AmendSubmissionDataService][applyRulesAndAddSubmissionDate] could not add submission date: $errors")
+      case JsError(errors)     =>
+        logger.error(
+          s"[AmendSubmissionDataService][applyRulesAndAddSubmissionDate] could not add submission date: $errors"
+        )
         amendedJson
     }
   }
+
 }

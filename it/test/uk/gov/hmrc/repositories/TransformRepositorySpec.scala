@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package uk.gov.hmrc.repositories
 
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
+import org.bson.BsonType
+import org.mongodb.scala.model.Filters.`type`
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import repositories.TransformationRepositoryImpl
@@ -33,35 +35,39 @@ class TransformRepositorySpec extends IntegrationTestBase {
     Seq(
       AmendTrusteeTransform(
         None,
-        Json.toJson(AmendedLeadTrusteeIndType(
-          None,
-          NameType("New", Some("lead"), "Trustee"),
-          LocalDate.parse("2000-01-01"),
-          "",
-          None,
-          IdentificationType(None, None, None, None),
-          countryOfResidence = None,
-          legallyIncapable = None,
-          nationality = None
-        )),
+        Json.toJson(
+          AmendedLeadTrusteeIndType(
+            None,
+            NameType("New", Some("lead"), "Trustee"),
+            LocalDate.parse("2000-01-01"),
+            "",
+            None,
+            IdentificationType(None, None, None, None),
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None
+          )
+        ),
         Json.obj(),
         LocalDate.now(),
         "leadTrusteeInd"
       ),
       AddTrusteeTransform(
-        Json.toJson(TrusteeIndividualType(
-          Some("lineNo"),
-          Some("bpMatchStatus"),
-          NameType("New", None, "Trustee"),
-          Some(LocalDate.parse("2000-01-01")),
-          Some("phoneNumber"),
-          Some(IdentificationType(Some("nino"), None, None, None)),
-          countryOfResidence = None,
-          legallyIncapable = None,
-          nationality = None,
-          LocalDate.parse("2010-10-10"),
-          None
-        )),
+        Json.toJson(
+          TrusteeIndividualType(
+            Some("lineNo"),
+            Some("bpMatchStatus"),
+            NameType("New", None, "Trustee"),
+            Some(LocalDate.parse("2000-01-01")),
+            Some("phoneNumber"),
+            Some(IdentificationType(Some("nino"), None, None, None)),
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            LocalDate.parse("2010-10-10"),
+            None
+          )
+        ),
         "trusteeInd"
       )
     )
@@ -69,7 +75,7 @@ class TransformRepositorySpec extends IntegrationTestBase {
 
   "a transform repository" should {
 
-    "be able to store and retrieve a payload" in assertMongoTest(createApplication)({ app =>
+    "be able to store and retrieve a payload" in assertMongoTest(createApplication) { app =>
       val repository = app.injector.instanceOf[TransformationRepositoryImpl]
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
@@ -77,6 +83,25 @@ class TransformRepositorySpec extends IntegrationTestBase {
 
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
       retrieved.value.futureValue mustBe Right(Some(data))
-    })
+    }
+
+    "be able to store and retrieve a payload with correct date time format" in assertMongoTest(createApplication) {
+      app =>
+        val repository = app.injector.instanceOf[TransformationRepositoryImpl]
+
+        val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
+        storedOk.value.futureValue mustBe Right(true)
+
+        val query     = `type`("updatedAt", BsonType.DATE_TIME)
+        val documents = repository.collection.countDocuments(query).toFuture().futureValue.toInt
+
+        // Verify at least one document exists with updatedAt as datetime
+        documents must be > 0
+
+        // Optional: Check if our specific document has the correct format
+        val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
+        retrieved.value.futureValue mustBe Right(Some(data))
+    }
   }
+
 }

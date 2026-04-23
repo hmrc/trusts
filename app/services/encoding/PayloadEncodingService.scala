@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,8 @@ class PayloadEncodingService {
 
   def generateChecksum(payload: JsValue): String = {
     val digest = MessageDigest.getInstance("SHA-256")
-    val hash = digest.digest(Json.stringify(payload).getBytes("UTF-8"))
+    val hash   = digest.digest(Json.stringify(payload).getBytes("UTF-8"))
     hash.map("%02x".format(_)).mkString
   }
-
 
 }

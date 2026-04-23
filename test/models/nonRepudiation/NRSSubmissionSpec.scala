@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package models.nonRepudiation
 
 import base.BaseSpec
 import models.requests.CredentialData
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
@@ -41,13 +40,18 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
-          provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val payLoad = NRSSubmission(
         "payload",
-        MetaData(businessId = "trs",
+        MetaData(
+          businessId = "trs",
           notableEvent = NotableEvent.TrsRegistration,
           payloadContentType = "application/json",
           payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
@@ -55,14 +59,14 @@ class NRSSubmissionSpec extends BaseSpec {
           identityData = identityData,
           userAuthToken = "AbCdEf123456",
           headerData = Json.obj(
-            "Gov-Client-Public-IP" -> "198.51.100.0",
+            "Gov-Client-Public-IP"   -> "198.51.100.0",
             "Gov-Client-Public-Port" -> "12345"
           ),
           searchKeys = SearchKeys(SearchKey.TRN, "ABTRUST123456789")
-        ))
+        )
+      )
 
-      Json.toJson(payLoad) mustBe Json.parse(
-        """
+      Json.toJson(payLoad) mustBe Json.parse("""
           |{
           | "payload": "payload",
           | "metadata": {
@@ -121,12 +125,18 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val payLoad = NRSSubmission(
         "payload",
-        MetaData(businessId = "trs",
+        MetaData(
+          businessId = "trs",
           notableEvent = NotableEvent.TrsUpdateTaxable,
           payloadContentType = "application/json",
           payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
@@ -134,14 +144,14 @@ class NRSSubmissionSpec extends BaseSpec {
           identityData = identityData,
           userAuthToken = "AbCdEf123456",
           headerData = Json.obj(
-            "Gov-Client-Public-IP" -> "198.51.100.0",
+            "Gov-Client-Public-IP"   -> "198.51.100.0",
             "Gov-Client-Public-Port" -> "12345"
           ),
           searchKeys = SearchKeys(SearchKey.UTR, "1234567890")
-        ))
+        )
+      )
 
-      Json.toJson(payLoad) mustBe Json.parse(
-        """
+      Json.toJson(payLoad) mustBe Json.parse("""
           |{
           | "payload": "payload",
           | "metadata": {
@@ -197,12 +207,18 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val payLoad = NRSSubmission(
         "payload",
-        MetaData(businessId = "trs",
+        MetaData(
+          businessId = "trs",
           notableEvent = NotableEvent.TrsUpdateNonTaxable,
           payloadContentType = "application/json",
           payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
@@ -210,14 +226,14 @@ class NRSSubmissionSpec extends BaseSpec {
           identityData = identityData,
           userAuthToken = "AbCdEf123456",
           headerData = Json.obj(
-            "Gov-Client-Public-IP" -> "198.51.100.0",
+            "Gov-Client-Public-IP"   -> "198.51.100.0",
             "Gov-Client-Public-Port" -> "12345"
           ),
           searchKeys = SearchKeys(SearchKey.URN, "ABTRUST12345678")
-        ))
+        )
+      )
 
-      Json.toJson(payLoad) mustBe Json.parse(
-        """
+      Json.toJson(payLoad) mustBe Json.parse("""
           |{
           | "payload": "payload",
           | "metadata": {

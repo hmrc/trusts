@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import utils.Constants._
 
 trait SettlorTransform {
   val `type`: String
-  val path: JsPath = {
+
+  val path: JsPath =
     if (isDeceasedSettlor) {
       ENTITIES \ `type`
     } else {
       ENTITIES \ SETTLORS \ `type`
     }
-  }
 
   def isDeceasedSettlor: Boolean = `type` == DECEASED_SETTLOR
 }

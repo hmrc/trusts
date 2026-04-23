@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveOtherIndividualTransform(index: Option[Int],
-                                          entity: JsValue,
-                                          endDate: LocalDate) extends OtherIndividualTransform with RemoveEntityTransform
+case class RemoveOtherIndividualTransform(index: Option[Int], entity: JsValue, endDate: LocalDate)
+    extends OtherIndividualTransform with RemoveEntityTransform
 
 object RemoveOtherIndividualTransform {
 

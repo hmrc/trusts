@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,19 @@ import services.dates.TimeService
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TrusteeSubmissionDraftController @Inject()(
-                                                  submissionRepository: RegistrationSubmissionRepository,
-                                                  identify: IdentifierAction,
-                                                  timeService: TimeService,
-                                                  cc: ControllerComponents
-                                                )(implicit ec: ExecutionContext)
-  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
+class TrusteeSubmissionDraftController @Inject() (
+  submissionRepository: RegistrationSubmissionRepository,
+  identify: IdentifierAction,
+  timeService: TimeService,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
-  def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
-      implicit val writes: Writes[LeadTrusteeType] = LeadTrusteeType.writes
+  def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    val path                                     = JsPath \ "registration" \ "trust/entities/leadTrustees"
+    implicit val writes: Writes[LeadTrusteeType] = LeadTrusteeType.writes
 
-      getResult[LeadTrusteeType](draftId, path)
+    getResult[LeadTrusteeType](draftId, path)
   }
 
 }

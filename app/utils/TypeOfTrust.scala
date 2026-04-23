@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,15 @@ object TypeOfTrust extends Enumeration {
 
   type TypeOfTrust = Value
 
-  val Will = Value("Will Trust or Intestacy Trust")
+  val Will                             = Value("Will Trust or Intestacy Trust")
   val DeedOfVariationOrFamilyAgreement = Value("Deed of Variation Trust or Family Arrangement")
-  val Employment = Value("Employment Related")
-  val IntervivosSettlement = Value("Inter vivos Settlement")
-  val HeritageMaintenance = Value("Heritage Maintenance Fund")
-  val FlatManagement = Value("Flat Management Company or Sinking Fund")
+  val Employment                       = Value("Employment Related")
+  val IntervivosSettlement             = Value("Inter vivos Settlement")
+  val HeritageMaintenance              = Value("Heritage Maintenance Fund")
+  val FlatManagement                   = Value("Flat Management Company or Sinking Fund")
 
-  implicit val reads: Reads[TypeOfTrust] = Reads.enumNameReads(TypeOfTrust)
-  implicit val writes: Writes[TypeOfTrust] = Writes.enumNameWrites
+  implicit val reads: Reads[TypeOfTrust]    = Reads.enumNameReads(TypeOfTrust)
+  implicit val writes: Writes[TypeOfTrust]  = Writes.enumNameWrites
   implicit val formats: Format[TypeOfTrust] = Format(reads, writes)
 
 }

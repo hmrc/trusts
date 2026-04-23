@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,49 +29,60 @@ class MDTPTransformationSpec extends AnyFreeSpec {
     "must transform trustees" in {
 
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-trustee-transform.json")
+      val afterJson    = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-trustee-transform.json")
 
       val processedResponse = TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("trustees")).json.pick).get mustBe afterJson
+      result.getTrust
+        .transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("trustees")).json.pick)
+        .get mustBe afterJson
     }
 
     "must transform beneficiaries" in {
 
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-beneficiary.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-beneficiaries-transform.json")
+      val afterJson    =
+        JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-beneficiaries-transform.json")
 
       val processedResponse = models.get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("beneficiary")).json.pick).get mustBe afterJson
+      result.getTrust
+        .transform(
+          (JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("beneficiary")).json.pick
+        )
+        .get mustBe afterJson
     }
 
     "must transform settlors" in {
 
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-protector.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-settlors-transform.json")
+      val afterJson    = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-settlors-transform.json")
 
       val processedResponse = models.get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("settlors")).json.pick).get mustBe afterJson
+      result.getTrust
+        .transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("settlors")).json.pick)
+        .get mustBe afterJson
     }
 
     "must transform protectors" in {
 
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-protector.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-protectors-transform.json")
+      val afterJson    = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-protectors-transform.json")
 
       val processedResponse = models.get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("protectors")).json.pick).get mustBe afterJson
+      result.getTrust
+        .transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("protectors")).json.pick)
+        .get mustBe afterJson
     }
 
   }

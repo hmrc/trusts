@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@
 package models.mapping.registration
 
 import base.BaseSpec
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.DataExamples
 
 import java.time.LocalDate
-
 
 class LeadTrusteeMapperSpec extends BaseSpec with DataExamples {
 
@@ -32,7 +30,7 @@ class LeadTrusteeMapperSpec extends BaseSpec with DataExamples {
       "it is individual type" when {
 
         val domainLeadTrustee = leadTrusteeIndividual
-        val json: JsValue = Json.toJson(domainLeadTrustee)
+        val json: JsValue     = Json.toJson(domainLeadTrustee)
         "containing a name" in {
           (json \ "name" \ "firstName").get.as[String] mustBe domainLeadTrustee.leadTrusteeInd.get.name.firstName
         }
@@ -42,7 +40,8 @@ class LeadTrusteeMapperSpec extends BaseSpec with DataExamples {
         }
 
         "containing an identification" in {
-          (json \ "identification" \ "nino").get.as[String] mustBe domainLeadTrustee.leadTrusteeInd.get.identification.nino.get
+          (json \ "identification" \ "nino").get
+            .as[String] mustBe domainLeadTrustee.leadTrusteeInd.get.identification.nino.get
         }
 
         "containing a phoneNumber" in {
@@ -57,7 +56,7 @@ class LeadTrusteeMapperSpec extends BaseSpec with DataExamples {
       "it is an organisation type" when {
 
         val domainLeadTrustee = leadTrusteeOrganisation
-        val json: JsValue = Json.toJson(domainLeadTrustee)
+        val json: JsValue     = Json.toJson(domainLeadTrustee)
 
         "containing a name" in {
           (json \ "name").get.as[String] mustBe domainLeadTrustee.leadTrusteeOrg.get.name
@@ -74,9 +73,11 @@ class LeadTrusteeMapperSpec extends BaseSpec with DataExamples {
         "containing identification with UTR" in {
           val json: JsValue = Json.toJson(domainLeadTrustee)
 
-          (json \ "identification" \ "utr").get.as[String] mustBe domainLeadTrustee.leadTrusteeOrg.get.identification.utr.get
+          (json \ "identification" \ "utr").get
+            .as[String] mustBe domainLeadTrustee.leadTrusteeOrg.get.identification.utr.get
         }
       }
     }
   }
+
 }

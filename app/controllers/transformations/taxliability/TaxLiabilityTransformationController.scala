@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,18 @@ import transformers.taxliability.SetTaxLiabilityTransform
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TaxLiabilityTransformationController @Inject()(identify: IdentifierAction,
-                                                     transformationService: TransformationService,
-                                                     taxableMigrationService: TaxableMigrationService)
-                                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+class TaxLiabilityTransformationController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
   def setYearsReturns(identifier: String): Action[JsValue] = addNewTransform[YearsReturns](identifier)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     SetTaxLiabilityTransform(Json.toJson(value))
-  }
+
 }

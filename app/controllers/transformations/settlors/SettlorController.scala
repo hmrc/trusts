@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import utils.Constants._
 
 trait SettlorController extends Logging {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) =>
         logger.info(s"[SettlorController][path] Index defined. Settlor is living and of type ${`type`}.")
         ENTITIES \ SETTLORS \ `type` \ i
-      case _ =>
+      case _       =>
         logger.info(s"[SettlorController][path] Index not defined. Settlor is deceased.")
         ENTITIES \ `type`
     }
-  }
+
 }

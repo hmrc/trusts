@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,21 @@ import utils.Constants._
 
 trait TrusteeController extends Logging {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) =>
-        logger.info(s"[TrusteeController][path] Index defined. Trustee is not the lead trustee and is of type ${`type`}.")
+        logger.info(
+          s"[TrusteeController][path] Index defined. Trustee is not the lead trustee and is of type ${`type`}."
+        )
         ENTITIES \ TRUSTEES \ i
-      case _ =>
-        logger.info(s"[TrusteeController][path] Index not defined. Trustee is the lead trustee and is of type ${`type`}.")
+      case _       =>
+        logger.info(
+          s"[TrusteeController][path] Index not defined. Trustee is the lead trustee and is of type ${`type`}."
+        )
         ENTITIES \ LEAD_TRUSTEE
     }
-  }
 
-  def validate[T](implicit request: IdentifierRequest[JsValue], rds: Reads[T]): Option[T] = {
+  def validate[T](implicit request: IdentifierRequest[JsValue], rds: Reads[T]): Option[T] =
     request.body.validateOpt[T].getOrElse(None)
-  }
+
 }

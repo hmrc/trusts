@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import utils.Constants._
 
 trait OtherIndividualController {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) => ENTITIES \ OTHER_INDIVIDUALS \ i
-      case _ => throw new Exception(s"Index should not be None for other individual.")
+      case _       => throw new Exception(s"Index should not be None for other individual.")
     }
-  }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class NRSAuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext){
+class NRSAuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
   def audit(event: NrsAuditEvent)(implicit hc: HeaderCarrier): Unit = {
     val auditType = event.metaData.notableEvent match {
-      case NotableEvent.TrsRegistration => TrustAuditing.NRS_TRS_REGISTRATION
-      case NotableEvent.TrsUpdateTaxable => TrustAuditing.NRS_TRS_TAXABLE_UPDATE
+      case NotableEvent.TrsRegistration     => TrustAuditing.NRS_TRS_REGISTRATION
+      case NotableEvent.TrsUpdateTaxable    => TrustAuditing.NRS_TRS_TAXABLE_UPDATE
       case NotableEvent.TrsUpdateNonTaxable => TrustAuditing.NRS_TRS_NON_TAXABLE_UPDATE
     }
     auditConnector.sendExplicitAudit(auditType, Json.toJson(event)(NrsAuditEvent.txmWrites))

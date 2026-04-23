@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendProtectorTransform(index: Option[Int],
-                                   amended: JsValue,
-                                   original: JsValue,
-                                   endDate: LocalDate,
-                                   `type`: String) extends ProtectorTransform with AmendEntityTransform
+case class AmendProtectorTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends ProtectorTransform with AmendEntityTransform
 
 object AmendProtectorTransform {
 

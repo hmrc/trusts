@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ class RemoveProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with S
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
 
   private def removeProtector(protectorType: String): RemoveProtector = RemoveProtector(
@@ -97,7 +97,11 @@ class RemoveProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with S
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(protectorType, Seq(Json.toJson(protector)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(protectorType, Seq(Json.toJson(protector)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -171,7 +175,11 @@ class RemoveProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with S
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(protectorType, Seq(Json.toJson(protector)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(protectorType, Seq(Json.toJson(protector)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -203,7 +211,11 @@ class RemoveProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with S
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(protectorType, Seq(Json.toJson(protector)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(protectorType, Seq(Json.toJson(protector)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -240,4 +252,5 @@ class RemoveProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with S
 
     }
   }
+
 }

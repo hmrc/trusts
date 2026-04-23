@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,18 @@ trait TrusteeTransform {
   val `type`: String
   val path: JsPath = ENTITIES \ TRUSTEES
 
-  def isLeadTrustee: Boolean = isIndividualLeadTrustee || isBusinessLeadTrustee
+  def isLeadTrustee: Boolean                   = isIndividualLeadTrustee || isBusinessLeadTrustee
   private def isIndividualLeadTrustee: Boolean = `type` == INDIVIDUAL_LEAD_TRUSTEE
-  private def isBusinessLeadTrustee: Boolean = `type` == BUSINESS_LEAD_TRUSTEE
+  private def isBusinessLeadTrustee: Boolean   = `type` == BUSINESS_LEAD_TRUSTEE
 
   def isIndividualTrustee: Boolean = `type` == INDIVIDUAL_TRUSTEE || isIndividualLeadTrustee
 
   val leadTrusteePath: JsPath = ENTITIES \ LEAD_TRUSTEE
 
-  def putAmendedBpMatchStatus(amended: JsValue): Reads[JsObject] = {
+  def putAmendedBpMatchStatus(amended: JsValue): Reads[JsObject] =
     amended.transform((__ \ BP_MATCH_STATUS).json.pick) match {
       case JsSuccess(bpMatchStatus, _) => __.json.update((leadTrusteePath \ BP_MATCH_STATUS).json.put(bpMatchStatus))
-      case _ => doNothing()
+      case _                           => doNothing()
     }
-  }
+
 }

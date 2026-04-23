@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,12 @@ object SearchKey extends Enumerable.Implicits {
   case object URN extends WithName("urn") with SearchKey
 
   val values: Set[SearchKey] = Set(
-    TRN, UTR, URN
+    TRN,
+    UTR,
+    URN
   )
 
   implicit val enumerable: Enumerable[SearchKey] =
     Enumerable(values.toSeq.map(v => v.toString -> v): _*)
+
 }

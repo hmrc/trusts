@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ trait Protectors[T <: Protector[T]] extends Entities[T]
 
 object Protectors {
 
-  def transform(response: JsValue): Reads[JsObject] = {
+  def transform(response: JsValue): Reads[JsObject] =
     Individual.transform(response) andThen
-    Business.transform(response)
-  }
+      Business.transform(response)
 
 }

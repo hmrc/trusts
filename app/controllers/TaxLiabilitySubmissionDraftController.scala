@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,26 +28,24 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TaxLiabilitySubmissionDraftController @Inject()(
-                                                       submissionRepository: RegistrationSubmissionRepository,
-                                                       identify: IdentifierAction,
-                                                       timeService: TimeService,
-                                                       cc: ControllerComponents,
-                                                       taxYearService: TaxYearService
-                                                     )(implicit ec: ExecutionContext)
-  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
+class TaxLiabilitySubmissionDraftController @Inject() (
+  submissionRepository: RegistrationSubmissionRepository,
+  identify: IdentifierAction,
+  timeService: TimeService,
+  cc: ControllerComponents,
+  taxYearService: TaxYearService
+)(implicit ec: ExecutionContext)
+    extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 
-  def getTaxLiabilityStartDate(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
-      getResult[LocalDate, JsValue](draftId, taxLiabilityStartDatePath)(x => Json.obj("startDate" -> x))
+  def getTaxLiabilityStartDate(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
+    getResult[LocalDate, JsValue](draftId, taxLiabilityStartDatePath)(x => Json.obj("startDate" -> x))
   }
 
-  def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      getResult[LocalDate, FirstTaxYearAvailable](draftId, whenTrustSetupPath)(taxYearService.firstTaxYearAvailable)
+  def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    getResult[LocalDate, FirstTaxYearAvailable](draftId, whenTrustSetupPath)(taxYearService.firstTaxYearAvailable)
   }
+
 }

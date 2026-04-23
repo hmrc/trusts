@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class RemoveAsset(endDate: LocalDate,
-                       index: Int,
-                       override val `type`: String) extends Remove
+case class RemoveAsset(endDate: LocalDate, index: Int, override val `type`: String) extends Remove
 
 object RemoveAsset {
+
   val validAssetTypes: Seq[String] = Seq(
     MONEY_ASSET,
     PROPERTY_OR_LAND_ASSET,
@@ -36,7 +35,7 @@ object RemoveAsset {
     NON_EEA_BUSINESS_ASSET
   )
 
-  val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))
+  val reads: Reads[RemoveAsset]    = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))
   val writes: OWrites[RemoveAsset] = Json.writes[RemoveAsset]
 
   implicit val formats: Format[RemoveAsset] = Format(reads, writes)

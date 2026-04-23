@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,23 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendAssetTransform(index: Option[Int],
-                               amended: JsValue,
-                               original: JsValue,
-                               endDate: LocalDate,
-                               `type`: String) extends AssetTransform with AmendEntityTransform {
+case class AmendAssetTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends AssetTransform with AmendEntityTransform {
 
   override val endDateField: String = nonEeaBusinessEndDateField
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     if (isNonEeaBusiness) {
       endEntity(input, path, original, endDate, endDateField)
     } else {
       JsSuccess(input)
     }
-  }
+
 }
 
 object AmendAssetTransform {

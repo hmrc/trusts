@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package utils
 
 import base.BaseSpec
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import utils.JsonOps._
 
@@ -29,8 +28,10 @@ class JsonOpsSpec extends BaseSpec {
 
       "return modified json with no brackets in phone numbers" in {
 
-        val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-brackets-in-phone-numbers.json")
-        val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-reformatted-phone-numbers.json")
+        val initialJson: JsValue     =
+          JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-brackets-in-phone-numbers.json")
+        val reformattedJson: JsValue =
+          JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-reformatted-phone-numbers.json")
 
         initialJson.applyRules mustBe reformattedJson
 
@@ -38,8 +39,10 @@ class JsonOpsSpec extends BaseSpec {
 
       "return modified json with no brackets in agent telephone numbers" in {
 
-        val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-brackets-in-agent-telephone-numbers.json")
-        val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-reformatted-agent-telephone-numbers.json")
+        val initialJson: JsValue     =
+          JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-brackets-in-agent-telephone-numbers.json")
+        val reformattedJson: JsValue =
+          JsonUtils.getJsonValueFromFile("json-ops-example-data/data-with-reformatted-agent-telephone-numbers.json")
 
         initialJson.applyRules mustBe reformattedJson
 
@@ -52,16 +55,23 @@ class JsonOpsSpec extends BaseSpec {
 
         "remove beneficiary type field from mapped pieces" in {
 
-          val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-mapped-pieces.json")
-          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-mapped-pieces-with-beneficiary-type-removed.json")
+          val initialJson: JsValue     =
+            JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-mapped-pieces.json")
+          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-mapped-pieces-with-beneficiary-type-removed.json"
+          )
 
           initialJson.removeMappedPieces() mustBe reformattedJson
         }
 
         "return original json if no beneficiary type values in mapped pieces" in {
 
-          val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-mapped-pieces-with-beneficiary-type-removed.json")
-          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-mapped-pieces-with-beneficiary-type-removed.json")
+          val initialJson: JsValue     = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-mapped-pieces-with-beneficiary-type-removed.json"
+          )
+          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-mapped-pieces-with-beneficiary-type-removed.json"
+          )
 
           initialJson.removeMappedPieces() mustBe reformattedJson
         }
@@ -71,16 +81,23 @@ class JsonOpsSpec extends BaseSpec {
 
         "remove role in company answer from answer rows" in {
 
-          val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-answer-rows.json")
-          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-answer-rows-with-role-in-company-rows-removed.json")
+          val initialJson: JsValue     =
+            JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-answer-rows.json")
+          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-answer-rows-with-role-in-company-rows-removed.json"
+          )
 
           initialJson.removeAnswerRows() mustBe reformattedJson
         }
 
         "return original json if no role in company answers in answer rows" in {
 
-          val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-answer-rows-with-role-in-company-rows-removed.json")
-          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-answer-rows-with-role-in-company-rows-removed.json")
+          val initialJson: JsValue     = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-answer-rows-with-role-in-company-rows-removed.json"
+          )
+          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-answer-rows-with-role-in-company-rows-removed.json"
+          )
 
           initialJson.removeAnswerRows() mustBe reformattedJson
         }
@@ -90,20 +107,27 @@ class JsonOpsSpec extends BaseSpec {
 
         "remove role in company answers from beneficiaries draft data" in {
 
-          val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-draft-data.json")
-          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-draft-data-with-role-in-company-answers-removed.json")
+          val initialJson: JsValue     = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-draft-data.json")
+          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-draft-data-with-role-in-company-answers-removed.json"
+          )
 
           initialJson.removeDraftData() mustBe reformattedJson
         }
 
         "return original json if no role in company answers in beneficiaries draft data" in {
 
-          val initialJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-draft-data-with-role-in-company-answers-removed.json")
-          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("json-ops-example-data/beneficiary-draft-data-with-role-in-company-answers-removed.json")
+          val initialJson: JsValue     = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-draft-data-with-role-in-company-answers-removed.json"
+          )
+          val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile(
+            "json-ops-example-data/beneficiary-draft-data-with-role-in-company-answers-removed.json"
+          )
 
           initialJson.removeDraftData() mustBe reformattedJson
         }
       }
     }
   }
+
 }

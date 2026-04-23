@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,20 @@ import play.api.libs.json.{JsValue, Json}
 
 import scala.io.Source
 
-
 trait JsonUtils {
 
   def getJsonFromFile(filename: String): String = {
-    val source = Source.fromFile(getClass.getResource(s"/$filename").getPath)
+    val source     = Source.fromInputStream(getClass.getResourceAsStream(s"/$filename"))
     val jsonString = source.mkString
     source.close()
     jsonString
   }
 
-  def getJsonValueFromFile(filename: String): JsValue = {
+  def getJsonValueFromFile(filename: String): JsValue =
     Json.parse(getJsonFromFile(filename))
-  }
 
-  def getJsonValueFromString(jsonString: String): JsValue = {
+  def getJsonValueFromString(jsonString: String): JsValue =
     Json.parse(jsonString)
-  }
 
 }
 

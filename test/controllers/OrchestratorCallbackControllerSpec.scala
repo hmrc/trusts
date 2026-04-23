@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package controllers
 import base.BaseSpec
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.verify
-import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers
@@ -33,18 +32,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val auditConnector: AuditConnector = mock[AuditConnector]
-  val urn = "NTTRUST00000001"
-  val utr = "123456789"
+  val urn                            = "NTTRUST00000001"
+  val utr                            = "123456789"
 
   ".migrationToTaxableCallback" should {
 
     "return NoContent when sent an success message" when {
       "orchestrator callback for subscription id migration " in {
         val auditService = mock[MigrationAuditService]
-        val SUT = new OrchestratorCallbackController(auditService, Helpers.stubControllerComponents())
+        val SUT          = new OrchestratorCallbackController(auditService, Helpers.stubControllerComponents())
 
         val payloadBody = s"""{ "success" : true, "urn": "$urn", "utr": "$utr"}"""
-        val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
+        val result      = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
         status(result) mustBe NO_CONTENT
 
         verify(auditService).auditOrchestratorSuccess(eqTo(urn), eqTo(utr))(any[HeaderCarrier])
@@ -52,15 +51,18 @@ class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
 
       "orchestrator callback for subscription id migration with error message" in {
         val auditService = mock[MigrationAuditService]
-        val SUT = new OrchestratorCallbackController(auditService, Helpers.stubControllerComponents())
+        val SUT          = new OrchestratorCallbackController(auditService, Helpers.stubControllerComponents())
 
         val payloadBody = s"""{ "success" : false, "urn": "$urn", "utr": "$utr", "errorMessage": "An error message"}"""
-        val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
+        val result      = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
         status(result) mustBe NO_CONTENT
 
-        verify(auditService).auditOrchestratorFailure(eqTo(urn), eqTo(utr), eqTo("An error message"))(any[HeaderCarrier])
+        verify(auditService).auditOrchestratorFailure(eqTo(urn), eqTo(utr), eqTo("An error message"))(
+          any[HeaderCarrier]
+        )
       }
     }
 
   }
+
 }

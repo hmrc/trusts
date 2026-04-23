@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ package models.auditing
 import models.nonRepudiation.{MetaData, NRSResponse}
 import play.api.libs.json.{Json, Writes}
 
-case class NrsAuditEvent(metaData: MetaData,
-                         result: NRSResponse)
+case class NrsAuditEvent(metaData: MetaData, result: NRSResponse)
 
 object NrsAuditEvent {
 
   val txmWrites: Writes[NrsAuditEvent] = Writes { event =>
     Json.obj(
       "payload" -> Json.toJson(event.metaData)(MetaData.txmWrites),
-      "result" -> Json.toJson(event.result)
+      "result"  -> Json.toJson(event.result)
     )
   }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ object MigrationStatus extends Enumeration {
   def of(updated: Boolean): MigrationStatus = if (updated) Updated else NeedsUpdating
 
   val NothingToUpdate: Value = Value("nothing-to-update")
-  val NeedsUpdating: Value = Value("needs-updating")
-  val Updated: Value = Value("updated")
+  val NeedsUpdating: Value   = Value("needs-updating")
+  val Updated: Value         = Value("updated")
 
-  implicit val reads: Reads[Value] = Reads.enumNameReads(MigrationStatus)
-  implicit val writes: Writes[Value] = Writes.enumNameWrites
+  implicit val reads: Reads[Value]    = Reads.enumNameReads(MigrationStatus)
+  implicit val writes: Writes[Value]  = Writes.enumNameWrites
   implicit val formats: Format[Value] = Format.apply(reads, writes)
 }

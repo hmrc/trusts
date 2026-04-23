@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,17 +30,22 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AmendProtectorController @Inject()(identify: IdentifierAction,
-                                         transformationService: TransformationService,
-                                         localDateService: LocalDateService)
-                                        (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) with ProtectorController {
+class AmendProtectorController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  localDateService: LocalDateService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AmendTransformationController(identify, transformationService) with ProtectorController {
 
-  def amendIndividual(identifier: String, index: Int): Action[JsValue] = addNewTransform[ProtectorIndividual](identifier, Some(index), INDIVIDUAL_PROTECTOR)
+  def amendIndividual(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[ProtectorIndividual](identifier, Some(index), INDIVIDUAL_PROTECTOR)
 
-  def amendBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, Some(index), BUSINESS_PROTECTOR)
+  def amendBusiness(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[ProtectorCompany](identifier, Some(index), BUSINESS_PROTECTOR)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AmendProtectorTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
-  }
+
 }

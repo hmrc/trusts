@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,19 +29,22 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AddProtectorController @Inject()(identify: IdentifierAction,
-                                       transformationService: TransformationService,
-                                       taxableMigrationService: TaxableMigrationService)
-                                      (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+class AddProtectorController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
-  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[ProtectorIndividual](identifier, INDIVIDUAL_PROTECTOR)
+  def addIndividual(identifier: String): Action[JsValue] =
+    addNewTransform[ProtectorIndividual](identifier, INDIVIDUAL_PROTECTOR)
 
-  def addBusiness(identifier: String): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, BUSINESS_PROTECTOR)
+  def addBusiness(identifier: String): Action[JsValue] =
+    addNewTransform[ProtectorCompany](identifier, BUSINESS_PROTECTOR)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AddProtectorTransform(Json.toJson(value), `type`)
-  }
 
 }

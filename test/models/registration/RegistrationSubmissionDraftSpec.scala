@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package models.registration
 
 import base.BaseSpec
 import models.registration.RegistrationSubmission.AnswerRow
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 
 class RegistrationSubmissionDraftSpec extends BaseSpec {
@@ -32,8 +31,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArg empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -52,8 +50,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArg not empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -75,8 +72,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArgs empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -95,8 +91,7 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
 
           "labelArgs not empty" in {
 
-            val json = Json.parse(
-              """
+            val json = Json.parse("""
                 |{
                 |  "label": "Label",
                 |  "answer": "Answer",
@@ -119,4 +114,5 @@ class RegistrationSubmissionDraftSpec extends BaseSpec {
       }
     }
   }
+
 }

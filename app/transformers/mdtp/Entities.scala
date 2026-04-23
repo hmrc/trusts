@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,21 @@ trait Entities[T <: Entity[T]] {
 
   val path: JsPath
 
-  def transform(response: JsValue)(implicit rds: Reads[T]): Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        putNewValue(path, JsArray())
-      },
-      entities => {
-        val updatedEntities = JsArray(entities.as[List[T]].map {
-          entity => updateEntity(entity)
-        })
+  def transform(response: JsValue)(implicit rds: Reads[T]): Reads[JsObject] =
+    response
+      .transform(path.json.pick)
+      .fold(
+        _ => putNewValue(path, JsArray()),
+        entities => {
+          val updatedEntities = JsArray(entities.as[List[T]].map { entity =>
+            updateEntity(entity)
+          })
 
-        prunePathAndPutNewValue(path, updatedEntities)
-      }
-    )
-  }
+          prunePathAndPutNewValue(path, updatedEntities)
+        }
+      )
 
-  def updateEntity(entity: T): JsValue = {
+  def updateEntity(entity: T): JsValue =
     Json.toJson(entity)(entity.writeToMaintain)
-  }
 
 }

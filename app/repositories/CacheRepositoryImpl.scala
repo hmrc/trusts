@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package repositories
 
 import config.AppConfig
 import org.mongodb.scala.model._
-import play.api.libs.json._
+import play.api.libs.json.{Format, JsValue}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
@@ -28,36 +28,42 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class CacheRepositoryImpl @Inject()(
-                                     mongo: MongoComponent,
-                                     config: AppConfig
-                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[JsValue](
-  mongoComponent = mongo,
-  collectionName = "trusts",
-  domainFormat = implicitly[Format[JsValue]],
-  indexes = Seq(
-    IndexModel(
-      Indexes.ascending("updatedAt"),
-      IndexOptions().name("etmp-data-updated-at-index").expireAfter(config.ttlInSeconds, TimeUnit.SECONDS).unique(false)
-    ),
-    IndexModel(
-      Indexes.ascending("id"),
-      IndexOptions().name("id-index").unique(false)
+class CacheRepositoryImpl @Inject() (
+  mongo: MongoComponent,
+  config: AppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[JsValue](
+      mongoComponent = mongo,
+      collectionName = "trusts",
+      domainFormat = implicitly[Format[JsValue]],
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("updatedAt"),
+          IndexOptions()
+            .name("etmp-data-updated-at-index")
+            .expireAfter(config.ttlInSeconds, TimeUnit.SECONDS)
+            .unique(false)
+        ),
+        IndexModel(
+          Indexes.ascending("id"),
+          IndexOptions().name("id-index").unique(false)
+        )
+      ),
+      replaceIndexes = config.dropIndexesEnabled
     )
-  )
-) with RepositoryHelper[JsValue] with CacheRepository {
+    with RepositoryHelper[JsValue]
+    with CacheRepository {
 
-  override implicit val executionContext: ExecutionContext = ec
-  override val className: String = "CacheRepositoryImpl"
-  override val key: String = "etmpData"
+  implicit override val executionContext: ExecutionContext = ec
+  override val className: String                           = "CacheRepositoryImpl"
+  override val key: String                                 = "etmpData"
 
-  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[JsValue]] = {
+  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[JsValue]] =
     getOpt(identifier, internalId, sessionId)
-  }
 
-  override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean] = {
+  override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean] =
     upsert(identifier, internalId, sessionId, data)
-  }
+
 }
 
 trait CacheRepository {
@@ -67,4 +73,5 @@ trait CacheRepository {
   def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean]
 
   def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean]
+
 }

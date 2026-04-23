@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,20 +42,21 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class DemoteLeadTrusteeControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
+  private val utr: String        = "utr"
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
 
   private val invalidBody: JsValue = Json.parse("{}")
 
-  private val mockTransformationService = mock[TransformationService]
+  private val mockTransformationService   = mock[TransformationService]
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
-  private val mockLocalDateService = mock[LocalDateService]
+  private val mockLocalDateService        = mock[LocalDateService]
 
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
@@ -113,7 +114,8 @@ class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with
 
         status(result) mustBe OK
 
-        val transform = PromoteTrusteeTransform(None, Json.toJson(trustee), Json.obj(), endDate, trusteeType, isTaxable = true)
+        val transform =
+          PromoteTrusteeTransform(None, Json.toJson(trustee), Json.obj(), endDate, trusteeType, isTaxable = true)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -195,7 +197,8 @@ class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with
 
         status(result) mustBe OK
 
-        val transform = PromoteTrusteeTransform(None, Json.toJson(trustee), Json.obj(), endDate, trusteeType, isTaxable = true)
+        val transform =
+          PromoteTrusteeTransform(None, Json.toJson(trustee), Json.obj(), endDate, trusteeType, isTaxable = true)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -266,4 +269,5 @@ class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with
       }
     }
   }
+
 }

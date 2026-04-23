@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.gov.hmrc.time.TaxYear
 
 import java.time.LocalDate
 
-class TaxYearServiceSpec extends BaseSpec with ScalaCheckPropertyChecks with MockitoSugar with DateGenerators with BeforeAndAfterEach {
+class TaxYearServiceSpec
+    extends BaseSpec with ScalaCheckPropertyChecks with MockitoSugar with DateGenerators with BeforeAndAfterEach {
 
   val taxYearService: TaxYearService = mock[TaxYearService]
 
@@ -49,88 +49,72 @@ class TaxYearServiceSpec extends BaseSpec with ScalaCheckPropertyChecks with Moc
 
         "before deadline" when {
 
-          "start date is more than 4 tax years ago" in {
-
+          "start date is more than 4 tax years ago" in
             forAll(
               arbitrary[LocalDate](arbitraryDateInTaxYearOnOrBeforeDecember22nd),
               Gen.choose(5, 10) // any number of years ago over 4 (10 is arbitrary)
-            ) {
-              (currentDate, yearsAgo) =>
+            ) { (currentDate, yearsAgo) =>
+              forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
+                beforeEach()
 
-                forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
-                  beforeEach()
+                when(taxYearService.currentDate).thenReturn(currentDate)
 
-                  when(taxYearService.currentDate).thenReturn(currentDate)
+                val result = taxYearService.firstTaxYearAvailable(startDate)
 
-                  val result = taxYearService.firstTaxYearAvailable(startDate)
-
-                  result mustBe FirstTaxYearAvailable(yearsAgo = 4, earlierYearsToDeclare = true)
-                }
+                result mustBe FirstTaxYearAvailable(yearsAgo = 4, earlierYearsToDeclare = true)
+              }
             }
-          }
 
-          "start date is 4 or less years ago" in {
-
+          "start date is 4 or less years ago" in
             forAll(
               arbitrary[LocalDate](arbitraryDateInTaxYearOnOrBeforeDecember22nd),
               Gen.choose(0, 4) // 4 or less years ago
-            ) {
-              (currentDate, yearsAgo) =>
+            ) { (currentDate, yearsAgo) =>
+              forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
+                beforeEach()
 
-                forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
-                  beforeEach()
+                when(taxYearService.currentDate).thenReturn(currentDate)
 
-                  when(taxYearService.currentDate).thenReturn(currentDate)
+                val result = taxYearService.firstTaxYearAvailable(startDate)
 
-                  val result = taxYearService.firstTaxYearAvailable(startDate)
-
-                  result mustBe FirstTaxYearAvailable(yearsAgo = yearsAgo, earlierYearsToDeclare = false)
-                }
+                result mustBe FirstTaxYearAvailable(yearsAgo = yearsAgo, earlierYearsToDeclare = false)
+              }
             }
-          }
         }
 
         "after deadline" when {
 
-          "start date is more than 3 tax years ago" in {
-
+          "start date is more than 3 tax years ago" in
             forAll(
               arbitrary[LocalDate](arbitraryDateInTaxYearAfterDecember22nd),
               Gen.choose(4, 10) // any number of years ago over 3 (10 is arbitrary)
-            ) {
-              (currentDate, yearsAgo) =>
+            ) { (currentDate, yearsAgo) =>
+              forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
+                beforeEach()
 
-                forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
-                  beforeEach()
+                when(taxYearService.currentDate).thenReturn(currentDate)
 
-                  when(taxYearService.currentDate).thenReturn(currentDate)
+                val result = taxYearService.firstTaxYearAvailable(startDate)
 
-                  val result = taxYearService.firstTaxYearAvailable(startDate)
-
-                  result mustBe FirstTaxYearAvailable(yearsAgo = 3, earlierYearsToDeclare = true)
-                }
+                result mustBe FirstTaxYearAvailable(yearsAgo = 3, earlierYearsToDeclare = true)
+              }
             }
-          }
 
-          "start date is 3 or less years ago" in {
-
+          "start date is 3 or less years ago" in
             forAll(
               arbitrary[LocalDate](arbitraryDateInTaxYearAfterDecember22nd),
               Gen.choose(0, 3) // 3 or less years ago
-            ) {
-              (currentDate, yearsAgo) =>
+            ) { (currentDate, yearsAgo) =>
+              forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
+                beforeEach()
 
-                forAll(arbitrary[LocalDate](arbitraryDateInTaxYearNTaxYearsAgo(yearsAgo))) { startDate =>
-                  beforeEach()
+                when(taxYearService.currentDate).thenReturn(currentDate)
 
-                  when(taxYearService.currentDate).thenReturn(currentDate)
+                val result = taxYearService.firstTaxYearAvailable(startDate)
 
-                  val result = taxYearService.firstTaxYearAvailable(startDate)
-
-                  result mustBe FirstTaxYearAvailable(yearsAgo = yearsAgo, earlierYearsToDeclare = false)
-                }
+                result mustBe FirstTaxYearAvailable(yearsAgo = yearsAgo, earlierYearsToDeclare = false)
+              }
             }
-          }
         }
       }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package connectors
 import connector.TaxEnrolmentConnector
 import errors.ServerError
 import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsSuccessResponse}
-import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.Json
 
@@ -58,7 +57,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
   ".enrolSubscriber" should {
 
     val taxable: Boolean = true
-    val trn = "XTRN1234567"
+    val trn              = "XTRN1234567"
 
     "return success response" when {
       "tax enrolments successfully subscribed to provided subscription id" in {
@@ -80,8 +79,8 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.enrolSubscriber("987654321", taxable, trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Bad request"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Bad request"))
         }
       }
 
@@ -123,8 +122,8 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.migrateSubscriberToTaxable("987654321", urn).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Bad request"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Bad request"))
         }
       }
 
@@ -143,12 +142,11 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
   ".subscriptions" should {
 
-    val urn = "NTTRUST00000001"
-    val utr = "123456789"
+    val urn            = "NTTRUST00000001"
+    val utr            = "123456789"
     val subscriptionId = "987654321"
 
-    val response = Json.parse(
-      s"""
+    val response = Json.parse(s"""
          |{
          |   "created": 1482329348256,
          |    "lastModified": 1482329348256,
@@ -182,8 +180,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     "return ServerError(message)" when {
 
       "an exception is recovered" in {
-        val invalidJsonResponse = Json.parse(
-          s"""
+        val invalidJsonResponse = Json.parse(s"""
              |{
              |   "created": 1482329348256,
              |    "lastModified": 1482329348256,
@@ -203,8 +200,9 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.subscriptions(subscriptionId).value
 
-        val url = server.url(endpoint)
-        val exceptionMessage = "JsResultException(errors:List(((0)/value,List(JsonValidationError(List(error.path.missing),List())))))"
+        val url              = server.url(endpoint)
+        val exceptionMessage =
+          "JsResultException(errors:List(((0)/value,List(JsonValidationError(List(error.path.missing),List())))))"
 
         whenReady(futureResult) { result =>
           result mustBe Left(ServerError(s"Error occurred when calling $url with exception $exceptionMessage"))
@@ -212,8 +210,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
       }
 
       "OK response but no state supplied" in {
-        val responseWithNoState = Json.parse(
-          s"""
+        val responseWithNoState = Json.parse(s"""
              |{
              |   "created": 1482329348256,
              |    "lastModified": 1482329348256,
@@ -229,18 +226,24 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
              |}
              |""".stripMargin)
 
-        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, responseWithNoState.toString())
+        stubForHeaderlessGet(
+          server,
+          s"/tax-enrolments/subscriptions/$subscriptionId",
+          OK,
+          responseWithNoState.toString()
+        )
 
         val futureResult = connector.subscriptions(subscriptionId).value
 
         whenReady(futureResult) { result =>
-          result mustBe Left(ServerError(s"[SubscriptionId: $subscriptionId, UTR: $utr] InvalidDataErrorResponse - No State supplied"))
+          result mustBe Left(
+            ServerError(s"[SubscriptionId: $subscriptionId, UTR: $utr] InvalidDataErrorResponse - No State supplied")
+          )
         }
       }
 
       "OK response but no UTR supplied" in {
-        val responseWithNoUTR = Json.parse(
-          s"""
+        val responseWithNoUTR = Json.parse(s"""
              |{
              |   "created": 1482329348256,
              |    "lastModified": 1482329348256,
@@ -259,13 +262,14 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
         val futureResult = connector.subscriptions(subscriptionId).value
 
         whenReady(futureResult) { result =>
-          result mustBe Left(ServerError(s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No UTR supplied"))
+          result mustBe Left(
+            ServerError(s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No UTR supplied")
+          )
         }
       }
 
       "OK response but no state or UTR supplied" in {
-        val responseWithNoStateOrUtr = Json.parse(
-          s"""
+        val responseWithNoStateOrUtr = Json.parse(s"""
              |{
              |   "created": 1482329348256,
              |    "lastModified": 1482329348256,
@@ -278,12 +282,19 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
              |}
              |""".stripMargin)
 
-        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, responseWithNoStateOrUtr.toString())
+        stubForHeaderlessGet(
+          server,
+          s"/tax-enrolments/subscriptions/$subscriptionId",
+          OK,
+          responseWithNoStateOrUtr.toString()
+        )
 
         val futureResult = connector.subscriptions(subscriptionId).value
 
         whenReady(futureResult) { result =>
-          result mustBe Left(ServerError(s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No State or UTR supplied"))
+          result mustBe Left(
+            ServerError(s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No State or UTR supplied")
+          )
         }
       }
 
@@ -311,7 +322,12 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
       "des returns a service not available error response" in {
 
-        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", SERVICE_UNAVAILABLE, response.toString())
+        stubForHeaderlessGet(
+          server,
+          s"/tax-enrolments/subscriptions/$subscriptionId",
+          SERVICE_UNAVAILABLE,
+          response.toString()
+        )
 
         val futureResult = connector.subscriptions(subscriptionId).value
 
@@ -322,7 +338,12 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
       "des returns an unexpected error response" in {
 
-        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", TOO_MANY_REQUESTS, response.toString())
+        stubForHeaderlessGet(
+          server,
+          s"/tax-enrolments/subscriptions/$subscriptionId",
+          TOO_MANY_REQUESTS,
+          response.toString()
+        )
 
         val futureResult = connector.subscriptions(subscriptionId).value
 

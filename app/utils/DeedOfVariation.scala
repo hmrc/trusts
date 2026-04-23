@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ object DeedOfVariation extends Enumeration {
   type DeedOfVariation = Value
 
   val AbsoluteInterestUnderWill = Value("Previously there was only an absolute interest under the will")
-  val ReplacedWill = Value("Replaced the will trust")
-  val AdditionToWill = Value("Addition to the will trust")
+  val ReplacedWill              = Value("Replaced the will trust")
+  val AdditionToWill            = Value("Addition to the will trust")
 
-  implicit val reads: Reads[DeedOfVariation] = Reads.enumNameReads(DeedOfVariation)
-  implicit val writes: Writes[DeedOfVariation] = Writes.enumNameWrites
-  implicit val formats: Format[DeedOfVariation]  = Format(reads, writes)
+  implicit val reads: Reads[DeedOfVariation]    = Reads.enumNameReads(DeedOfVariation)
+  implicit val writes: Writes[DeedOfVariation]  = Writes.enumNameWrites
+  implicit val formats: Format[DeedOfVariation] = Format(reads, writes)
 
 }

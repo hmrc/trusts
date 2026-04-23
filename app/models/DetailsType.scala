@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ object DetailsType extends Enumeration {
 
   type DetailsType = Value
 
-  val Passport: Value = Value("passport")
-  val IdCard: Value = Value("id-card")
-  val Combined: Value = Value("combined")
+  val Passport: Value            = Value("passport")
+  val IdCard: Value              = Value("id-card")
+  val Combined: Value            = Value("combined")
   val CombinedProvisional: Value = Value("combined-provisional")
 
-  implicit val reads: Reads[Value] = Reads.enumNameReads(DetailsType)
-  implicit val writes: Writes[Value] = Writes.enumNameWrites
+  implicit val reads: Reads[Value]    = Reads.enumNameReads(DetailsType)
+  implicit val writes: Writes[Value]  = Writes.enumNameWrites
   implicit val formats: Format[Value] = Format.apply(reads, writes)
 }

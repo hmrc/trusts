@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class AuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext){
+class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
-  def audit(event: String,
-            request: JsValue,
-            internalId: String,
-            response: JsValue
-           )
-           (implicit hc: HeaderCarrier): Unit = {
+  def audit(
+    event: String,
+    request: JsValue,
+    internalId: String,
+    response: JsValue
+  )(implicit hc: HeaderCarrier): Unit = {
 
     val auditPayload = RequestAndResponseAuditEvent(
       request = request,
@@ -46,12 +46,9 @@ class AuditService @Inject()(auditConnector: AuditConnector)(implicit ec: Execut
     )
   }
 
-  def auditErrorResponse(eventName: String,
-                         request: JsValue,
-                         internalId: String,
-                         errorReason: String
-                        )
-                        (implicit hc: HeaderCarrier): Unit = {
+  def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit
+    hc: HeaderCarrier
+  ): Unit =
 
     audit(
       event = eventName,
@@ -59,7 +56,5 @@ class AuditService @Inject()(auditConnector: AuditConnector)(implicit ec: Execut
       internalId = internalId,
       response = Json.obj("errorReason" -> errorReason)
     )
-  }
-
 
 }

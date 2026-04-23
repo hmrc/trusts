@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package models.mapping.registration
 
 import base.BaseSpec
 import models.Trust
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.DataExamples
 
@@ -26,9 +25,10 @@ class RegistrationMapperSpec extends BaseSpec with DataExamples {
 
   "Registration" should {
     "map trust to des representation of trust" in {
-      val apiRegistration = registrationRequest
+      val apiRegistration          = registrationRequest
       val desRegistration: JsValue = Json.toJson(apiRegistration)
       (desRegistration \ "details" \ "trust").get.as[Trust].details mustBe apiRegistration.trust.details
     }
   }
+
 }

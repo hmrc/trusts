@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package config
 import com.google.inject.AbstractModule
 import connector.{TaxEnrolmentConnector, TaxEnrolmentConnectorImpl}
 import controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
+import play.api.{Configuration, Environment}
 import repositories._
 import retry.{NrsRetryHelper, RetryHelper}
 import services.rosm.{RosmPatternService, RosmPatternServiceImpl, TaxEnrolmentsService, TaxEnrolmentsServiceImpl}
 
-class Module extends AbstractModule {
+class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   override def configure(): Unit = {
     // For session based storage instead of cred based, change to SessionIdentifierAction
@@ -39,5 +40,7 @@ class Module extends AbstractModule {
     bind(classOf[RosmPatternService]).to(classOf[RosmPatternServiceImpl]).asEagerSingleton()
 
     bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
+
   }
+
 }

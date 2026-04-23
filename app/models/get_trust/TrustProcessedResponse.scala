@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,27 +25,30 @@ import transformers.mdtp.{OtherIndividuals, Trustees}
 
 case class TrustProcessedResponse(getTrust: JsValue, responseHeader: ResponseHeader) extends GetTrustSuccessResponse {
 
-  def transform: JsResult[TrustProcessedResponse] = {
-    getTrust.transform(
-      Trustees.transform(getTrust) andThen
-        Beneficiaries.transform(getTrust) andThen
-        Settlors.transform(getTrust) andThen
-        Protectors.transform(getTrust) andThen
-        OtherIndividuals.transform(getTrust) andThen
-        Assets.transform(getTrust)
-    ).map {
-      json =>
+  def transform: JsResult[TrustProcessedResponse] =
+    getTrust
+      .transform(
+        Trustees.transform(getTrust)           andThen
+          Beneficiaries.transform(getTrust)    andThen
+          Settlors.transform(getTrust)         andThen
+          Protectors.transform(getTrust)       andThen
+          OtherIndividuals.transform(getTrust) andThen
+          Assets.transform(getTrust)
+      )
+      .map { json =>
         TrustProcessedResponse(json, responseHeader)
-    }
-  }
+      }
 
 }
 
 object TrustProcessedResponse {
-  val mongoWrites: Writes[TrustProcessedResponse] = (o: TrustProcessedResponse) => Json.obj(
-    "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
-    "trustOrEstateDisplay" -> o.getTrust
-  )
+
+  val mongoWrites: Writes[TrustProcessedResponse] = (o: TrustProcessedResponse) =>
+    Json.obj(
+      "responseHeader"       -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
+      "trustOrEstateDisplay" -> o.getTrust
+    )
+
 }
 
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse

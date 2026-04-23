@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,15 @@ import transformers.remove.{Remove, RemoveOtherIndividual}
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveOtherIndividualController @Inject()(identify: IdentifierAction,
-                                                transformationService: TransformationService)
-                                               (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) with OtherIndividualController {
+class RemoveOtherIndividualController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends RemoveTransformationController(identify, transformationService) with OtherIndividualController {
 
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveOtherIndividual](identifier)
 
-  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
+  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform =
     RemoveOtherIndividualTransform(Some(remove.index), entity, remove.endDate)
-  }
+
 }

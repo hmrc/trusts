@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,22 @@ import services.dates.TimeService
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AgentSubmissionDraftController @Inject()(
-                                                submissionRepository: RegistrationSubmissionRepository,
-                                                identify: IdentifierAction,
-                                                timeService: TimeService,
-                                                cc: ControllerComponents
-                                              )(implicit ec: ExecutionContext)
-  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
+class AgentSubmissionDraftController @Inject() (
+  submissionRepository: RegistrationSubmissionRepository,
+  identify: IdentifierAction,
+  timeService: TimeService,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
-  def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
-      getResult[AddressType](draftId, path)
+  def getAgentAddress(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
+    getResult[AddressType](draftId, path)
   }
 
-  def getClientReference(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
-      getResult[String](draftId, path)
+  def getClientReference(draftId: String): Action[AnyContent] = identify.async { implicit request =>
+    val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
+    getResult[String](draftId, path)
   }
+
 }

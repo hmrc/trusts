@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +19,33 @@ package utils
 import models.Registration
 import services.TrustsValidationError
 
+class AssetsDomainValidation(registration: Registration) extends ValidationUtil {
 
-class AssetsDomainValidation (registration: Registration) extends ValidationUtil {
-
-
-  def valueFullIsNotMoreThanValuePrevious:List[Option[TrustsValidationError]]= {
-    registration.trust.assets.map {
-      asset => asset.propertyOrLand match {
-        case Some(properties) =>
-          properties.zipWithIndex.map {
-            case (property, index) =>
+  def valueFullIsNotMoreThanValuePrevious: List[Option[TrustsValidationError]] =
+    registration.trust.assets
+      .map { asset =>
+        asset.propertyOrLand match {
+          case Some(properties) =>
+            properties.zipWithIndex.map { case (property, index) =>
               val isValid = property.valueFull >= property.valuePrevious
               if (!isValid) {
-                Some(TrustsValidationError(s"Value full must be equal or more than value previous.",
-                  s"/trust/assets/propertyOrLand/$index/valueFull"))
+                Some(
+                  TrustsValidationError(
+                    s"Value full must be equal or more than value previous.",
+                    s"/trust/assets/propertyOrLand/$index/valueFull"
+                  )
+                )
               } else {
                 None
               }
-          }
-        case None => List(None)
+            }
+          case None             => List(None)
+        }
       }
-    }.toList.flatten
-  }
-
+      .toList
+      .flatten
 
 }
-
 
 object AssetsDomainValidation {
 
@@ -52,4 +53,5 @@ object AssetsDomainValidation {
     val aValidator = new AssetsDomainValidation(registration)
     aValidator.valueFullIsNotMoreThanValuePrevious.flatten
   }
+
 }

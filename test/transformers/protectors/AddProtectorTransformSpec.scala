@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
 
       "when individual" - {
 
-        val newProtector = ProtectorIndividual(Some("1"),
+        val newProtector = ProtectorIndividual(
+          Some("1"),
           None,
           NameType("abcdefghijkl", Some("abcdefghijklmn"), "abcde"),
           Some(LocalDate.parse("2000-01-01")),
@@ -45,7 +46,8 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
           None
         )
 
-        val newSecondProtector = ProtectorIndividual(None,
+        val newSecondProtector = ProtectorIndividual(
+          None,
           None,
           NameType("second", None, "protector"),
           Some(LocalDate.parse("2000-01-01")),
@@ -74,7 +76,8 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
         "must add a new individual protector" in {
           val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-individual-protector.json")
 
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-protector.json")
+          val afterJson =
+            JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-protector.json")
 
           val transformer = new AddProtectorTransform(Json.toJson(newSecondProtector), `type`)
 
@@ -123,7 +126,8 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
         "must add a new business protector" in {
           val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-company-protector.json")
 
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-company-protector.json")
+          val afterJson =
+            JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-company-protector.json")
 
           val transformer = new AddProtectorTransform(Json.toJson(newSecondProtector), `type`)
 
@@ -134,4 +138,5 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

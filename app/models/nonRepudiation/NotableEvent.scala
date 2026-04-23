@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import models.{Enumerable, WithName}
 
 sealed trait NotableEvent
 
-
 object NotableEvent extends Enumerable.Implicits {
 
   case object TrsRegistration extends WithName("trs-registration") with NotableEvent
@@ -28,9 +27,12 @@ object NotableEvent extends Enumerable.Implicits {
   case object TrsUpdateNonTaxable extends WithName("trs-update-non-taxable") with NotableEvent
 
   val values: Set[NotableEvent] = Set(
-    TrsRegistration, TrsUpdateTaxable, TrsUpdateNonTaxable
+    TrsRegistration,
+    TrsUpdateTaxable,
+    TrsUpdateNonTaxable
   )
 
   implicit val enumerable: Enumerable[NotableEvent] =
     Enumerable(values.toSeq.map(v => v.toString -> v): _*)
+
 }

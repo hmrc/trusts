@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package models.existing_trust
 
 import play.api.libs.json.{Json, OFormat}
 
-case class ExistingTrustResponse(`match`:Boolean)
+case class ExistingTrustResponse(`match`: Boolean)
 
 object ExistingTrustResponse {
   implicit val formats: OFormat[ExistingTrustResponse] = Json.format[ExistingTrustResponse]
 }
 
-case class DesErrorResponse(code: String,reason: String )
+case class DesErrorResponse(code: String, reason: String)
 
 object DesErrorResponse {
   implicit val formats: OFormat[DesErrorResponse] = Json.format[DesErrorResponse]

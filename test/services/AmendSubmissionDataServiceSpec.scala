@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package services
 
 import base.BaseSpec
 import org.mockito.Mockito.when
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import services.dates.LocalDateService
 
@@ -27,7 +26,7 @@ import java.time.LocalDate
 class AmendSubmissionDataServiceSpec extends BaseSpec {
 
   private val mockLocalDateService = mock[LocalDateService]
-  private val service = new AmendSubmissionDataService(mockLocalDateService)
+  private val service              = new AmendSubmissionDataService(mockLocalDateService)
 
   "AmendSubmissionDataService" when {
 
@@ -53,4 +52,5 @@ class AmendSubmissionDataServiceSpec extends BaseSpec {
       }
     }
   }
+
 }

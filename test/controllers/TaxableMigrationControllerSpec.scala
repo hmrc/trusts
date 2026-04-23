@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import models.taxable_migration.TaxableMigrationFlag
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsBoolean, JsNull, Json}
 import play.api.test.Helpers._
@@ -36,26 +35,25 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
+class TaxableMigrationControllerSpec
+    extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   private val identifier: String = "utr"
-  private val sessionId: String = Session.id(hc)
+  private val sessionId: String  = Session.id(hc)
 
-  private def taxableMigrationController = {
+  private def taxableMigrationController =
     new TaxableMigrationController(
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockTaxableMigrationService,
       Helpers.stubControllerComponents()
     )
-  }
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(mockTaxableMigrationService)
-  }
 
   ".getTaxableMigrationFlag" should {
 
@@ -67,7 +65,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         val request = FakeRequest(GET, "path")
 
         val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
-        status(result) mustBe OK
+        status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(TaxableMigrationFlag(Some(true)))
 
         verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id", sessionId)
@@ -80,7 +78,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         val request = FakeRequest(GET, "path")
 
         val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
-        status(result) mustBe OK
+        status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(TaxableMigrationFlag(None))
 
         verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id", sessionId)
@@ -109,30 +107,43 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
-        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+        val result = taxableMigrationController
+          .setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsBoolean(true)))
 
         status(result) mustBe OK
 
-        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", sessionId, migratingToTaxable = true)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(
+          identifier,
+          "id",
+          sessionId,
+          migratingToTaxable = true
+        )
       }
 
       "setting to false" in {
         when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
-        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+        val result = taxableMigrationController
+          .setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsBoolean(false)))
 
         status(result) mustBe OK
 
-        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", sessionId, migratingToTaxable = false)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(
+          identifier,
+          "id",
+          sessionId,
+          migratingToTaxable = false
+        )
       }
     }
 
     "return BAD_REQUEST" when {
       "request body cannot be validated" in {
-        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+        val result = taxableMigrationController
+          .setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsNull))
 
         status(result) mustBe BAD_REQUEST
@@ -144,13 +155,20 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
 
-        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+        val result = taxableMigrationController
+          .setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsBoolean(true)))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
 
-        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", sessionId, migratingToTaxable = true)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(
+          identifier,
+          "id",
+          sessionId,
+          migratingToTaxable = true
+        )
       }
     }
   }
+
 }

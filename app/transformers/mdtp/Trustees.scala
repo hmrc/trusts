@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ object Trustees extends Entities[TrusteeType] {
 
   override val path: JsPath = ENTITIES \ TRUSTEES
 
-  override def updateEntity(trustee: TrusteeType): JsValue = {
+  override def updateEntity(trustee: TrusteeType): JsValue =
     trustee match {
       case TrusteeType(Some(trusteeInd), None) =>
         Json.obj(
@@ -34,9 +34,8 @@ object Trustees extends Entities[TrusteeType] {
         Json.obj(
           BUSINESS_TRUSTEE -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
         )
-      case _ =>
+      case _                                   =>
         Json.obj()
     }
-  }
 
 }

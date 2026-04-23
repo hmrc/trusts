@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import play.api.libs.json._
 import transformers.SetValueTransform
 import utils.Constants._
 
-case class SetTrustDetailTransform(value: JsValue,
-                                   `type`: String) extends SetValueTransform {
+case class SetTrustDetailTransform(value: JsValue, `type`: String) extends SetValueTransform {
 
   override val path: JsPath = TRUST \ DETAILS \ `type`
 }

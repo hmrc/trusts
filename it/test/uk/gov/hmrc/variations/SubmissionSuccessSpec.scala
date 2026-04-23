@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import scala.concurrent.Future
 
 class SubmissionSuccessSpec extends IntegrationTestBase {
 
-  val utr = "5174384721"
+  val utr        = "5174384721"
   val internalId = "internalId"
 
   "submit a successful variation" in {
@@ -57,20 +57,30 @@ class SubmissionSuccessSpec extends IntegrationTestBase {
       val responseHeader: ResponseHeader = ResponseHeader("Processed", "123456789012")
     }
 
-    lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
+    lazy val get5MLDTrustNonTaxableResponse: String =
+      getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
     when(stubbedCacheRepository.get(eqTo(utr), any(), any()))
-      .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(Some(Json.parse(get5MLDTrustNonTaxableResponse))))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, Option[JsValue]](
+          Future.successful(Right(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
+        )
+      )
 
     when(stubbedTrustsConnector.getTrustInfo(eqTo(utr)))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(trustResponse))))
 
     when(stubbedTrustsConnector.trustVariation(any()))
-      .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse("tvn")))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, VariationSuccessResponse](
+          Future.successful(Right(VariationSuccessResponse("tvn")))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )
@@ -84,6 +94,5 @@ class SubmissionSuccessSpec extends IntegrationTestBase {
     status(result) mustBe OK
 
   }
-
 
 }

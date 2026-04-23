@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package implicits
 
 import base.BaseSpec
 import implicits.Implicits._
-import org.scalatest.matchers.must.Matchers._
 
 import java.time.{LocalDate, MonthDay}
 
@@ -35,7 +34,7 @@ class ImplicitsSpec extends BaseSpec {
         "return following year" when {
           "month/day is before date" in {
             val monthDay = MonthDay.of(2, 2)
-            val result = date.next(monthDay)
+            val result   = date.next(monthDay)
             result mustBe LocalDate.of(1997, 2, 2)
           }
         }
@@ -44,14 +43,14 @@ class ImplicitsSpec extends BaseSpec {
 
           "month/day is same as date" in {
             val monthDay = MonthDay.of(2, 3)
-            val result = date.next(monthDay)
+            val result   = date.next(monthDay)
             result mustBe LocalDate.of(1996, 2, 3)
           }
 
           "month/day is after date" in {
 
             val monthDay = MonthDay.of(2, 4)
-            val result = date.next(monthDay)
+            val result   = date.next(monthDay)
             result mustBe LocalDate.of(1996, 2, 4)
           }
         }

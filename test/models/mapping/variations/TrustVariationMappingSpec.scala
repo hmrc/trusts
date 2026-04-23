@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package models.mapping.variations
 import base.BaseSpec
 import models.variation.TrustVariation
 import org.scalatest.enablers.Definition
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, Json}
 
 class TrustVariationMappingSpec extends BaseSpec {
@@ -57,8 +56,10 @@ class TrustVariationMappingSpec extends BaseSpec {
         val json = Json.toJson(payload)
 
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0) mustBe defined
-        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name").as[String] mustNot be(empty)
-        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "entityStart").as[String] mustEqual "1998-02-12"
+        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name")
+          .as[String] mustNot be(empty)
+        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "entityStart")
+          .as[String] mustEqual "1998-02-12"
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeInd") mustNot be(defined)
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1 \ "leadTrusteeInd") mustNot be(defined)
       }
@@ -69,10 +70,12 @@ class TrustVariationMappingSpec extends BaseSpec {
         val json = Json.toJson(payload)
 
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0) mustBe defined
-        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name").as[String] mustBe "Trust Services LTD"
+        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name")
+          .as[String]                                                  mustBe "Trust Services LTD"
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeInd") mustNot be(defined)
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1) mustBe defined
-        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1 \ "leadTrusteeInd" \ "name" \ "firstName").as[String] mustBe "John"
+        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1 \ "leadTrusteeInd" \ "name" \ "firstName")
+          .as[String]                                                  mustBe "John"
 
         (json \ "details" \ "trust" \ "assets" \ "monetary" \ 0 \ "assetMonetaryAmount").as[Int] mustBe 100000
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
         "must add a new individual settlor" in {
           val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-settlor.json")
+          val afterJson =
+            JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-settlor.json")
 
           val transformer = new AddSettlorTransform(Json.toJson(newSettlor), `type`)
 
@@ -104,7 +105,8 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
         "must add a new business settlor" in {
           val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-business-settlor.json")
 
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-business-settlor.json")
+          val afterJson =
+            JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-business-settlor.json")
 
           val transformer = new AddSettlorTransform(Json.toJson(newSettlor), `type`)
 
@@ -115,4 +117,5 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

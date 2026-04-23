@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import play.api.libs.json._
 import transformers.AddEntityTransform
 import utils.Constants.{COMPANY_TIME, COMPANY_TYPE}
 
-case class AddSettlorTransform(entity: JsValue,
-                              `type`: String) extends SettlorTransform with AddEntityTransform {
+case class AddSettlorTransform(entity: JsValue, `type`: String) extends SettlorTransform with AddEntityTransform {
 
   override val trustTypeDependentFields: Seq[String] = Seq(COMPANY_TYPE, COMPANY_TIME)
 }

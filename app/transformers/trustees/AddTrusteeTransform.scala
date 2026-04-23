@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package transformers.trustees
 import play.api.libs.json._
 import transformers.AddEntityTransform
 
-case class AddTrusteeTransform(entity: JsValue,
-                               `type`: String) extends TrusteeTransform with AddEntityTransform {
+case class AddTrusteeTransform(entity: JsValue, `type`: String) extends TrusteeTransform with AddEntityTransform {
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     addToList(input, path, Json.obj(`type` -> entity))
-  }
+
 }
 
 object AddTrusteeTransform {

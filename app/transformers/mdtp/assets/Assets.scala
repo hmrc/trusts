@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ trait Assets[T <: Asset[T]] extends Entities[T]
 
 object Assets {
 
-  def transform(response: JsValue): Reads[JsObject] = {
+  def transform(response: JsValue): Reads[JsObject] =
     AssetMonetaryAmount.transform(response) andThen
-    PropertyLandAsset.transform(response) andThen
-    SharesAsset.transform(response) andThen
-    BusinessAsset.transform(response) andThen
-    PartnershipAsset.transform(response) andThen
-    OtherAsset.transform(response) andThen
-    NonEEABusiness.transform(response)
-  }
+      PropertyLandAsset.transform(response) andThen
+      SharesAsset.transform(response)       andThen
+      BusinessAsset.transform(response)     andThen
+      PartnershipAsset.transform(response)  andThen
+      OtherAsset.transform(response)        andThen
+      NonEEABusiness.transform(response)
+
 }

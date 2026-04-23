@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import connector.OrchestratorConnector
 import errors.ServerError
 import models.orchestrator.OrchestratorMigrationRequest
 import models.tax_enrolments.OrchestratorToTaxableSuccessResponse
-import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.Json
 
@@ -35,24 +34,27 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
     val utr = "123456789"
 
     val request: OrchestratorMigrationRequest = OrchestratorMigrationRequest(urn, utr)
-    val requestBody = Json.stringify(Json.toJson(request))
+    val requestBody                           = Json.stringify(Json.toJson(request))
 
-    "return OrchestratorToTaxableSuccessResponse" when {
-
+    "return OrchestratorToTaxableSuccessResponse" when
       Seq(OK, NO_CONTENT, ACCEPTED).foreach { status =>
         s"tax enrolments successfully subscribed to provided subscription id (status: $status)" in {
           val responseBody = """{"success": "true"}"""
-          stubForHeaderlessPost(server, "/trusts-enrolment-orchestrator/orchestration-process", requestBody, status, responseBody)
+          stubForHeaderlessPost(
+            server,
+            "/trusts-enrolment-orchestrator/orchestration-process",
+            requestBody,
+            status,
+            responseBody
+          )
 
           val futureResult = connector.migrateToTaxable(urn, utr).value
 
-          whenReady(futureResult) {
-            result => result mustBe Right(OrchestratorToTaxableSuccessResponse())
+          whenReady(futureResult) { result =>
+            result mustBe Right(OrchestratorToTaxableSuccessResponse())
           }
         }
       }
-    }
-
 
     "return ServerError(message)" when {
       "tax enrolments returns BadRequest " in {
@@ -63,8 +65,8 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.migrateToTaxable(urn, utr).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Bad request"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Bad request"))
         }
       }
 
@@ -76,8 +78,8 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.migrateToTaxable(urn, utr).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Error response from orchestrator: 500"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Error response from orchestrator: 500"))
         }
       }
     }

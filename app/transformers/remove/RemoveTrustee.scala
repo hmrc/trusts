@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,8 @@ import play.api.libs.json.{Format, Json}
 
 import java.time.LocalDate
 
-case class RemoveTrustee(endDate: LocalDate,
-                         index: Int,
-                         override val `type`: String) extends Remove
+case class RemoveTrustee(endDate: LocalDate, index: Int, override val `type`: String) extends Remove
 
 object RemoveTrustee {
-  implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]
+  implicit val formats: Format[RemoveTrustee] = Json.format[RemoveTrustee]
 }

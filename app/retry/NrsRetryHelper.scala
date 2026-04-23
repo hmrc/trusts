@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import config.AppConfig
 
 import javax.inject.Inject
 
-class NrsRetryHelper @Inject()(appConfig: AppConfig) extends RetryHelper {
+class NrsRetryHelper @Inject() (appConfig: AppConfig) extends RetryHelper {
   val maxAttempts: Int = appConfig.nrsTotalAttempts
-  val factor: Int = appConfig.nrsRetryWaitFactor
+  val factor: Int      = appConfig.nrsRetryWaitFactor
   val initialWait: Int = appConfig.nrsRetryWaitMs
 }
