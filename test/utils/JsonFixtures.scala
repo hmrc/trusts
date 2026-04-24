@@ -37,6 +37,15 @@ trait JsonFixtures extends JsonUtils {
     "invalid-payload-trusts-registration-missing-settlors.json"
   )
 
+  lazy val validRegistration5MldWillTrustDeceasedRequestJson: String =
+    getJsonFromFile("valid-trusts-registration-api-5mld-will-trust-deceased-nontaxable.json")
+
+  lazy val validRegistration5MldSettlorRequestJson: String =
+    getJsonFromFile("valid-trusts-registration-api-5mld-settlor-nontaxable.json")
+
+  lazy val validRegistration5MldSettlorAndDeceasedRequestJson: String =
+    getJsonFromFile("valid-trusts-registration-api-5mld-settlor-and-deceased-nontaxable.json")
+
   lazy val invalidTrustBusinessValidation: String = getJsonFromFile("trust-business-validation-fail.json")
 
   lazy val validTrustVariations5mldRequestJson: String = getJsonFromFile(
