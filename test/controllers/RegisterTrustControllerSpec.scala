@@ -190,6 +190,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
               Future.successful(Right(RegistrationTrnResponse(trnResponse)))
             )
           )
+
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
@@ -203,12 +204,13 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val result = SUT
           .registration()
           .apply(postRequestWithPayload(Json.parse(validRegistration5MldWillTrustDeceasedRequestJson)))
+
         status(result)                             mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
         verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
-      "individual user calls register endpoint with valid settlor information hen registering a non taxable trust" in {
+      "individual user calls register endpoint with valid settlor information when registering a non taxable trust" in {
         when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(
             EitherT[Future, TrustErrors, RegistrationResponse](
@@ -217,6 +219,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           )
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any()))
           .thenReturn(
             EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Right(TaxEnrolmentSuccess)))
@@ -226,6 +229,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         val result =
           SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistration5MldSettlorRequestJson)))
+
         status(result)                             mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
         verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
@@ -241,6 +245,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any()))
           .thenReturn(
             EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Right(TaxEnrolmentSuccess)))
@@ -251,6 +256,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val result = SUT
           .registration()
           .apply(postRequestWithPayload(Json.parse(validRegistration5MldSettlorAndDeceasedRequestJson)))
+
         status(result)                             mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
         verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
