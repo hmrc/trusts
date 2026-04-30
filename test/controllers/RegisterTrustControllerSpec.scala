@@ -172,16 +172,16 @@ class RegisterTrustControllerSpec extends BaseSpec {
             )
           )
 
-          val SUT = new RegisterTrustController(
-            mockTrustsService,
-            appConfig,
-            validationService,
-            fakeAgentAuthAction,
-            rosmPatternService,
-            mockNonRepudiationService,
-            Helpers.stubControllerComponents(),
-            default5mldDataService
-          )
+        val SUT = new RegisterTrustController(
+          mockTrustsService,
+          appConfig,
+          validationService,
+          fakeAgentAuthAction,
+          rosmPatternService,
+          mockNonRepudiationService,
+          Helpers.stubControllerComponents(),
+          default5mldDataService
+        )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistration5MldRequestJson)))
 
