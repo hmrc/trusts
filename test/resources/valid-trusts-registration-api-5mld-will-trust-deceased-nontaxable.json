@@ -1,0 +1,200 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+    "address": {
+      "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "postCode": "SR2 7UY",
+      "country": "GB"
+    },
+    "phoneNumber": "+123456789012345678",
+    "welsh": false,
+    "braille": false
+  },
+  "declaration": {
+    "name": {
+      "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+      "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+    },
+    "address": {
+      "line1": "DECLARED WITH NINO",
+      "line2": "DECLARED WITH NINO",
+      "postCode": "XX1 1XX",
+      "country": "GB"
+    }
+  },
+  "trust": {
+    "details": {
+      "startDate": "2019-04-06",
+      "trustTaxable": false,
+      "expressTrust": true,
+      "trustUKResident": true,
+      "trustRecorded": false,
+      "trustUKRelation": false
+    },
+    "entities": {
+      "naturalPerson": [
+        {
+          "name": {
+            "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "middleName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+          },
+          "countryOfResidence": "DE",
+          "nationality": "DE",
+          "legallyIncapable": false
+        }
+      ],
+      "beneficiary": {
+        "individualDetails": [
+          {
+            "name": {
+              "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+              "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+            },
+            "dateOfBirth": "1500-03-20",
+            "vulnerableBeneficiary": true,
+            "countryOfResidence": "DE",
+            "nationality": "DE",
+            "legallyIncapable": false
+          }
+        ],
+        "company": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE"
+          }
+        ],
+        "trust": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE"
+          }
+        ],
+        "charity": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE"
+          }
+        ],
+        "unidentified": [
+          {
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr"
+          }
+        ],
+        "large": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+            "numberOfBeneficiary": "1",
+            "countryOfResidence": "DE"
+          },
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- na01",
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+            "description1": "Description 2",
+            "description2": "Description 3",
+            "description3": "Description 4",
+            "description4": "Description 5",
+            "numberOfBeneficiary": "501",
+            "countryOfResidence": "DE"
+          }
+        ],
+        "other": [
+          {
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+            "address": {
+              "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "postCode": "SR2 7UY",
+              "country": "GB"
+            },
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE"
+          }
+        ]
+      },
+      "deceased": {
+        "name": {
+          "firstName": "John",
+          "middleName": "William",
+          "lastName": "O'Connor"
+        },
+        "dateOfBirth": "1956-02-12",
+        "dateOfDeath": "2016-01-01"
+      },
+      "leadTrustees": {
+        "leadTrusteeInd": {
+          "name": {
+            "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+            "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+          },
+          "dateOfBirth": "2015-03-20",
+          "identification": {
+            "nino": "SJ123456B"
+          },
+          "phoneNumber": "+123456789012345678",
+          "countryOfResidence": "DE",
+          "nationality": "DE",
+          "legallyIncapable": false
+        }
+      },
+      "trustees": [
+        {
+          "trusteeInd": {
+            "name": {
+              "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+            },
+            "dateOfBirth": "1983-09-24",
+            "countryOfResidence": "DE",
+            "nationality": "DE",
+            "legallyIncapable": false
+          }
+        }
+      ],
+      "protectors": {
+        "protectorCompany": [
+          {
+            "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "countryOfResidence": "DE"
+          }
+        ]
+      }
+    },
+    "assets": {
+      "nonEEABusiness": [
+        {
+          "orgName": "nonEEA Org",
+          "address": {
+            "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "postCode": "Z99 2YY",
+            "country": "GB"
+          },
+          "govLawCountry": "GB",
+          "startDate": "2001-08-14"
+        }
+      ]
+    }
+  },
+  "agentDetails": {
+    "arn": "SARN1234567",
+    "agentName": "Agent name",
+    "agentAddress": {
+      "line1": "56 Maple Street",
+      "line2": "Northumberland",
+      "postCode": "ne64 8hr",
+      "country": "GB"
+    },
+    "agentTelephoneNumber": "+123456789012345678",
+    "clientReference": "Agent01"
+  },
+  "submissionDate": "2020-09-01"
+}
