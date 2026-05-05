@@ -23,7 +23,9 @@ import errors.{ServerError, TrustErrors}
 import models._
 import models.nonRepudiation.NRSResponse
 import models.registration._
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
+import models.tax_enrolments.{
+  TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess
+}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.libs.json.Json

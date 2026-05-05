@@ -30,7 +30,10 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.{Injector, bind}
 import play.api.test.Helpers.stubControllerComponents
-import repositories.{CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl, TransformationRepositoryImpl}
+import repositories.{
+  CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl,
+  TransformationRepositoryImpl
+}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 

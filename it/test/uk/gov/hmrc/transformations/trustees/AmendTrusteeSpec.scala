@@ -21,7 +21,9 @@ import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.NameType
-import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse}
+import models.get_trust.{
+  DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse
+}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion

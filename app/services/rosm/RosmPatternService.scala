@@ -18,7 +18,9 @@ package services.rosm
 
 import cats.data.EitherT
 import errors.ServerError
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
+import models.tax_enrolments.{
+  TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess
+}
 import play.api.Logging
 import services.TrustsService
 import uk.gov.hmrc.auth.core.AffinityGroup
