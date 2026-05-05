@@ -21,11 +21,10 @@ import controllers.actions.IdentifierAction
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.TransformationService
-import javax.inject.Inject
 import utils.Session
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class TransformationController @Inject() (
   identify: IdentifierAction,

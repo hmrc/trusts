@@ -21,13 +21,10 @@ import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.NameType
-import models.get_trust.{
-  DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse
-}
+import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion
-import org.scalatest.matchers.must.Matchers._
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}

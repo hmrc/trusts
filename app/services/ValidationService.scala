@@ -22,12 +22,12 @@ import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import models.Registration
 import play.api.Logging
-import play.api.libs.json.{Format, JsPath, Json, JsonValidationError, Reads}
+import play.api.libs.json._
 import utils.BusinessValidation
 
 import javax.inject.{Inject, Singleton}
-import scala.jdk.CollectionConverters._
 import scala.io.Source
+import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 @Singleton

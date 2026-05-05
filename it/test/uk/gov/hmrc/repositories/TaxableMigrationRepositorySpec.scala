@@ -18,7 +18,6 @@ package uk.gov.hmrc.repositories
 
 import org.bson.BsonType
 import org.mongodb.scala.model.Filters.`type`
-import org.scalatest.matchers.must.Matchers._
 import repositories.TaxableMigrationRepositoryImpl
 import uk.gov.hmrc.itbase.IntegrationTestBase
 

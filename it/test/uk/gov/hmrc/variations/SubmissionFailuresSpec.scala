@@ -25,7 +25,6 @@ import models.variation.DeclarationForApi
 import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
-import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}

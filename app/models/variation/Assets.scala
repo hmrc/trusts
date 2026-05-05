@@ -19,6 +19,7 @@ package models.variation
 import models.AddressType
 import models.JsonWithoutNulls.JsonWithoutNullValues
 import play.api.libs.json.{Format, Json, Writes}
+
 import java.time.LocalDate
 
 trait Asset[T] extends Entity[T]

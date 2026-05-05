@@ -26,8 +26,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.Session
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class OrchestratorCallbackController @Inject() (auditService: MigrationAuditService, cc: ControllerComponents)(implicit
   ec: ExecutionContext

@@ -20,7 +20,6 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.registration.RegistrationSubmissionDraft
 import org.bson.BsonType
 import org.mongodb.scala.model.Filters.`type`
-import org.scalatest.matchers.must.Matchers._
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json._

@@ -17,10 +17,10 @@
 package models.get_trust
 
 import play.api.libs.json._
+import transformers.mdtp.assets.Assets
 import transformers.mdtp.beneficiaries.Beneficiaries
 import transformers.mdtp.protectors.Protectors
 import transformers.mdtp.settlors.Settlors
-import transformers.mdtp.assets.Assets
 import transformers.mdtp.{OtherIndividuals, Trustees}
 
 case class TrustProcessedResponse(getTrust: JsValue, responseHeader: ResponseHeader) extends GetTrustSuccessResponse {

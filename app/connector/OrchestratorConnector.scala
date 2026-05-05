@@ -20,9 +20,7 @@ import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
 import models.orchestrator.OrchestratorMigrationRequest
-import models.tax_enrolments.{
-  OrchestratorToTaxableFailureResponse, OrchestratorToTaxableResponse, OrchestratorToTaxableSuccessResponse
-}
+import models.tax_enrolments.{OrchestratorToTaxableFailureResponse, OrchestratorToTaxableResponse, OrchestratorToTaxableSuccessResponse}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}

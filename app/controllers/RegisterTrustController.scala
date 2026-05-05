@@ -34,8 +34,7 @@ import utils.ErrorResponses._
 import utils.Headers
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegisterTrustController @Inject() (
   trustsService: TrustsService,

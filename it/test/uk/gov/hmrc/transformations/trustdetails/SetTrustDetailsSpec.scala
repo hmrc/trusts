@@ -24,7 +24,6 @@ import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
-import org.scalatest.matchers.must.Matchers._
 import play.api.inject.bind
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import play.api.test.Helpers._

@@ -16,9 +16,10 @@
 
 package transformers.remove
 
-import java.time.LocalDate
 import play.api.libs.json.{Format, Json, OWrites, Reads}
 import utils.Constants._
+
+import java.time.LocalDate
 
 case class RemoveSettlor(endDate: LocalDate, index: Int, override val `type`: String) extends Remove
 

@@ -16,8 +16,8 @@
 
 package controllers.transformations
 
-import controllers.actions.IdentifierAction
 import controllers.TrustsBaseController
+import controllers.actions.IdentifierAction
 import errors.ServerError
 import play.api.Logging
 import play.api.libs.json._
@@ -25,10 +25,9 @@ import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.remove.Remove
-
-import javax.inject.Inject
 import utils.Session
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class RemoveTransformationController @Inject() (

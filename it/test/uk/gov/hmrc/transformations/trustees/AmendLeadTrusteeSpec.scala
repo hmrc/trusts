@@ -26,7 +26,6 @@ import models.{AddressType, NameType}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion
-import org.scalatest.matchers.must.Matchers._
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}

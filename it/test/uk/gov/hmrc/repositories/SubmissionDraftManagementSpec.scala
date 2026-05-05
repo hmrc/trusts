@@ -17,7 +17,6 @@
 package uk.gov.hmrc.repositories
 
 import models.registration.RegistrationSubmissionDraftData
-import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

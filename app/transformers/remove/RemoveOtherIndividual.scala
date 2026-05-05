@@ -16,9 +16,9 @@
 
 package transformers.remove
 
-import java.time.LocalDate
-
 import play.api.libs.json.{Format, Json}
+
+import java.time.LocalDate
 
 case class RemoveOtherIndividual(endDate: LocalDate, index: Int) extends Remove
 

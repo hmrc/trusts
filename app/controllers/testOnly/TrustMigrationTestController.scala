@@ -17,8 +17,6 @@
 package controllers.testOnly
 
 import controllers._
-
-import javax.inject.Inject
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services._
@@ -26,8 +24,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.{Session, ValidationUtil}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class TrustMigrationTestController @Inject() (migrationService: TaxableMigrationService, cc: ControllerComponents)(
   implicit ec: ExecutionContext
