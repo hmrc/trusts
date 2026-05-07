@@ -21,7 +21,7 @@ import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 import errors.ServerError
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
-import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}
+import models.get_trust._
 import models.requests.IdentifierRequest
 import models.taxable_migration.MigrationStatus.MigrationStatus
 import play.api.Logging
@@ -36,8 +36,7 @@ import utils.{RequiredEntityDetailsForMigration, Session}
 
 import java.time.LocalDate
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class GetTrustController @Inject() (
   identify: IdentifierAction,

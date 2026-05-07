@@ -16,18 +16,17 @@
 
 package controllers
 
-import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.TaxableMigrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.Session
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class TaxEnrolmentCallbackController @Inject() (migrationService: TaxableMigrationService, cc: ControllerComponents)(
   implicit ec: ExecutionContext

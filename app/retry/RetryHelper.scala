@@ -20,12 +20,12 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.pattern.Patterns.after
 import play.api.Logging
 import retry.RetryHelper.RetryExecution
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.Session
 
 import java.util.concurrent.Callable
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import utils.Session
-import uk.gov.hmrc.http.HeaderCarrier
 
 trait RetryHelper extends Logging {
 

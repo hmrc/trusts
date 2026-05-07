@@ -26,7 +26,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.Assertion
-import org.scalatest.matchers.must.Matchers._
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}

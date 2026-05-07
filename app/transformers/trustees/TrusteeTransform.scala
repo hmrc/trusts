@@ -16,7 +16,7 @@
 
 package transformers.trustees
 
-import play.api.libs.json.{JsObject, JsPath, JsSuccess, JsValue, Reads, __}
+import play.api.libs.json._
 import utils.Constants._
 import utils.JsonOps.doNothing
 

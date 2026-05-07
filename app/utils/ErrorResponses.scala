@@ -16,10 +16,10 @@
 
 package utils
 
+import models.registration.RegistrationErrorResponse
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results._
-import models.registration.RegistrationErrorResponse
 
 object ErrorResponses {
 

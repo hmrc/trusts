@@ -27,8 +27,8 @@ import org.scalatest.{Assertion, BeforeAndAfterEach, EitherValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
-import play.api.inject.{Injector, bind}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{Injector, bind}
 import play.api.test.Helpers.stubControllerComponents
 import repositories.{
   CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl,
@@ -37,8 +37,8 @@ import repositories.{
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
 
 class IntegrationTestBase
     extends AnyWordSpec

@@ -17,10 +17,10 @@
 package models.nonRepudiation
 
 import models.requests.CredentialData
-
-import java.time.LocalDateTime
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup
+
+import java.time.LocalDateTime
 
 case class NRSSubmission(payload: String, metadata: MetaData)
 

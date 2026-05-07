@@ -16,8 +16,8 @@
 
 package utils
 
-import play.api.Logging
 import models.Registration
+import play.api.Logging
 import services.TrustsValidationError
 
 class DomainValidator(registration: Registration) extends ValidationUtil with Logging {

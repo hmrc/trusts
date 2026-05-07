@@ -16,60 +16,63 @@
 
 package services
 
-import com.github.fge.jackson.JsonLoader
-import com.github.fge.jsonschema.core.report.LogLevel.ERROR
-import com.github.fge.jsonschema.core.report.ProcessingReport
-import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
+import com.networknt.schema.{Error, InputFormat, Schema, SchemaRegistry, SpecificationVersion}
 import models.Registration
 import play.api.Logging
-import play.api.libs.json.{Format, JsPath, Json, JsonValidationError, Reads}
+import play.api.libs.json._
 import utils.BusinessValidation
 
+import java.io.InputStream
 import javax.inject.{Inject, Singleton}
-import scala.jdk.CollectionConverters._
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
+import scala.jdk.CollectionConverters.IterableHasAsScala
+import scala.util.Using
 
 @Singleton
 class ValidationService @Inject() () {
 
-  private val factory = JsonSchemaFactory.byDefault()
-
   def get(schemaFile: String): Validator = {
-    val source               = Source.fromInputStream(getClass.getResourceAsStream(schemaFile))
-    val schemaJsonFileString = source.mkString
-    source.close()
-    val schemaJson           = JsonLoader.fromString(schemaJsonFileString)
-    val schema               = factory.getJsonSchema(schemaJson)
+    val resource = resourceAsString(schemaFile)
+      .getOrElse(throw new RuntimeException("Missing schema: " + schemaFile))
+
+    val schema = SchemaRegistry
+      .withDefaultDialect(SpecificationVersion.DRAFT_4)
+      .getSchema(resource)
+
     new Validator(schema)
   }
 
+  private def resourceAsString(resourcePath: String): Option[String] =
+    resourceAsInputStream(resourcePath).flatMap { is =>
+      Using(Source.fromInputStream(is))(_.getLines().mkString("\n")).toOption
+    }
+
+  private def resourceAsInputStream(resourcePath: String): Option[InputStream] =
+    Option(getClass.getResourceAsStream(resourcePath))
+
 }
 
-class Validator(schema: JsonSchema) extends Logging {
-
-  private val JsonErrorMessageTag  = "message"
-  private val JsonErrorInstanceTag = "instance"
-  private val JsonErrorPointerTag  = "pointer"
+class Validator(schema: Schema) extends Logging {
 
   def validate[T](inputJson: String)(implicit reads: Reads[T]): Either[List[TrustsValidationError], T] =
-    Try(JsonLoader.fromString(inputJson)) match {
-      case Success(json) =>
-        val result = schema.validate(json)
+    try {
+      val validationOutput: List[Error] = schema.validate(inputJson, InputFormat.JSON).asScala.toList
+      if (validationOutput.isEmpty) {
+        Json
+          .parse(inputJson)
+          .validate[T]
+          .fold(
+            errors => Left(getValidationErrors(errors)),
+            request => validateBusinessRules(request)
+          )
+      } else {
+        val validationErrors = getValidationErrors(validationOutput)
+        logger.error(s"[Validator][validate] unable to validate to schema ${validationErrors.mkString}")
 
-        if (result.isSuccess) {
-          Json
-            .parse(inputJson)
-            .validate[T]
-            .fold(
-              errors => Left(getValidationErrors(errors)),
-              request => validateBusinessRules(request)
-            )
-        } else {
-          logger.error(s"[Validator][validate] unable to validate to schema")
-          Left(getValidationErrors(result))
-        }
-      case Failure(e)    =>
+        Left(validationErrors)
+      }
+    } catch {
+      case e: Exception =>
         logger.error(s"[Validator][validate] IOException $e")
         Left(List(TrustsValidationError(s"[Validator][validate] IOException $e", "")))
     }
@@ -87,25 +90,23 @@ class Validator(schema: JsonSchema) extends Logging {
     }
 
   private def getValidationErrors(
-    errors: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]
+    validationOutput: List[Error]
+  ): List[TrustsValidationError] = {
+    val validationErrors = validationOutput
+      .map { errors =>
+        TrustsValidationError(errors.getMessage, errors.getInstanceLocation.toString)
+      }
+    logger.debug(s"[Validator][getValidationErrors] validationErrors in validate :  $validationErrors")
+    validationErrors
+  }
+
+  private def getValidationErrors(
+    errors: Iterable[(JsPath, Iterable[JsonValidationError])]
   ): List[TrustsValidationError] = {
     val validationErrors = errors
       .flatMap(errors => errors._2.map(error => TrustsValidationError(error.message, errors._1.toString())))
       .toList
     logger.debug(s"[Validator][getValidationErrors] validationErrors in validate :  $validationErrors")
-    validationErrors
-  }
-
-  private def getValidationErrors(validationOutput: ProcessingReport): List[TrustsValidationError] = {
-    val validationErrors: List[TrustsValidationError] =
-      validationOutput.iterator.asScala.toList.filter(m => m.getLogLevel == ERROR).map { m =>
-        val error     = m.asJson()
-        val message   = error.findValue(JsonErrorMessageTag).asText()
-        val location  = error.findValue(JsonErrorInstanceTag).at(s"/$JsonErrorPointerTag").asText()
-        val locations = error.findValues(JsonErrorPointerTag)
-        logger.error(s"[Validator][getValidationErrors] validation failed at locations :  $locations")
-        TrustsValidationError(message, location)
-      }
     validationErrors
   }
 

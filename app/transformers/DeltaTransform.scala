@@ -16,7 +16,7 @@
 
 package transformers
 
-import play.api.libs.json.{JsValue, _}
+import play.api.libs.json._
 import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import transformers.beneficiaries._
 import transformers.otherindividuals._

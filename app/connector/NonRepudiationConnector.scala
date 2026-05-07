@@ -17,16 +17,15 @@
 package connector
 
 import config.AppConfig
-
-import javax.inject.{Inject, Singleton}
 import models.nonRepudiation.{NRSResponse, NRSSubmission}
 import play.api.Logging
-import play.api.libs.json.Json
 import play.api.http.ContentTypes.JSON
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import utils.Constants.{CONTENT_TYPE, X_API_KEY}
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import utils.Constants.{CONTENT_TYPE, X_API_KEY}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

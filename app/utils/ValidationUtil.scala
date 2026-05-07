@@ -16,12 +16,11 @@
 
 package utils
 
-import java.time.LocalDate
-
 import models._
 import services.TrustsValidationError
 import utils.TypeOfTrust.TypeOfTrust
 
+import java.time.LocalDate
 import scala.annotation.tailrec
 
 trait ValidationUtil {

@@ -18,7 +18,7 @@ package services.auditing
 
 import models.auditing.{TrustAuditing, VariationAuditEvent}
 import models.variation.VariationSuccessResponse
-import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants.{DETAILS, TAXABLE, TRUST}
