@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.beneficiaries
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -29,7 +29,7 @@ import org.scalatest.Assertion
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}
-import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, status, _}
+import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services.dates.LocalDateService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -58,7 +58,7 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
     lazy val expectedDeclaredBeneficiaryJson: JsValue =
       JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
     when(stubbedTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
@@ -66,7 +66,7 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector),
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector),
         bind[LocalDateService].toInstance(TestLocalDateService)
       )
       .build()

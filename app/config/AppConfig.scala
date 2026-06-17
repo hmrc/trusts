@@ -24,7 +24,12 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
-  val registrationBaseUrl: String       = servicesConfig.baseUrl("registration")
+  val useHip: Boolean                   = servicesConfig.getBoolean("microservice.services.trusts.features.hip")
+
+  val desRegistrationBaseUrl: String       = servicesConfig.baseUrl("des.registration")
+  val hipRegistrationBaseUrl: String       = servicesConfig.baseUrl("hip.registration")
+
+
   val subscriptionBaseUrl: String       = servicesConfig.baseUrl("subscription")
   val taxEnrolmentsUrl: String          = servicesConfig.baseUrl("tax-enrolments")
   val taxEnrolmentsMigrationUrl: String = servicesConfig.baseUrl("tax-enrolments-migration")
@@ -33,8 +38,8 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
   val orchestratorUrl: String           = servicesConfig.baseUrl("orchestrator")
   val nonRepudiationUrl: String         = s"${servicesConfig.baseUrl("non-repudiation")}/nrs-orchestrator/submission"
 
-  val registrationEnvironment: String = configuration.get[String]("microservice.services.registration.environment")
-  val registrationToken: String       = configuration.get[String]("microservice.services.registration.token")
+  val registrationEnvironment: String = configuration.get[String]("microservice.services.des.registration.environment")
+  val registrationToken: String       = configuration.get[String]("microservice.services.des.registration.token")
 
   val subscriptionEnvironment: String = configuration.get[String]("microservice.services.subscription.environment")
   val subscriptionToken: String       = configuration.get[String]("microservice.services.subscription.token")

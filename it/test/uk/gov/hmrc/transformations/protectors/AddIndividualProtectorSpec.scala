@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.protectors
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -67,7 +67,7 @@ class AddIndividualProtectorSpec extends IntegrationTestBase {
     lazy val expectedGetAfterAddProtectorJson: JsValue =
       JsonUtils.getJsonValueFromFile("add-individual-protector-after-etmp-call.json")
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
     when(stubbedTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
@@ -75,7 +75,7 @@ class AddIndividualProtectorSpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 

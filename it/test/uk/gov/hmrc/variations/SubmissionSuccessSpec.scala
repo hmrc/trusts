@@ -17,7 +17,7 @@
 package uk.gov.hmrc.variations
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, ResponseHeader}
@@ -43,7 +43,7 @@ class SubmissionSuccessSpec extends IntegrationTestBase {
 
   "submit a successful variation" in {
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
     val stubbedCacheRepository = mock[CacheRepository]
 
     val declaration = DeclarationForApi(
@@ -80,7 +80,7 @@ class SubmissionSuccessSpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector),
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )
       .build()

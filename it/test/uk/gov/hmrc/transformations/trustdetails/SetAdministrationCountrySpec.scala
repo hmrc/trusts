@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.trustdetails
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -43,7 +43,7 @@ class SetAdministrationCountrySpec extends IntegrationTestBase {
 
     val getTrustResponse: JsValue = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
       .thenReturn(
@@ -56,7 +56,7 @@ class SetAdministrationCountrySpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 

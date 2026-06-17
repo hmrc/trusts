@@ -37,21 +37,21 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
-    extends ConnectorErrorResponseHandler {
+class DesTrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+    extends ConnectorErrorResponseHandler with TrustsConnector {
 
   val className: String = this.getClass.getSimpleName
 
-  private lazy val trustsServiceUrl: String =
-    s"${config.registrationBaseUrl}/trusts"
+  lazy val trustsServiceUrl: String =
+    s"${config.desRegistrationBaseUrl}/trusts"
 
-  private lazy val matchTrustsEndpoint: String =
+  lazy val matchTrustsEndpoint: String =
     s"$trustsServiceUrl/match"
 
-  private lazy val trustRegistrationEndpoint: String =
+  lazy val trustRegistrationEndpoint: String =
     s"$trustsServiceUrl/registration"
 
-  private lazy val getTrustOrEstateUrl: String =
+  lazy val getTrustOrEstateUrl: String =
     s"${config.getTrustOrEstateUrl}/trusts"
 
   def get5MLDTrustOrEstateEndpoint(identifier: String): String =
@@ -61,7 +61,7 @@ class TrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit
       s"$getTrustOrEstateUrl/registration/URN/$identifier"
     }
 
-  private lazy val trustVariationsEndpoint: String =
+  lazy val trustVariationsEndpoint: String =
     s"${config.varyTrustOrEstateUrl}/trusts/variation"
 
   val ENVIRONMENT_HEADER = "Environment"

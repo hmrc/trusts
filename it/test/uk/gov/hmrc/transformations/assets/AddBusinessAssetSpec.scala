@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.assets
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -57,7 +57,7 @@ class AddBusinessAssetSpec extends IntegrationTestBase {
         |}
         |""".stripMargin)
 
-    val mockTrustsConnector = mock[TrustsConnector]
+    val mockTrustsConnector = mock[DesTrustsConnector]
     when(mockTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
@@ -65,7 +65,7 @@ class AddBusinessAssetSpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(mockTrustsConnector)
+        bind[DesTrustsConnector].toInstance(mockTrustsConnector)
       )
       .build()
 

@@ -16,7 +16,7 @@
 
 package connectors
 
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckRequest._
@@ -32,7 +32,7 @@ import scala.concurrent.Future
 
 class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
-  private lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
+  private lazy val connector: DesTrustsConnector = injector.instanceOf[DesTrustsConnector]
 
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")

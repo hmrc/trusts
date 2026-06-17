@@ -35,6 +35,7 @@ object ExistingCheckResponse {
   implicit val desResponseReads: Format[ExistingTrustResponse] = ExistingTrustResponse.formats
   implicit val desErrorResponseReads: Format[DesErrorResponse] = DesErrorResponse.formats
 
+  // this can be removed when the DesTrustConnector is retired
   implicit lazy val httpReads: HttpReads[ExistingCheckResponse] =
     new HttpReads[ExistingCheckResponse] {
       override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse =
