@@ -25,12 +25,19 @@ import models.get_trust._
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json, Reads}
 import utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future
 
-class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
+class DesTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
+
+  override def applicationBuilder(): GuiceApplicationBuilder =
+    super.applicationBuilder().configure(
+      Seq(
+        "microservice.services.des.registration.port" -> server.port()
+    ): _*)
 
   private lazy val connector: DesTrustsConnector = injector.instanceOf[DesTrustsConnector]
 

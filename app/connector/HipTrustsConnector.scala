@@ -102,7 +102,7 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
                   ServerError
                 else
                   BadRequest
-              case BAD_REQUEST | NOT_FOUND =>
+              case BAD_REQUEST | NOT_FOUND | UNAUTHORIZED | FORBIDDEN =>
                 BadRequest
               case INTERNAL_SERVER_ERROR =>
                 ServerError

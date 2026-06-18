@@ -34,7 +34,6 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
       .applicationBuilder()
       .configure(
         Seq(
-          "microservice.services.registration.port"                               -> server.port(),
           "microservice.services.subscription.port"                               -> server.port(),
           "microservice.services.playback.port"                                   -> server.port(),
           "microservice.services.variation.port"                                  -> server.port(),
