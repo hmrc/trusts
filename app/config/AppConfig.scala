@@ -24,7 +24,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
-  val useHip: Boolean                   = servicesConfig.getBoolean("microservice.services.trusts.features.hip")
+  val useHipTrusts: Boolean                   = servicesConfig.getBoolean("features.hip.trusts")
 
   val desRegistrationBaseUrl: String       = servicesConfig.baseUrl("des.registration")
   val hipRegistrationBaseUrl: String       = servicesConfig.baseUrl("hip.registration")

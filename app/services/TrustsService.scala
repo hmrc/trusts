@@ -44,7 +44,7 @@ class TrustsService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  lazy val trustsConnector = if (config.useHip) hipTrustsConnector else desTrustsConnector
+  lazy val trustsConnector = if (config.useHipTrusts) hipTrustsConnector else desTrustsConnector
 
   private val className = this.getClass.getSimpleName
 
