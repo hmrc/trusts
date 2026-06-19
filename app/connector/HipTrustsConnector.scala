@@ -42,7 +42,7 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
   extends ConnectorErrorResponseHandler with TrustsConnector {
 
   lazy val trustsServiceUrl: String =
-    s"${config.hipRegistrationBaseUrl}/RESTAdapter/trustsandestates"
+    s"${config.hipRegistrationBaseUrl}/etmp/RESTAdapter/trustsandestates"
 
   lazy val matchTrustsEndpoint: String =
     s"$trustsServiceUrl/match"
