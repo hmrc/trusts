@@ -66,7 +66,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
       "trusts data match with existing trusts." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubForPost(server, "/RESTAdapter/trustsandestates/match", requestBody, CREATED, """{ "success": {"match": true}}""")
+        stubForPost(server, "/etmp/RESTAdapter/trustsandestates/match", requestBody, CREATED, """{ "success": {"match": true}}""")
         val futureResult = connector.checkExistingTrust(request).value
 
         whenReady(futureResult) { result =>
@@ -81,7 +81,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           UNPROCESSABLE_ENTITY,
           """{
@@ -107,7 +107,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           UNPROCESSABLE_ENTITY,
           """{
@@ -133,7 +133,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           UNPROCESSABLE_ENTITY,
           """{
@@ -159,7 +159,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           UNPROCESSABLE_ENTITY,
           """{
@@ -185,7 +185,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
           """{
@@ -211,7 +211,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
           """{
@@ -237,7 +237,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
           """{
@@ -263,7 +263,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
           """{
@@ -289,7 +289,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           INTERNAL_SERVER_ERROR,
           """{
@@ -315,7 +315,7 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
 
         stubForPost(
           server,
-          "/RESTAdapter/trustsandestates/match",
+          "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           SERVICE_UNAVAILABLE,
           """{

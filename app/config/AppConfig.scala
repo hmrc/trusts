@@ -24,10 +24,10 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
-  val useHipTrusts: Boolean                   = servicesConfig.getBoolean("features.hip.trusts")
+  val useHipTrusts: Boolean             = servicesConfig.getBoolean("features.hip.trusts")
 
-  val desRegistrationBaseUrl: String       = servicesConfig.baseUrl("des.registration")
-  val hipRegistrationBaseUrl: String       = servicesConfig.baseUrl("hip.registration")
+  val desRegistrationBaseUrl: String    = servicesConfig.baseUrl("des.registration")
+  val hipRegistrationBaseUrl: String    = servicesConfig.baseUrl("hip.registration")
 
 
   val subscriptionBaseUrl: String       = servicesConfig.baseUrl("subscription")
@@ -106,6 +106,7 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
                  |            nonRepudiate = $nonRepudiate
                  |      dropIndexesEnabled = $dropIndexesEnabled
                  |removeSavedRegistrations = $removeSavedRegistrations
+                 |                  trusts = $useHipTrusts
                  |=============== ============= ===============""".stripMargin)
 
 }

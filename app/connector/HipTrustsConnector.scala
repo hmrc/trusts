@@ -123,6 +123,7 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
     }
   }
 
+  // N.b. these will be implemented in near future
   override def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = ???
 
   override def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = ???
