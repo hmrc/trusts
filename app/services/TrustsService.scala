@@ -40,7 +40,7 @@ class TrustsService @Inject() (
   val desTrustsConnector: DesTrustsConnector,
   val subscriptionConnector: SubscriptionConnector,
   val repository: CacheRepository,
-  config: AppConfig,
+  config: AppConfig
 )(implicit ec: ExecutionContext)
     extends Logging {
 

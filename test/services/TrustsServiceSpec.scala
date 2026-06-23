@@ -39,13 +39,13 @@ import scala.concurrent.Future
 class TrustsServiceSpec extends BaseSpec {
 
   private trait TrustsServiceFixture {
-    lazy val request                               = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
-    
-    val mockTrustsConnector: DesTrustsConnector = mock[DesTrustsConnector]
+    lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+
+    val mockTrustsConnector: DesTrustsConnector          = mock[DesTrustsConnector]
     val mockSubscriptionConnector: SubscriptionConnector = mock[SubscriptionConnector]
-    val mockRepository: CacheRepositoryImpl        = mock[CacheRepositoryImpl]
-    val mockHipTrustsConnector = mock[HipTrustsConnector]
-    val mockAppConfig = mock[AppConfig]
+    val mockRepository: CacheRepositoryImpl              = mock[CacheRepositoryImpl]
+    val mockHipTrustsConnector                           = mock[HipTrustsConnector]
+    val mockAppConfig                                    = mock[AppConfig]
 
     when(mockRepository.get(any[String], any[String], any[String]))
       .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(None))))
@@ -56,7 +56,14 @@ class TrustsServiceSpec extends BaseSpec {
     val myId              = "myId"
     val sessionId: String = "sessionId"
 
-    val SUT = new TrustsService(mockHipTrustsConnector, mockTrustsConnector, mockSubscriptionConnector, mockRepository, mockAppConfig)
+    val SUT = new TrustsService(
+      mockHipTrustsConnector,
+      mockTrustsConnector,
+      mockSubscriptionConnector,
+      mockRepository,
+      mockAppConfig
+    )
+
   }
 
   ".checkExistingTrust" should {
@@ -139,13 +146,19 @@ class TrustsServiceSpec extends BaseSpec {
       val mockSubscriptionConnector                  = mock[DesTrustsConnector]
       val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
       val mockRepository                             = mock[CacheRepositoryImpl]
-      val mockHipTrustsConnector = mock[HipTrustsConnector]
-      val mockAppConfig = mock[AppConfig]
+      val mockHipTrustsConnector                     = mock[HipTrustsConnector]
+      val mockAppConfig                              = mock[AppConfig]
 
       when(mockSubscriptionConnector.getTrustInfo(any()))
         .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(etmpData))))
 
-      val OUT = new TrustsService(mockHipTrustsConnector, mockSubscriptionConnector, mockTrustsConnector, mockRepository, mockAppConfig)
+      val OUT = new TrustsService(
+        mockHipTrustsConnector,
+        mockSubscriptionConnector,
+        mockTrustsConnector,
+        mockRepository,
+        mockAppConfig
+      )
 
       whenReady(OUT.getTrustInfoFormBundleNo("75464876").value) { formBundleNo =>
         formBundleNo mustBe Right(etmpData.responseHeader.formBundleNo)
@@ -161,9 +174,15 @@ class TrustsServiceSpec extends BaseSpec {
         .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(errorResponse))))
 
       val mockHipTrustsConnector = mock[HipTrustsConnector]
-      val mockAppConfig = mock[AppConfig]
+      val mockAppConfig          = mock[AppConfig]
 
-      val OUT = new TrustsService(mockHipTrustsConnector, mockSubscriptionConnector, mockTrustsConnector, mockRepository, mockAppConfig)
+      val OUT = new TrustsService(
+        mockHipTrustsConnector,
+        mockSubscriptionConnector,
+        mockTrustsConnector,
+        mockRepository,
+        mockAppConfig
+      )
 
       whenReady(OUT.getTrustInfoFormBundleNo("75464876").value) { formBundleNo =>
         formBundleNo mustBe Left(
@@ -180,15 +199,21 @@ class TrustsServiceSpec extends BaseSpec {
         val mockSubscriptionConnector                  = mock[DesTrustsConnector]
         val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
         val mockRepository                             = mock[CacheRepositoryImpl]
-        val mockHipTrustsConnector = mock[HipTrustsConnector]
-        val mockAppConfig = mock[AppConfig]
+        val mockHipTrustsConnector                     = mock[HipTrustsConnector]
+        val mockAppConfig                              = mock[AppConfig]
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(
             EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("exception message"))))
           )
 
-        val OUT = new TrustsService(mockHipTrustsConnector, mockSubscriptionConnector, mockTrustsConnector, mockRepository, mockAppConfig)
+        val OUT = new TrustsService(
+          mockHipTrustsConnector,
+          mockSubscriptionConnector,
+          mockTrustsConnector,
+          mockRepository,
+          mockAppConfig
+        )
 
         whenReady(OUT.getTrustInfoFormBundleNo("75464876").value) { formBundleNo =>
           formBundleNo mustBe Left(ServerError())
@@ -199,13 +224,19 @@ class TrustsServiceSpec extends BaseSpec {
         val mockSubscriptionConnector                  = mock[DesTrustsConnector]
         val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
         val mockRepository                             = mock[CacheRepositoryImpl]
-        val mockHipTrustsConnector = mock[HipTrustsConnector]
-        val mockAppConfig = mock[AppConfig]
+        val mockHipTrustsConnector                     = mock[HipTrustsConnector]
+        val mockAppConfig                              = mock[AppConfig]
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError()))))
 
-        val OUT = new TrustsService(mockHipTrustsConnector, mockSubscriptionConnector, mockTrustsConnector, mockRepository, mockAppConfig)
+        val OUT = new TrustsService(
+          mockHipTrustsConnector,
+          mockSubscriptionConnector,
+          mockTrustsConnector,
+          mockRepository,
+          mockAppConfig
+        )
 
         whenReady(OUT.getTrustInfoFormBundleNo("75464876").value) { formBundleNo =>
           formBundleNo mustBe Left(ServerError())

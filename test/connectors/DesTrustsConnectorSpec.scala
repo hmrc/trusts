@@ -34,10 +34,13 @@ import scala.concurrent.Future
 class DesTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
   override def applicationBuilder(): GuiceApplicationBuilder =
-    super.applicationBuilder().configure(
-      Seq(
-        "microservice.services.des.registration.port" -> server.port()
-    ): _*)
+    super
+      .applicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.des.registration.port" -> server.port()
+        ): _*
+      )
 
   private lazy val connector: DesTrustsConnector = injector.instanceOf[DesTrustsConnector]
 

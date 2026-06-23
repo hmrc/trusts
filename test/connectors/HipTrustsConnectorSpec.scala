@@ -20,29 +20,34 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connector.HipTrustsConnector
 import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.existing_trust.ExistingCheckResponse.{
+  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
+}
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.CONTENT_TYPE
 
-class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
+class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
   override def applicationBuilder(): GuiceApplicationBuilder =
-    super.applicationBuilder().configure(
-      Seq(
-        "microservice.services.hip.registration.port" -> server.port()
-      ): _*)
+    super
+      .applicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.hip.registration.port" -> server.port()
+        ): _*
+      )
 
   override def stubForPost(
-                            server: WireMockServer,
-                            url: String,
-                            requestBody: String,
-                            returnStatus: Int,
-                            responseBody: String,
-                            delayResponse: Int = 0
-                          ) =
+    server: WireMockServer,
+    url: String,
+    requestBody: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ) =
 
     server.stubFor(
       post(urlEqualTo(url))
@@ -66,7 +71,13 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
       "trusts data match with existing trusts." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubForPost(server, "/etmp/RESTAdapter/trustsandestates/match", requestBody, CREATED, """{ "success": {"match": true}}""")
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/match",
+          requestBody,
+          CREATED,
+          """{ "success": {"match": true}}"""
+        )
         val futureResult = connector.checkExistingTrust(request).value
 
         whenReady(futureResult) { result =>
@@ -90,8 +101,8 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
           |    "errorId": "001",
           |    "text": "FAIL – NO MATCH"
           |  }
-          |}""".stripMargin)
-
+          |}""".stripMargin
+        )
 
         val futureResult = connector.checkExistingTrust(request).value
 
@@ -116,8 +127,8 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
             |    "errorId": "002",
             |    "text": "FAIL – ALREADY REGISTERED"
             |  }
-            |}""".stripMargin)
-
+            |}""".stripMargin
+        )
 
         val futureResult = connector.checkExistingTrust(request).value
 
@@ -142,8 +153,8 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
             |    "errorId": "999",
             |    "text": "Technical System Error"
             |  }
-            |}""".stripMargin)
-
+            |}""".stripMargin
+        )
 
         val futureResult = connector.checkExistingTrust(request).value
 
@@ -168,8 +179,8 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
             |    "errorId": "004",
             |    "text": "Duplicate submission acknowledgment reference"
             |  }
-            |}""".stripMargin)
-
+            |}""".stripMargin
+        )
 
         val futureResult = connector.checkExistingTrust(request).value
 
@@ -335,5 +346,5 @@ class HipTrustsConnectorSpec  extends ConnectorSpecHelper with EitherValues {
       }
     }
   }
-}
 
+}

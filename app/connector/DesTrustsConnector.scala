@@ -37,7 +37,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class DesTrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+class DesTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
     extends ConnectorErrorResponseHandler with TrustsConnector {
 
   val className: String = this.getClass.getSimpleName

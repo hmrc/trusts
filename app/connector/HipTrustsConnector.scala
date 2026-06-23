@@ -20,7 +20,9 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import models.Registration
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.existing_trust.ExistingCheckResponse.{
+  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
+}
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
 import models.get_trust.GetTrustResponse
 import models.registration.RegistrationResponse
@@ -38,8 +40,8 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
-  extends ConnectorErrorResponseHandler with TrustsConnector {
+class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+    extends ConnectorErrorResponseHandler with TrustsConnector {
 
   lazy val trustsServiceUrl: String =
     s"${config.hipRegistrationBaseUrl}/etmp/RESTAdapter/trustsandestates"
@@ -64,7 +66,6 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
   lazy val trustVariationsEndpoint: String =
     s"${config.varyTrustOrEstateUrl}/trusts/variation"
 
-
   override val className: String = this.getClass.getSimpleName
 
   protected def hipHeaders: Seq[(String, String)] =
@@ -75,11 +76,13 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
       "X-Transmitting-System" -> "HIP"
     )
 
-  override def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): TrustEnvelope[ExistingCheckResponse] = {
+  override def checkExistingTrust(
+    existingTrustCheckRequest: ExistingCheckRequest
+  ): TrustEnvelope[ExistingCheckResponse] =
     EitherT {
       val correlationId = UUID.randomUUID().toString
 
-      implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = hipHeaders)
+      implicit val hc: HeaderCarrier                                   = HeaderCarrier(extraHeaders = hipHeaders)
       implicit val hipCustomErrResponse: OFormat[HipCustomErrResponse] = HipCustomErrResponse.formats
 
       logger.info(
@@ -88,11 +91,11 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
 
       val httpReads: HttpReads[ExistingCheckResponse] =
         new HttpReads[ExistingCheckResponse] {
-          override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse = {
+          override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse =
             response.status match {
-              case CREATED =>
+              case CREATED                                            =>
                 Matched
-              case UNPROCESSABLE_ENTITY =>
+              case UNPROCESSABLE_ENTITY                               =>
                 val code = response.json.as[HipCustomErrResponse].error.errorId
                 if (code === "001")
                   NotMatched
@@ -104,12 +107,11 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
                   BadRequest
               case BAD_REQUEST | NOT_FOUND | UNAUTHORIZED | FORBIDDEN =>
                 BadRequest
-              case INTERNAL_SERVER_ERROR =>
+              case INTERNAL_SERVER_ERROR                              =>
                 ServerError
-              case _ =>
+              case _                                                  =>
                 ServiceUnavailable
             }
-          }
         }
 
       http
@@ -121,7 +123,6 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
           Left(handleError(ex, "checkExistingTrust", matchTrustsEndpoint))
         }
     }
-  }
 
   // N.b. these will be implemented in near future
   override def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = ???
@@ -130,4 +131,3 @@ class HipTrustsConnector  @Inject()(http: HttpClientV2, config: AppConfig)(impli
 
   override def trustVariation(trustVariations: JsValue): TrustEnvelope[VariationSuccessResponse] = ???
 }
-
