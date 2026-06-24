@@ -17,7 +17,8 @@
 package services
 
 import cats.data.EitherT
-import connector.{SubscriptionConnector, TrustsConnector}
+import config.AppConfig
+import connector.{DesTrustsConnector, HipTrustsConnector, SubscriptionConnector}
 import errors.{BadRequestErrorResponse, InternalServerErrorResponse, ServerError, VariationFailureForAudit}
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
@@ -35,11 +36,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TrustsService @Inject() (
-  val trustsConnector: TrustsConnector,
+  val hipTrustsConnector: HipTrustsConnector,
+  val desTrustsConnector: DesTrustsConnector,
   val subscriptionConnector: SubscriptionConnector,
-  val repository: CacheRepository
+  val repository: CacheRepository,
+  config: AppConfig
 )(implicit ec: ExecutionContext)
     extends Logging {
+
+  lazy val trustsConnector = if (config.useHipTrusts) hipTrustsConnector else desTrustsConnector
 
   private val className = this.getClass.getSimpleName
 

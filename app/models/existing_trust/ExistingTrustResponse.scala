@@ -29,3 +29,33 @@ case class DesErrorResponse(code: String, reason: String)
 object DesErrorResponse {
   implicit val formats: OFormat[DesErrorResponse] = Json.format[DesErrorResponse]
 }
+
+case class HipTrustMatchResponse(success: ExistingTrustResponse)
+
+object HipTrustMatchResponse {
+  implicit val formats: OFormat[HipTrustMatchResponse] = Json.format[HipTrustMatchResponse]
+}
+
+case class HipErr(code: String, message: String, logID: String)
+
+object HipErr {
+  implicit val formats: OFormat[HipErr] = Json.format[HipErr]
+}
+
+case class HipErrResponse(error: HipErr)
+
+object HipErrResponse {
+  implicit val formats: OFormat[HipErrResponse] = Json.format[HipErrResponse]
+}
+
+case class HipCustomErr(processingDate: String, errorId: String, text: String)
+
+object HipCustomErr {
+  implicit val formats: OFormat[HipCustomErr] = Json.format[HipCustomErr]
+}
+
+case class HipCustomErrResponse(error: HipCustomErr)
+
+object HipCustomErrResponse {
+  implicit val formats: OFormat[HipCustomErrResponse] = Json.format[HipCustomErrResponse]
+}

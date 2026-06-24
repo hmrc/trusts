@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.trustees
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -39,7 +39,7 @@ class RemoveTrusteeSpec extends IntegrationTestBase {
 
   "a remove trustee call" should {
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
 
     val getTrustResponse: JsValue = JsonUtils
       .getJsonValueFromFile("trusts-etmp-received-multiple-trustees.json")
@@ -55,7 +55,7 @@ class RemoveTrusteeSpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 

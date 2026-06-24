@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.trustees
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -71,7 +71,7 @@ class AmendLeadTrusteeSpec extends IntegrationTestBase {
     val expectedGetAfterAmendLeadTrusteeJson: JsValue =
       JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-lead-trustee.json")
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
     when(stubbedTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
@@ -79,7 +79,7 @@ class AmendLeadTrusteeSpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 

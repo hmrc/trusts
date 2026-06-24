@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.otherindividuals
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -29,7 +29,7 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.Helpers.{GET, contentAsJson, route, status, _}
+import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -51,7 +51,7 @@ class AmendOtherIndividualSpec extends IntegrationTestBase with ScalaFutures {
     val expectedGetAfterAmendOtherIndividualJson: JsValue =
       JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-other-individual.json")
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
@@ -60,7 +60,7 @@ class AmendOtherIndividualSpec extends IntegrationTestBase with ScalaFutures {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 

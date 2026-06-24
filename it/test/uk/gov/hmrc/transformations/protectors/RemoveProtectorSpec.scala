@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.protectors
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -41,7 +41,7 @@ class RemoveProtectorSpec extends IntegrationTestBase {
 
   "a remove protector call" should {
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
+    val stubbedTrustsConnector = mock[DesTrustsConnector]
 
     val getTrustResponse: JsValue = JsonUtils
       .getJsonValueFromFile("trusts-etmp-received-multiple-protectors.json")
@@ -57,7 +57,7 @@ class RemoveProtectorSpec extends IntegrationTestBase {
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[DesTrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 

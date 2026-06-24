@@ -17,7 +17,7 @@
 package uk.gov.hmrc.transformations.assets
 
 import cats.data.EitherT
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import errors.TrustErrors
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
@@ -28,7 +28,7 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.Helpers.{GET, contentAsJson, route, status, _}
+import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
@@ -57,7 +57,7 @@ class AmendPropertyOrLandAssetSpec extends IntegrationTestBase with ScalaFutures
         |}
         |""".stripMargin)
 
-    val mockTrustsConnector = mock[TrustsConnector]
+    val mockTrustsConnector = mock[DesTrustsConnector]
     when(mockTrustsConnector.getTrustInfo(any()))
       .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
@@ -65,7 +65,7 @@ class AmendPropertyOrLandAssetSpec extends IntegrationTestBase with ScalaFutures
       .overrides(
         bind[IdentifierAction]
           .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(mockTrustsConnector)
+        bind[DesTrustsConnector].toInstance(mockTrustsConnector)
       )
       .build()
 

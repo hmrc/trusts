@@ -16,7 +16,7 @@
 
 package connectors
 
-import connector.TrustsConnector
+import connector.DesTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckRequest._
@@ -25,14 +25,24 @@ import models.get_trust._
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json, Reads}
 import utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future
 
-class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
+class DesTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
-  private lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
+  override def applicationBuilder(): GuiceApplicationBuilder =
+    super
+      .applicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.des.registration.port" -> server.port()
+        ): _*
+      )
+
+  private lazy val connector: DesTrustsConnector = injector.instanceOf[DesTrustsConnector]
 
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
