@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
-  val useHipTrusts: Boolean = servicesConfig.getBoolean("features.hip.trusts")
+  val useHipTrusts: Boolean         = servicesConfig.getBoolean("features.hip.trusts")
   private val hipClientIdV1: String = configuration.get[String]("microservice.services.hip.registration.clientId")
   private val hipSecretV1: String   = configuration.get[String]("microservice.services.hip.registration.secret")
   def hipAuthorizationToken: String = Base64.getEncoder.encodeToString(s"$hipClientIdV1:$hipSecretV1".getBytes("UTF-8"))
