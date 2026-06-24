@@ -73,7 +73,8 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       "correlationid"         -> UUID.randomUUID().toString,
       "X-Originating-System"  -> "TRS",
       "X-Receipt-Date"        -> DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
-      "X-Transmitting-System" -> "HIP"
+      "X-Transmitting-System" -> "HIP",
+      "Authorization"         -> s"Basic ${config.hipAuthorizationToken}"
     )
 
   override def checkExistingTrust(
