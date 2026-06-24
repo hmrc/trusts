@@ -20,12 +20,10 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import models.Registration
-import models.existing_trust.ExistingCheckResponse.{
-  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
-}
+import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
 import models.get_trust.GetTrustResponse
-import models.registration.RegistrationResponse
+import models.registration._
 import models.variation.VariationSuccessResponse
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, OFormat}
@@ -81,13 +79,13 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     existingTrustCheckRequest: ExistingCheckRequest
   ): TrustEnvelope[ExistingCheckResponse] =
     EitherT {
-      val correlationId = UUID.randomUUID().toString
 
       implicit val hc: HeaderCarrier                                   = HeaderCarrier(extraHeaders = hipHeaders)
       implicit val hipCustomErrResponse: OFormat[HipCustomErrResponse] = HipCustomErrResponse.formats
 
       logger.info(
-        s"[$className][checkExistingTrust][Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId"
+        s"[$className][checkExistingTrust][Session ID: ${Session.id(hc)}] matching trust for " +
+          s"correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
       )
 
       val httpReads: HttpReads[ExistingCheckResponse] =
@@ -125,8 +123,57 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
         }
     }
 
-  // N.b. these will be implemented in near future
-  override def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = ???
+  override def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = EitherT {
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = hipHeaders)
+
+    println(s"################################################### using HIP for registerTrust")
+
+
+    logger.info(
+      // todo remove the session stuff maybe
+      s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for " +
+        s"correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
+    )
+
+    val httpReads: HttpReads[RegistrationResponse] =
+      (_: String, _: String, response: HttpResponse) =>
+        response.status match {
+          case CREATED              =>
+            response.json.as[HipSuccessRegistrationTrnResponse]
+          case UNPROCESSABLE_ENTITY =>
+
+            val code = response.json.as[HipCustomErrResponse].error.errorId
+            if (code === "001") {
+              logger.info("[RegistrationResponse] No match response from HIP.")
+              NoMatchResponse
+            } else if (code === "002") {
+              logger.info("[RegistrationResponse] already registered response from HIP.")
+              AlreadyRegisteredResponse
+            } else if (code === "999") {
+              logger.error("[RegistrationResponse] Forbidden response from HIP.")
+              InternalServerErrorResponse
+            } else
+              BadRequestResponse
+          case BAD_REQUEST | NOT_FOUND | UNAUTHORIZED | FORBIDDEN =>
+            logger.error(s"[RegistrationResponse] ${response.status} from HIP")
+            BadRequestResponse
+          case INTERNAL_SERVER_ERROR                              =>
+            InternalServerErrorResponse
+          case _                                                  =>
+            logger.error("[RegistrationResponse][parseForbiddenResponse] Forbidden response from des.")
+            ServiceUnavailableResponse
+        }
+
+    http
+      .post(url"$trustRegistrationEndpoint")
+      .withBody(Json.toJson(registration))
+      .execute[RegistrationResponse](using httpReads, ec)
+      .map(Right(_))
+      .recover { case ex =>
+        Left(handleError(ex, "registerTrust", trustRegistrationEndpoint))
+      }
+  }
 
   override def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = ???
 

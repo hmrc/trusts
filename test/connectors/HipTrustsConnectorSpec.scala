@@ -66,6 +66,13 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
+  ".registerTrust" should {
+    "return HipSuccessRegistrationTrnResponse" when {
+      "registration is successful " in {
+        ()
+      }
+    }
+  }
   ".checkExistingTrust" should {
     "return Matched" when {
       "trusts data match with existing trusts." in {

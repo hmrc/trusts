@@ -97,6 +97,8 @@ class DesTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
   def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = EitherT {
     val correlationId = UUID.randomUUID().toString
+    println(s"################################################### using DES for registerTrust")
+
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
