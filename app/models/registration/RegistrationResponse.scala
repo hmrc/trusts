@@ -25,11 +25,13 @@ import utils.Constants._
 sealed trait RegistrationResponse
 
 case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
+
 object RegistrationTrnResponse {
   implicit val formats: Format[RegistrationTrnResponse] = Json.format[RegistrationTrnResponse]
 }
 
 case class HipSuccessRegistrationTrnResponse(success: RegistrationTrnResponse) extends RegistrationResponse
+
 object HipSuccessRegistrationTrnResponse {
   implicit val formats: Format[HipSuccessRegistrationTrnResponse] = Json.format[HipSuccessRegistrationTrnResponse]
 }
