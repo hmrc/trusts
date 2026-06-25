@@ -85,32 +85,27 @@ class RegisterTrustController @Inject() (
 
   private def register(registration: Registration)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     trustsService.registerTrust(registration).value.flatMap {
-      case Right(response: HipSuccessRegistrationTrnResponse) =>
-        if (config.nonRepudiate) {
-          nonRepudiationService.register(response.success.trn, Json.toJson(registration))
-        }
-        enrol(response.success, registration)
-      case Right(response: RegistrationTrnResponse)           =>
+      case Right(response: RegistrationTrnResponse)       =>
         if (config.nonRepudiate) {
           nonRepudiationService.register(response.trn, Json.toJson(registration))
         }
         enrol(response, registration)
-      case Right(AlreadyRegisteredResponse)                   =>
+      case Right(AlreadyRegisteredResponse)               =>
         handleAlreadyRegisteredResponse()
-      case Right(NoMatchResponse)                             =>
+      case Right(NoMatchResponse)                         =>
         handleNoMatchResponse()
-      case Right(BadRequestResponse)                          =>
+      case Right(BadRequestResponse)                      =>
         handleBadRequestResponse()
-      case Right(ServiceUnavailableResponse)                  =>
+      case Right(ServiceUnavailableResponse)              =>
         handleServiceUnavailableResponse()
-      case Right(_)                                           =>
+      case Right(_)                                       =>
         handleInternalServerErrorResponse()
-      case Left(ServerError(message)) if message.nonEmpty     =>
+      case Left(ServerError(message)) if message.nonEmpty =>
         logger.error(
           s"[$className][registration][Session ID: ${request.sessionId}] failed to register. Message: $message"
         )
         Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
-      case Left(_)                                            =>
+      case Left(_)                                        =>
         logger.error(s"[$className][registration][Session ID: ${request.sessionId}] failed to register")
         Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
     }

@@ -24,7 +24,7 @@ import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
-import models.registration.{RegistrationResponse, RegistrationTrnResponse}
+import models.registration.RegistrationResponse
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -70,6 +70,15 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
+  ".get5MLDTrustOrEstateEndpoint" should {
+    "return UTR URL" when {
+      "identifierLength is 10" in {
+        val url = connector.get5MLDTrustOrEstateEndpoint("1234567890")
+        url.contains("UTR") mustBe true
+      }
+    }
+  }
+
   ".registerTrust" should {
     "return HipSuccessRegistrationTrnResponse" when {
       "registration is successful " in {
@@ -88,7 +97,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
         whenReady(futureResult) { result =>
           result mustBe Right(
-            models.registration.HipSuccessRegistrationTrnResponse(RegistrationTrnResponse("XTRN1234567"))
+            models.registration.RegistrationTrnResponse("XTRN1234567")
           )
         }
       }
@@ -177,6 +186,65 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           result mustBe Right(models.registration.NoMatchResponse)
         }
       }
+    }
+
+    "return InternalServerErrorResponse" when {
+      "we get a 422 999" in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "999",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "Technical System Error"
+             |    }
+             |}
+             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.InternalServerErrorResponse)
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "we get a 422 004" in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "004",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "Technical System Error"
+             |    }
+             |}
+             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.BadRequestResponse)
+        }
+      }
+
     }
 
     "return ServiceUnavailableResponse" when {
@@ -526,6 +594,31 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           result mustBe Right(ServiceUnavailable)
         }
       }
+    }
+  }
+
+  ".getTrustInfo" should {
+
+    "return trust info when utr|urn is valid" in {
+      // TODO correct test when method has been implemented
+      val result = intercept[NotImplementedError] {
+        connector.getTrustInfo("XXTRN1234567890")
+      }
+
+      result.getMessage must be("an implementation is missing")
+    }
+  }
+
+  ".trustVariation" should {
+
+    "return success response when json is valid" in {
+      // TODO correct test when method has been implemented
+      val requestBody = Json.toJson(trustVariationsRequest)
+      val result      = intercept[NotImplementedError] {
+        connector.trustVariation(requestBody)
+      }
+
+      result.getMessage must be("an implementation is missing")
     }
   }
 

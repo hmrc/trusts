@@ -20,9 +20,7 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import models.Registration
-import models.existing_trust.ExistingCheckResponse.{
-  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
-}
+import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
 import models.get_trust.GetTrustResponse
 import models.registration._
@@ -129,8 +127,6 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = hipHeaders)
 
-    println(s"################################################### using HIP for registerTrust")
-
     logger.info(
       // todo remove the session stuff maybe
       s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for " +
@@ -141,7 +137,8 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
           case CREATED                                =>
-            response.json.as[HipSuccessRegistrationTrnResponse]
+            val hip = response.json.as[HipSuccessRegistrationTrnResponse]
+            hip.success
           case UNPROCESSABLE_ENTITY                   =>
             val code = response.json.as[HipCustomErrResponse].error.errorId
             if (code === "001") {
