@@ -19,15 +19,19 @@ package connectors
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connector.HipTrustsConnector
+import errors.TrustErrors
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
+import models.registration.{RegistrationResponse, RegistrationTrnResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.CONTENT_TYPE
+
+import scala.concurrent.Future
 
 class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
@@ -69,10 +73,181 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
   ".registerTrust" should {
     "return HipSuccessRegistrationTrnResponse" when {
       "registration is successful " in {
-        ()
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          CREATED,
+          """{"success": {"trn": "XTRN1234567"}}"""
+        )
+
+        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] =
+          connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(
+            models.registration.HipSuccessRegistrationTrnResponse(RegistrationTrnResponse("XTRN1234567"))
+          )
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "payload sent downstream is invalid" in {
+        val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          BAD_REQUEST,
+          s"""
+             |{
+             |  "error": {
+             |    "code": "400",
+             |    "message": "String",
+             |    "logID": "00000000000000000000000000000000"
+             |  }
+             |}             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(invalidRegistrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.BadRequestResponse)
+        }
+
+      }
+    }
+
+    "return AlreadyRegisteredResponse" when {
+      "trusts is already registered with provided details" in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "002",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "FAIL – ALREADY REGISTERED"
+             |    }
+             |}
+             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.AlreadyRegisteredResponse)
+        }
+      }
+    }
+
+    "return NoMatchResponse" when {
+      "payload has UTR that does not match" in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "001",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "FAIL – NO MATCH"
+             |    }
+             |}
+             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.NoMatchResponse)
+        }
+      }
+    }
+
+    "return ServiceUnavailableResponse" when {
+      "downstream dependent service is not responding" in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          IM_A_TEAPOT,
+          s"""
+             |{
+             |  "error": {
+             |    "code": "418",
+             |    "message": "String",
+             |    "logID": "00000000000000000000000000000000"
+             |  }
+             |}             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.ServiceUnavailableResponse)
+        }
+      }
+    }
+
+    "return InternalServerErrorResponse" when {
+      "downstream is experiencing some problem" in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          INTERNAL_SERVER_ERROR,
+          s"""
+             |{
+             |  "error": {
+             |    "code": "500",
+             |    "message": "String",
+             |    "logID": "00000000000000000000000000000000"
+             |  }
+             |}             |}
+             |""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.InternalServerErrorResponse)
+        }
+      }
+    }
+
+    "return InternalServerErrorResponse" when {
+      "downstream is returning 403 " in {
+        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+        stubForPost(server, "/etmp/RESTAdapter/trustsandestates/registration", requestBody, FORBIDDEN, "{}")
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.InternalServerErrorResponse)
+        }
       }
     }
   }
+
   ".checkExistingTrust" should {
     "return Matched" when {
       "trusts data match with existing trusts." in {

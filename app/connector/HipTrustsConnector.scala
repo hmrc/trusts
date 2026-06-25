@@ -20,7 +20,9 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import models.Registration
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.existing_trust.ExistingCheckResponse.{
+  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
+}
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
 import models.get_trust.GetTrustResponse
 import models.registration._
@@ -129,7 +131,6 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     println(s"################################################### using HIP for registerTrust")
 
-
     logger.info(
       // todo remove the session stuff maybe
       s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for " +
@@ -139,10 +140,9 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     val httpReads: HttpReads[RegistrationResponse] =
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
-          case CREATED              =>
+          case CREATED                                =>
             response.json.as[HipSuccessRegistrationTrnResponse]
-          case UNPROCESSABLE_ENTITY =>
-
+          case UNPROCESSABLE_ENTITY                   =>
             val code = response.json.as[HipCustomErrResponse].error.errorId
             if (code === "001") {
               logger.info("[RegistrationResponse] No match response from HIP.")
@@ -155,12 +155,12 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
               InternalServerErrorResponse
             } else
               BadRequestResponse
-          case BAD_REQUEST | NOT_FOUND | UNAUTHORIZED | FORBIDDEN =>
+          case BAD_REQUEST | NOT_FOUND | UNAUTHORIZED =>
             logger.error(s"[RegistrationResponse] ${response.status} from HIP")
             BadRequestResponse
-          case INTERNAL_SERVER_ERROR                              =>
+          case INTERNAL_SERVER_ERROR | FORBIDDEN      =>
             InternalServerErrorResponse
-          case _                                                  =>
+          case _                                      =>
             logger.error("[RegistrationResponse][parseForbiddenResponse] Forbidden response from des.")
             ServiceUnavailableResponse
         }
