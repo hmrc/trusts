@@ -20,7 +20,9 @@ import cats.data.EitherT
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
 import models.Registration
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.existing_trust.ExistingCheckResponse.{
+  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
+}
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
 import models.get_trust.GetTrustResponse
 import models.registration._
