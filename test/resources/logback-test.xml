@@ -9,7 +9,7 @@
     <logger name="services" level="WARN"/>
     <logger name="models" level="OFF"/>
     <logger name="repositories" level="WARN"/>
-    <logger name="connector" level="WARN"/>
+    <logger name="connector" level="INFO"/>
     <logger name="transformers" level="WARN"/>
     <logger name="utils" level="OFF"/>
     <logger name="retry" level="INFO"/>

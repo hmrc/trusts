@@ -30,6 +30,12 @@ object RegistrationTrnResponse {
   implicit val formats: Format[RegistrationTrnResponse] = Json.format[RegistrationTrnResponse]
 }
 
+case class HipSuccessRegistrationTrnResponse(success: RegistrationTrnResponse) extends RegistrationResponse
+
+object HipSuccessRegistrationTrnResponse {
+  implicit val formats: Format[HipSuccessRegistrationTrnResponse] = Json.format[HipSuccessRegistrationTrnResponse]
+}
+
 case object AlreadyRegisteredResponse extends RegistrationResponse
 case object NoMatchResponse extends RegistrationResponse
 case object BadRequestResponse extends RegistrationResponse
