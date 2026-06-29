@@ -19,6 +19,10 @@ package connector
 import cats.data.EitherT
 import cats.implicits.catsSyntaxEq
 import config.AppConfig
+import errors.{
+  BadRequestErrorResponse, InternalServerErrorResponse => VariationInternalServerErrorResponse,
+  ServiceNotAvailableErrorResponse, VariationFailureForAudit
+}
 import models.Registration
 import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
@@ -26,7 +30,9 @@ import models.existing_trust.ExistingCheckResponse.{
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
 import models.get_trust.GetTrustResponse
 import models.registration._
-import models.variation.VariationSuccessResponse
+import models.variation.{
+  HipSuccessVariationTrnResponse, VariationFailureResponse, VariationResponse, VariationSuccessResponse
+}
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -64,7 +70,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     }
 
   lazy val trustVariationsEndpoint: String =
-    s"${config.varyTrustOrEstateUrl}/trusts/variation"
+    s"${config.hipVaryTrustOrEstateUrl}/etmp/RESTAdapter/trustsandestates/variation"
 
   override val className: String = this.getClass.getSimpleName
 
@@ -159,8 +165,8 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
             BadRequestResponse
           case INTERNAL_SERVER_ERROR | FORBIDDEN      =>
             InternalServerErrorResponse
-          case _                                      =>
-            logger.error("[RegistrationResponse][parseForbiddenResponse] Forbidden response from des.")
+          case status                                 =>
+            logger.error(s"[RegistrationResponse][parseForbiddenResponse] $status response from des.")
             ServiceUnavailableResponse
         }
 
@@ -176,5 +182,82 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
   override def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = ???
 
-  override def trustVariation(trustVariations: JsValue): TrustEnvelope[VariationSuccessResponse] = ???
+  override def trustVariation(trustVariations: JsValue): TrustEnvelope[VariationSuccessResponse] = EitherT {
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = hipHeaders)
+
+    logger.info(
+      s"[$className][trustVariation][Session ID: ${Session.id(hc)}]" +
+        s" submitting trust variation for correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
+    )
+
+    val httpReads: HttpReads[VariationResponse] = new HttpReads[VariationResponse] {
+      override def read(method: String, url: String, response: HttpResponse): VariationResponse =
+        response.status match {
+          case OK                    =>
+            val hip = response.json.as[HipSuccessVariationTrnResponse]
+            hip.success
+          case BAD_REQUEST           =>
+            logger.error(s"[VariationResponse][httpReads] Bad Request response from hip")
+            VariationFailureResponse(BAD_REQUEST, BadRequestErrorResponse, "Bad request")
+          case UNPROCESSABLE_ENTITY  =>
+            val code = response.json.as[HipCustomErrResponse].error.errorId
+            if (code === "004") {
+              logger.info("[VariationResponse] Duplicate submission response from HIP.")
+              VariationFailureResponse(CONFLICT, VariationInternalServerErrorResponse, "Conflict response from hip")
+            } else if (code === "003") {
+              logger.info("[VariationResponse] request could not be processed from HIP.")
+              // n.b. despite the status being 400 the des connector returned InternalServerErrorResponse
+              VariationFailureResponse(
+                BAD_REQUEST,
+                VariationInternalServerErrorResponse,
+                "Invalid correlation id response from hip"
+              )
+            } else if (code === "999") {
+              logger.error("[RegistrationResponse] Forbidden response from HIP.")
+              VariationFailureResponse(
+                INTERNAL_SERVER_ERROR,
+                VariationInternalServerErrorResponse,
+                "hip is currently experiencing problems that require live service intervention"
+              )
+            } else
+              VariationFailureResponse(BAD_REQUEST, BadRequestErrorResponse, "Bad request")
+          case INTERNAL_SERVER_ERROR =>
+            logger.error(s"[VariationResponse][httpReads] Internal server error response from hip")
+            VariationFailureResponse(
+              INTERNAL_SERVER_ERROR,
+              VariationInternalServerErrorResponse,
+              "hip is currently experiencing problems that require live service intervention"
+            )
+
+          case status =>
+            logger.error(s"[VariationResponse][httpReads] $status response from hip.")
+            VariationFailureResponse(
+              SERVICE_UNAVAILABLE,
+              ServiceNotAvailableErrorResponse,
+              s"hip dependent service is down."
+            )
+        }
+    }
+
+    http
+      .post(url"$trustVariationsEndpoint")
+      .withBody(trustVariations)
+      .execute[VariationResponse](using httpReads, ec)
+      .map {
+        case response: VariationSuccessResponse => Right(response)
+
+        case response: VariationFailureResponse =>
+          logger.warn(
+            s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
+              s"trust variation failed with status: ${response.status}, with message: ${response.message} with errorType: ${response.errorType}"
+          )
+
+          Left(VariationFailureForAudit(response.errorType, response.message))
+      }
+      .recover { case ex =>
+        Left(handleError(ex, "trustVariation", trustVariationsEndpoint))
+      }
+  }
+
 }

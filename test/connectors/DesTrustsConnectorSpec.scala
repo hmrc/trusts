@@ -38,7 +38,8 @@ class DesTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       .applicationBuilder()
       .configure(
         Seq(
-          "microservice.services.des.registration.port" -> server.port()
+          "microservice.services.des.registration.port" -> server.port(),
+          "microservice.services.des.variation.port"    -> server.port()
         ): _*
       )
 
