@@ -70,7 +70,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     }
 
   lazy val trustVariationsEndpoint: String =
-    s"${config.hipVaryTrustOrEstateUrl}/etmp/RESTAdapter/trustsandestates/variation"
+    s"${config.hipVaryTrustOrEstateUrl}/etmp/RESTAdapter/trustsandestates/registration"
 
   override val className: String = this.getClass.getSimpleName
 
@@ -241,7 +241,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     }
 
     http
-      .post(url"$trustVariationsEndpoint")
+      .put(url"$trustVariationsEndpoint")
       .withBody(trustVariations)
       .execute[VariationResponse](using httpReads, ec)
       .map {
