@@ -21,9 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{
-  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
-}
+import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
 import models.registration.RegistrationResponse
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
@@ -73,12 +71,12 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
   ".TrustVariation" should {
-    val url = "/etmp/RESTAdapter/trustsandestates/variation"
+    val url = "/etmp/RESTAdapter/trustsandestates/registration"
 
     "return a VariationTrnResponse" when {
       "hip has returned a 200 with a trn" in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
-        stubForPost(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
+        stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
 
@@ -94,7 +92,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     "return a VariationTrnResponse" when {
       "hip has returned a 200 with a trn for a submission of property or land without previousValue" in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
-        stubForPost(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
+        stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest)).value
 
@@ -114,7 +112,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
         val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
 
         val requestBody = Json.stringify(Json.toJson(variation))
-        stubForPost(
+        stubForPutWithBody(
           server,
           url,
           requestBody,
@@ -139,7 +137,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       "trusts two requests are submitted with the same Correlation ID." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(
+        stubForPutWithBody(
           server,
           url,
           requestBody,
@@ -168,7 +166,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       "trusts provides an invalid Correlation ID." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(
+        stubForPutWithBody(
           server,
           url,
           requestBody,
@@ -197,7 +195,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(
+        stubForPutWithBody(
           server,
           url,
           requestBody,
@@ -216,10 +214,10 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return errors.InternalServerErrorResponse" when {
-      "des is experiencing some problem." in {
+      "hip is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(
+        stubForPutWithBody(
           server,
           url,
           requestBody,
@@ -252,7 +250,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       "hip returns 500" in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(
+        stubForPutWithBody(
           server,
           url,
           requestBody,

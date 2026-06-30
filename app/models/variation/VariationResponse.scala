@@ -17,7 +17,6 @@
 package models.variation
 
 import errors.{BadRequestErrorResponse, InternalServerErrorResponse, ServiceNotAvailableErrorResponse, VariationErrors}
-import models.registration.{RegistrationResponse, RegistrationTrnResponse}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
