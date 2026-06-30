@@ -21,7 +21,9 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.existing_trust.ExistingCheckResponse.{
+  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
+}
 import models.registration.RegistrationResponse
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
