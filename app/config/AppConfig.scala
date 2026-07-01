@@ -37,7 +37,8 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
   val taxEnrolmentsUrl: String          = servicesConfig.baseUrl("tax-enrolments")
   val taxEnrolmentsMigrationUrl: String = servicesConfig.baseUrl("tax-enrolments-migration")
   val getTrustOrEstateUrl: String       = servicesConfig.baseUrl("playback")
-  val varyTrustOrEstateUrl: String      = servicesConfig.baseUrl("variation")
+  val desVaryTrustOrEstateUrl: String   = servicesConfig.baseUrl("des.variation")
+  val hipVaryTrustOrEstateUrl: String   = servicesConfig.baseUrl("hip.variation")
   val orchestratorUrl: String           = servicesConfig.baseUrl("orchestrator")
   val nonRepudiationUrl: String         = s"${servicesConfig.baseUrl("non-repudiation")}/nrs-orchestrator/submission"
 

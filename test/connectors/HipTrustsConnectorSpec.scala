@@ -19,16 +19,17 @@ package connectors
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connector.HipTrustsConnector
-import errors.TrustErrors
+import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
 import models.registration.RegistrationResponse
+import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import play.api.test.Helpers.CONTENT_TYPE
 
 import scala.concurrent.Future
@@ -40,7 +41,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       .applicationBuilder()
       .configure(
         Seq(
-          "microservice.services.hip.registration.port" -> server.port()
+          "microservice.services.hip.registration.port" -> server.port(),
+          "microservice.services.hip.variation.port"    -> server.port()
         ): _*
       )
 
@@ -69,6 +71,215 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+
+  ".TrustVariation" should {
+    val url = "/etmp/RESTAdapter/trustsandestates/registration"
+
+    "return a VariationTrnResponse" when {
+      "hip has returned a 200 with a trn" in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(VariationSuccessResponse("XXTVN1234567890"))
+          inside(result.value) { case VariationSuccessResponse(tvn) =>
+            tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r
+          }
+        }
+      }
+    }
+
+    "return a VariationTrnResponse" when {
+      "hip has returned a 200 with a trn for a submission of property or land without previousValue" in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
+        stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(VariationSuccessResponse("XXTVN1234567890"))
+          inside(result.value) { case VariationSuccessResponse(tvn) =>
+            tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r
+          }
+        }
+      }
+    }
+
+    "return BadRequestErrorResponse" when {
+      "payload sent to hip is invalid" in {
+        implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
+
+        val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
+
+        val requestBody = Json.stringify(Json.toJson(variation))
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          BAD_REQUEST,
+          s"""
+             |{
+             | "code": "400",
+             | "message": "String",
+             | "logID": "00000000000000000000000000000000"
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(variation)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(VariationFailureForAudit(BadRequestErrorResponse, "Bad request"))
+        }
+      }
+    }
+
+    "return errors.InternalServerErrorResponse" when {
+      "trusts two requests are submitted with the same Correlation ID." in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "004",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "Duplicate submission acknowledgment reference"
+             |    }
+             |}
+             |""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "Conflict response from hip"))
+        }
+      }
+    }
+
+    "return errors.InternalServerErrorResponse" when {
+      "trusts provides an invalid Correlation ID." in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "003",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "Request could not be processed"
+             |    }
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+        whenReady(futureResult) { result =>
+          result mustBe Left(
+            VariationFailureForAudit(errors.InternalServerErrorResponse, "Invalid correlation id response from hip")
+          )
+        }
+      }
+    }
+
+    "return ServiceNotAvailableErrorResponse  " when {
+      "des dependent service is not responding " in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          IM_A_TEAPOT,
+          "foo"
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(
+            VariationFailureForAudit(ServiceNotAvailableErrorResponse, "hip dependent service is down.")
+          )
+        }
+      }
+    }
+
+    "return errors.InternalServerErrorResponse" when {
+      "hip is experiencing some problem." in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          UNPROCESSABLE_ENTITY,
+          s"""
+             |{
+             |  "error":
+             |    {
+             |      "errorId": "999",
+             |      "processingDate": "2001-12-17T09:30:47.0",
+             |      "text": "Technical System Error"
+             |    }
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(
+            VariationFailureForAudit(
+              errors.InternalServerErrorResponse,
+              "hip is currently experiencing problems that require live service intervention"
+            )
+          )
+        }
+      }
+    }
+
+    "return errors.InternalServerErrorResponse" when {
+      "hip returns 500" in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          INTERNAL_SERVER_ERROR,
+          s"""
+             |{
+             |  "error": {
+             |    "code": "500",
+             |    "message": "String",
+             |    "logID": "00000000000000000000000000000000"
+             |  }
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(
+            VariationFailureForAudit(
+              errors.InternalServerErrorResponse,
+              "hip is currently experiencing problems that require live service intervention"
+            )
+          )
+        }
+      }
+    }
+  }
 
   ".get5MLDTrustOrEstateEndpoint" should {
     "return UTR URL" when {
@@ -603,19 +814,6 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       // TODO correct test when method has been implemented
       val result = intercept[NotImplementedError] {
         connector.getTrustInfo("XXTRN1234567890")
-      }
-
-      result.getMessage must be("an implementation is missing")
-    }
-  }
-
-  ".trustVariation" should {
-
-    "return success response when json is valid" in {
-      // TODO correct test when method has been implemented
-      val requestBody = Json.toJson(trustVariationsRequest)
-      val result      = intercept[NotImplementedError] {
-        connector.trustVariation(requestBody)
       }
 
       result.getMessage must be("an implementation is missing")

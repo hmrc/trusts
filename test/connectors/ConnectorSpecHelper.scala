@@ -272,4 +272,24 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
         )
     )
 
+  def stubForPutWithBody(
+    server: WireMockServer,
+    url: String,
+    requestBody: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ) =
+    server.stubFor(
+      put(urlEqualTo(url))
+        .withHeader(CONTENT_TYPE, containing("application/json"))
+        .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
+
 }

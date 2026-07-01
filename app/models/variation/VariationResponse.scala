@@ -24,6 +24,13 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 sealed trait VariationResponse
 case class VariationSuccessResponse(tvn: String) extends VariationResponse
+
+case class HipSuccessVariationTrnResponse(success: VariationSuccessResponse) extends VariationResponse
+
+object HipSuccessVariationTrnResponse {
+  implicit val formats: Format[HipSuccessVariationTrnResponse] = Json.format[HipSuccessVariationTrnResponse]
+}
+
 case class VariationFailureResponse(status: Int, errorType: VariationErrors, message: String) extends VariationResponse
 
 object VariationResponse extends Logging {

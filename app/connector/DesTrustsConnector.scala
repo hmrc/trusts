@@ -62,7 +62,7 @@ class DesTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     }
 
   lazy val trustVariationsEndpoint: String =
-    s"${config.varyTrustOrEstateUrl}/trusts/variation"
+    s"${config.desVaryTrustOrEstateUrl}/trusts/variation"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
