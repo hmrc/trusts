@@ -52,7 +52,7 @@ class DesTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     s"$trustsServiceUrl/registration"
 
   lazy val getTrustOrEstateUrl: String =
-    s"${config.getTrustOrEstateUrl}/trusts"
+    s"${config.desGetTrustOrEstateUrl}/trusts"
 
   def get5MLDTrustOrEstateEndpoint(identifier: String): String =
     if (identifier.length == 10) {

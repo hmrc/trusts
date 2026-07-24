@@ -27,6 +27,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
@@ -37,6 +38,16 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import scala.concurrent.Future
 
 class SubmissionFailuresSpec extends ConnectorSpecHelper {
+
+  override def applicationBuilder(): GuiceApplicationBuilder =
+    super
+      .applicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.des.playback.port"     -> server.port()
+        ): _*
+      )
+
 
   val utr        = "5174384721"
   val internalId = "internalId"

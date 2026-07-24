@@ -28,15 +28,16 @@ import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
-import models.get_trust.GetTrustResponse
+import models.get_trust.{GetTrustResponse, HipGetTrustResponse, NotEnoughDataResponse}
 import models.registration._
 import models.variation.{
   HipSuccessVariationTrnResponse, VariationFailureResponse, VariationResponse, VariationSuccessResponse
 }
 import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
+import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON}
 import utils.Session
 import utils.TrustEnvelope.TrustEnvelope
 
@@ -60,7 +61,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
   // note this is the playback service, which is another stub
   lazy val getTrustOrEstateUrl: String =
-    s"${config.getTrustOrEstateUrl}/trustsandestates"
+    s"${config.hipGetTrustOrEstateUrl}/etmp/RESTAdapter/trustsandestates"
 
   def get5MLDTrustOrEstateEndpoint(identifier: String): String =
     if (identifier.length == 10) {
@@ -80,7 +81,8 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       "X-Originating-System"  -> "TRS",
       "X-Receipt-Date"        -> DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
       "X-Transmitting-System" -> "HIP",
-      "Authorization"         -> s"Basic ${config.hipAuthorizationToken}"
+      "Authorization"         -> s"Basic ${config.hipAuthorizationToken}",
+      CONTENT_TYPE            -> CONTENT_TYPE_JSON
     )
 
   override def checkExistingTrust(
@@ -180,7 +182,87 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       }
   }
 
-  override def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = ???
+  override def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = EitherT {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = hipHeaders)
+
+    logger.info(
+      s"[$className][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
+        s" getting playback for trust for correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
+    )
+
+    def parseOkResponse(response: HttpResponse, identifier: String): GetTrustResponse =
+      response.json.validate[HipGetTrustResponse] match {
+        case JsSuccess(trustFound, _) => trustFound.success
+        case JsError(errors)          =>
+          logger.error(
+            s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
+              s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}"
+          )
+          NotEnoughDataResponse(response.json, JsError.toJson(errors))
+      }
+
+    import models.get_trust._
+    def httpReads(identifier: String): HttpReads[GetTrustResponse] =
+      (_: String, _: String, response: HttpResponse) =>
+        response.status match {
+          case OK                    =>
+            parseOkResponse(response, identifier)
+          case BAD_REQUEST           =>
+            logger.warn(
+              s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                s" bad request returned from des: ${response.json}"
+            )
+            BadRequestResponse
+          case NOT_FOUND             =>
+            logger.info(
+              s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                s" trust not found in ETMP for given identifier"
+            )
+            ResourceNotFoundResponse
+          case INTERNAL_SERVER_ERROR =>
+            logger.error(
+              s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                s" error occurred when getting trust, status: ${response.json}"
+            )
+            InternalServerErrorResponse
+          case UNPROCESSABLE_ENTITY  =>
+            val code = response.json.as[HipCustomErrResponse].error.errorId
+            if (code === "000") {
+              logger.info(
+                s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                  s" trust not found in ETMP for given identifier"
+              )
+              ResourceNotFoundResponse
+            } else if (code === "999") {
+              logger.error(
+                s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                  s" error occurred when getting trust, status: 422 errorId 999"
+              )
+              InternalServerErrorResponse
+            } else { // 003 or unknown errorId
+              logger.warn(
+                s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                  s" bad request returned from des: ${response.json}"
+              )
+              BadRequestResponse
+            }
+          case _                     =>
+            logger.warn(
+              s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+                s" service is unavailable, unable to get trust"
+            )
+            ServiceUnavailableResponse
+        }
+
+    val fullUrl = get5MLDTrustOrEstateEndpoint(identifier)
+    http
+      .get(url"$fullUrl")
+      .execute(httpReads(identifier), ec)
+      .map(Right(_))
+      .recover { case ex =>
+        Left(handleError(ex, "getTrustInfo", fullUrl))
+      }
+  }
 
   override def trustVariation(trustVariations: JsValue): TrustEnvelope[VariationSuccessResponse] = EitherT {
 
