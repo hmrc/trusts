@@ -190,23 +190,20 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
         s" getting playback for trust for correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
     )
 
-    def parseOkResponse(response: HttpResponse, identifier: String): GetTrustResponse =
-      response.json.validate[HipGetTrustResponse] match {
-        case JsSuccess(trustFound, _) => trustFound.success
-        case JsError(errors)          =>
-          logger.error(
-            s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
-              s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}"
-          )
-          NotEnoughDataResponse(response.json, JsError.toJson(errors))
-      }
-
     import models.get_trust._
     def httpReads(identifier: String): HttpReads[GetTrustResponse] =
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
           case OK                    =>
-            parseOkResponse(response, identifier)
+            response.json.validate[HipGetTrustResponse] match {
+              case JsSuccess(trustFound, _) => trustFound.success
+              case JsError(errors)          =>
+                logger.error(
+                  s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
+                    s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}"
+                )
+                NotEnoughDataResponse(response.json, JsError.toJson(errors))
+            }
           case BAD_REQUEST           =>
             logger.warn(
               s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
