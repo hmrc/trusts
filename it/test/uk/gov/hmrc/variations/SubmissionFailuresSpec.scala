@@ -44,10 +44,9 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper {
       .applicationBuilder()
       .configure(
         Seq(
-          "microservice.services.des.playback.port"     -> server.port()
+          "microservice.services.des.playback.port" -> server.port()
         ): _*
       )
-
 
   val utr        = "5174384721"
   val internalId = "internalId"

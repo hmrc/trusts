@@ -38,7 +38,7 @@ case object HipGetTrustResponse {
                 JsSuccess(HipGetTrustResponse(NotEnoughDataResponse(json, JsError.toJson(x))))
             }
         }
-      case e: JsError  =>
+      case e: JsError                 =>
         JsSuccess(
           HipGetTrustResponse(
             NotEnoughDataResponse(json, JsError.toJson(e))
