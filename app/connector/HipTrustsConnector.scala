@@ -28,7 +28,7 @@ import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse, HipCustomErrResponse}
-import models.get_trust.{GetTrustResponse, HipGetTrustResponse, NotEnoughDataResponse}
+import models.get_trust.GetTrustResponse
 import models.registration._
 import models.variation.{
   HipSuccessVariationTrnResponse, VariationFailureResponse, VariationResponse, VariationSuccessResponse
@@ -37,12 +37,12 @@ import play.api.http.Status._
 import play.api.libs.json._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
-import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON}
 import utils.Session
 import utils.TrustEnvelope.TrustEnvelope
 
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -79,11 +79,17 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     Seq(
       "correlationid"         -> UUID.randomUUID().toString,
       "X-Originating-System"  -> "TRS",
-      "X-Receipt-Date"        -> DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+      "X-Receipt-Date"        -> DateTimeFormatter.ISO_INSTANT.format(Instant.now().truncatedTo(ChronoUnit.SECONDS)),
       "X-Transmitting-System" -> "HIP",
-      "Authorization"         -> s"Basic ${config.hipAuthorizationToken}",
-      CONTENT_TYPE            -> CONTENT_TYPE_JSON
+      "Authorization"         -> s"Basic ${config.hipAuthorizationToken}"
     )
+
+  implicit private class RichHeaderCarrier(in: HeaderCarrier) {
+
+    def correlationid =
+      in.extraHeaders.toMap.getOrElse("correlationid", "NOT FOUND")
+
+  }
 
   override def checkExistingTrust(
     existingTrustCheckRequest: ExistingCheckRequest
@@ -138,9 +144,8 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = hipHeaders)
 
     logger.info(
-      // todo remove the session stuff maybe
       s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for " +
-        s"correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
+        s"correlationid: ${hc.correlationid}"
     )
 
     val httpReads: HttpReads[RegistrationResponse] =
@@ -187,7 +192,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     logger.info(
       s"[$className][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
-        s" getting playback for trust for correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
+        s" getting playback for trust for correlationid: ${hc.correlationid}"
     )
 
     import models.get_trust._
@@ -199,7 +204,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
               case JsSuccess(trustFound, _) => trustFound.success
               case JsError(errors)          =>
                 logger.error(
-                  s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
+                  s"[GetTrustResponse][httpReads][UTR/URN: $identifier] " +
                     s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}"
                 )
                 NotEnoughDataResponse(response.json, JsError.toJson(errors))
@@ -267,7 +272,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     logger.info(
       s"[$className][trustVariation][Session ID: ${Session.id(hc)}]" +
-        s" submitting trust variation for correlationid: ${hipHeaders.toMap.getOrElse("correlationid", "NOT FOUND")}"
+        s" submitting trust variation for correlationid: ${hc.correlationid}"
     )
 
     val httpReads: HttpReads[VariationResponse] = new HttpReads[VariationResponse] {

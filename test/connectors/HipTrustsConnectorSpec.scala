@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
@@ -59,12 +60,28 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     returnStatus: Int,
     responseBody: String,
     delayResponse: Int = 0
-  ) =
-
+  ): StubMapping =
     server.stubFor(
       post(urlEqualTo(url))
         .withHeader(CONTENT_TYPE, containing("application/json"))
         .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
+
+  override def stubForGet(
+    server: WireMockServer,
+    url: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ): StubMapping =
+    server.stubFor(
+      get(urlEqualTo(url))
         .willReturn(
           aResponse()
             .withStatus(returnStatus)
