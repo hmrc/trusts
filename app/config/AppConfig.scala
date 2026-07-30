@@ -26,8 +26,8 @@ import javax.inject.{Inject, Singleton}
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
   val useHipTrusts: Boolean         = servicesConfig.getBoolean("features.hip.trusts")
-  private val hipClientIdV1: String = configuration.get[String]("microservice.services.hip.registration.clientId")
-  private val hipSecretV1: String   = configuration.get[String]("microservice.services.hip.registration.secret")
+  private val hipClientIdV1: String = configuration.get[String]("microservice.services.hip.clientId")
+  private val hipSecretV1: String   = configuration.get[String]("microservice.services.hip.secret")
   def hipAuthorizationToken: String = Base64.getEncoder.encodeToString(s"$hipClientIdV1:$hipSecretV1".getBytes("UTF-8"))
 
   val desRegistrationBaseUrl: String = servicesConfig.baseUrl("des.registration")
@@ -36,7 +36,8 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
   val subscriptionBaseUrl: String       = servicesConfig.baseUrl("subscription")
   val taxEnrolmentsUrl: String          = servicesConfig.baseUrl("tax-enrolments")
   val taxEnrolmentsMigrationUrl: String = servicesConfig.baseUrl("tax-enrolments-migration")
-  val getTrustOrEstateUrl: String       = servicesConfig.baseUrl("playback")
+  val desGetTrustOrEstateUrl: String    = servicesConfig.baseUrl("des.playback")
+  val hipGetTrustOrEstateUrl: String    = servicesConfig.baseUrl("hip.playback")
   val desVaryTrustOrEstateUrl: String   = servicesConfig.baseUrl("des.variation")
   val hipVaryTrustOrEstateUrl: String   = servicesConfig.baseUrl("hip.variation")
   val orchestratorUrl: String           = servicesConfig.baseUrl("orchestrator")

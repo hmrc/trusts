@@ -18,19 +18,25 @@ package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
+import models.get_trust.{
+  BadRequestResponse, GetTrustResponse, InternalServerErrorResponse, NotEnoughDataResponse, ResourceNotFoundResponse,
+  ResponseHeader, ServiceUnavailableResponse, TrustFoundResponse, TrustProcessedResponse
+}
 import models.registration.RegistrationResponse
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsObject, JsValue, Json, Reads}
 import play.api.test.Helpers.CONTENT_TYPE
+import utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future
 
@@ -42,7 +48,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       .configure(
         Seq(
           "microservice.services.hip.registration.port" -> server.port(),
-          "microservice.services.hip.variation.port"    -> server.port()
+          "microservice.services.hip.variation.port"    -> server.port(),
+          "microservice.services.hip.playback.port"     -> server.port()
         ): _*
       )
 
@@ -53,8 +60,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     returnStatus: Int,
     responseBody: String,
     delayResponse: Int = 0
-  ) =
-
+  ): StubMapping =
     server.stubFor(
       post(urlEqualTo(url))
         .withHeader(CONTENT_TYPE, containing("application/json"))
@@ -67,10 +73,39 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
         )
     )
 
+  override def stubForGet(
+    server: WireMockServer,
+    url: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ): StubMapping =
+    server.stubFor(
+      get(urlEqualTo(url))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
+
+  private def wrapInSuccessNode(in: String) =
+    Json.obj("success" -> Json.parse(in))
+
+  private def expectedHeaderAndJson(response: JsObject): (ResponseHeader, JsValue) =
+    (
+      (response \ "success" \ "responseHeader").as[ResponseHeader],
+      (response \ "success" \ "trustOrEstateDisplay").as[JsValue]
+    )
+
   private lazy val connector: HipTrustsConnector = injector.instanceOf[HipTrustsConnector]
 
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+
+  private def get5MLDTrustUTREndpoint(utr: String) = s"/etmp/RESTAdapter/trustsandestates/registration/UTR/$utr"
+  private def get5MLDTrustURNEndpoint(urn: String) = s"/etmp/RESTAdapter/trustsandestates/registration/URN/$urn"
 
   ".TrustVariation" should {
     val url = "/etmp/RESTAdapter/trustsandestates/registration"
@@ -808,15 +843,350 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
   }
 
-  ".getTrustInfo" should {
+  ".getTrustInfoJson" when {
+    "5MLD" when {
+      "identifier is UTR" must {
+        "return TrustFoundResponse" when {
+          "hip has returned a 200 with trust details" in {
+            val utr                                 = "1234567890"
+            val getProcessedTrustResponse: JsObject = wrapInSuccessNode(get5MLDTrustResponseJson)
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getProcessedTrustResponse.toString)
 
-    "return trust info when utr|urn is valid" in {
-      // TODO correct test when method has been implemented
-      val result = intercept[NotImplementedError] {
-        connector.getTrustInfo("XXTRN1234567890")
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(utr).value
+            val (expectedHeader, expectedJson)                              = expectedHeaderAndJson(getProcessedTrustResponse)
+
+            whenReady(futureResult) {
+              case Right(r: TrustProcessedResponse) =>
+                r.responseHeader mustBe expectedHeader
+                r.getTrust       mustBe expectedJson
+              case _                                => fail()
+            }
+          }
+
+          "hip has returned a 200 with property or land asset with no previous value" in {
+            val utr                                                   = "1234567890"
+            val getTrustPropertyLandNoPreviousValueResponse: JsObject =
+              wrapInSuccessNode(getTrustPropertyLandNoPreviousValue)
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustPropertyLandNoPreviousValueResponse.toString)
+
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(utr).value
+            val (expectedHeader, expectedJson)                              = expectedHeaderAndJson(getTrustPropertyLandNoPreviousValueResponse)
+
+            whenReady(futureResult) {
+              case Right(r: TrustProcessedResponse) =>
+                r.responseHeader mustBe expectedHeader
+                r.getTrust       mustBe expectedJson
+              case _                                => fail()
+            }
+          }
+
+          "hip has returned a 200 and indicated that the submission is still being processed" in {
+            val utr = "1234567800"
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              OK,
+              wrapInSuccessNode(getTrustOrEstateProcessingResponseJson).toString
+            )
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(TrustFoundResponse(ResponseHeader("In Processing", "1")))
+            }
+          }
+        }
+
+        "return NotEnoughData" when {
+          "json does not validate as GetData model" in {
+            val utr      = "1234567890"
+            val expected = wrapInSuccessNode(getTrustMalformedJsonResponse).toString
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, expected)
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(
+                NotEnoughDataResponse(
+                  Json.parse(expected),
+                  Json.parse("""
+                               |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                               |""".stripMargin)
+                )
+              )
+            }
+          }
+        }
+
+        "return BadRequestResponse" when {
+          "hip has returned a 400" in {
+            val utr = "1234567891"
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              BAD_REQUEST,
+              """
+                |{
+                | "code": "400",
+                | "message": "String",
+                | "logID": "00000000000000000000000000000000"
+                |}""".stripMargin
+            )
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(BadRequestResponse)
+            }
+          }
+        }
+
+        "return NotEnoughDataResponse" when {
+          "hip has returned a 204" in {
+            val utr = "6666666666"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, Json.stringify(jsonResponse204))
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(
+                NotEnoughDataResponse(
+                  jsonResponse204,
+                  Json.parse("""
+                               |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
+                               |""".stripMargin)
+                )
+              )
+            }
+          }
+        }
+
+        "return ResourceNotFoundResponse" when {
+          "hip has returned a 422 000" in {
+            val utr = "1234567892"
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              UNPROCESSABLE_ENTITY,
+              s"""
+                 |{
+                 |  "error":
+                 |    {
+                 |      "errorId": "000",
+                 |      "processingDate": "2001-12-17T09:30:47.0",
+                 |      "text": "Duplicate submission acknowledgment reference"
+                 |    }
+                 |}
+                 |""".stripMargin
+            )
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(ResourceNotFoundResponse)
+            }
+          }
+        }
+
+        "return InternalServerErrorResponse" when {
+          "hip has returned a 500 with the code SERVER_ERROR" in {
+            val utr = "1234567893"
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              INTERNAL_SERVER_ERROR,
+              """{
+                |  "error": {
+                |    "code": "500",
+                |    "message": "String",
+                |    "logID": "00000000000000000000000000000000"
+                |  }
+                |}
+                |""".stripMargin
+            )
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(InternalServerErrorResponse)
+            }
+          }
+        }
+
+        "return ServiceUnavailableResponse" when {
+          "hip has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+            val utr = "1234567894"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), SERVICE_UNAVAILABLE, "")
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(ServiceUnavailableResponse)
+            }
+          }
+        }
       }
 
-      result.getMessage must be("an implementation is missing")
+      "identifier is URN" must {
+        "return TrustFoundResponse" when {
+          "hip has returned a 200 with trust details" in {
+            val urn                            = "1234567890ADCEF"
+            val (expectedHeader, expectedJson) =
+              expectedHeaderAndJson(wrapInSuccessNode(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse))
+            stubForGet(
+              server,
+              get5MLDTrustURNEndpoint(urn),
+              OK,
+              wrapInSuccessNode(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse).toString()
+            )
+
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) {
+              case Right(r: TrustProcessedResponse) =>
+                r.responseHeader mustBe expectedHeader
+                r.getTrust       mustBe expectedJson
+              case _                                => fail()
+            }
+          }
+
+          "hip has returned a 200 with property or land asset with no previous value" in {
+            val urn                                                         = "1234567890ADCEF"
+            val expectedPayload                                             = wrapInSuccessNode(getTrustPropertyLandNoPreviousValue)
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, expectedPayload.toString)
+            val (expectedHeader, expectedJson)                              = expectedHeaderAndJson(expectedPayload)
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) {
+              case Right(r: TrustProcessedResponse) =>
+                r.responseHeader mustBe expectedHeader
+                r.getTrust       mustBe expectedJson
+              case _                                => fail()
+            }
+          }
+
+          "hip has returned a 200 and indicated that the submission is still being processed" in {
+            val urn = "1234567890ADCEF"
+            stubForGet(
+              server,
+              get5MLDTrustURNEndpoint(urn),
+              OK,
+              wrapInSuccessNode(getTrustOrEstateProcessingResponseJson).toString
+            )
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(TrustFoundResponse(ResponseHeader("In Processing", "1")))
+            }
+          }
+        }
+
+        "return NotEnoughData" when {
+          "json does not validate as GetData model" in {
+            val urn        = "1234567890ADCEF"
+            val hipPayload = wrapInSuccessNode(getTrustMalformedJsonResponse).toString
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, hipPayload)
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(
+                NotEnoughDataResponse(
+                  Json.parse(hipPayload),
+                  Json.parse("""
+                               |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                               |""".stripMargin)
+                )
+              )
+            }
+          }
+        }
+
+        "return BadRequestResponse" when {
+          "hip has returned a 400" in {
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST, Json.stringify(jsonResponse4005mld))
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(BadRequestResponse)
+            }
+          }
+        }
+
+        "return NotEnoughDataResponse" when {
+          "des has returned a 204" in {
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, Json.stringify(jsonResponse204))
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(
+                NotEnoughDataResponse(
+                  jsonResponse204,
+                  Json.parse("""
+                               |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
+                               |""".stripMargin)
+                )
+              )
+            }
+          }
+        }
+
+        "return ResourceNotFoundResponse" when {
+          "hip has returned a 404" in {
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), NOT_FOUND, "")
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(ResourceNotFoundResponse)
+            }
+          }
+        }
+
+        "return InternalServerErrorResponse" when {
+          "hip has returned a 500 with the code INTERNAL_SERVER_ERROR" in {
+            val urn = "1234567890ADCEF"
+            stubForGet(
+              server,
+              get5MLDTrustURNEndpoint(urn),
+              INTERNAL_SERVER_ERROR,
+              """{
+                |  "error": {
+                |    "code": "500",
+                |    "message": "String",
+                |    "logID": "00000000000000000000000000000000"
+                |  }
+                |}
+                |""".stripMargin
+            )
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(InternalServerErrorResponse)
+            }
+          }
+        }
+
+        "return ServiceUnavailableResponse" when {
+          "hip has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), SERVICE_UNAVAILABLE, "")
+
+            val futureResult = connector.getTrustInfo(urn).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(ServiceUnavailableResponse)
+            }
+          }
+        }
+      }
     }
   }
 
