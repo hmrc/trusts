@@ -16,6 +16,7 @@
 
 package connectors
 
+import cats.implicits.catsSyntaxEq
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
@@ -36,8 +37,9 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, JsValue, Json, Reads}
 import play.api.test.Helpers.CONTENT_TYPE
-import utils.NonTaxable5MLDFixtures
+import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
+import scala.annotation.unused
 import scala.concurrent.Future
 
 class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
@@ -1186,6 +1188,25 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
             }
           }
         }
+      }
+    }
+  }
+
+  "TrustsJsonBridge" should {
+    "change node names correctly " when {
+      "converting trust json from hip to mdtp and back" in {
+
+        val converter          = new TrustsJsonBridge {}
+        import converter._
+        val hipTrust: JsValue  = Json.toJson(trustWithBeneficiaryTrustsFromHip)
+        val mdtpTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustForHip)
+
+        val convertedToMdtp = hipTrust.converToMdtpJson
+        val convertedToHip  = mdtpTrust.convertToHipJson
+
+        assert(!(hipTrust === mdtpTrust))
+        assert(convertedToMdtp === mdtpTrust)
+        assert(convertedToHip === hipTrust)
       }
     }
   }
