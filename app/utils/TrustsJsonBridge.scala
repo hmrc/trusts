@@ -23,9 +23,9 @@ trait TrustsJsonBridge extends Logging {
 
   implicit class RichJsObject(in: JsValue) {
 
-    implicit val foo: Logger = logger
+    implicit val log: Logger = logger
 
-    def converToMdtpJson: JsObject =
+    def convertToMdtpJson: JsObject =
       JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trusts", "trust")
 
     def convertToHipJson: JsObject =

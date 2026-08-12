@@ -16,20 +16,14 @@
 
 package connectors
 
-import cats.implicits.catsSyntaxEq
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{
-  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
-}
-import models.get_trust.{
-  BadRequestResponse, GetTrustResponse, InternalServerErrorResponse, NotEnoughDataResponse, ResourceNotFoundResponse,
-  ResponseHeader, ServiceUnavailableResponse, TrustFoundResponse, TrustProcessedResponse
-}
+import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.get_trust._
 import models.registration.RegistrationResponse
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
@@ -39,7 +33,6 @@ import play.api.libs.json.{JsObject, JsValue, Json, Reads}
 import play.api.test.Helpers.CONTENT_TYPE
 import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
-import scala.annotation.unused
 import scala.concurrent.Future
 
 class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
@@ -1201,7 +1194,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
         val hipTrust: JsValue  = Json.toJson(trustWithBeneficiaryTrustsFromHip)
         val mdtpTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustForHip)
 
-        val convertedToMdtp = hipTrust.converToMdtpJson
+        val convertedToMdtp = hipTrust.convertToMdtpJson
         val convertedToHip  = mdtpTrust.convertToHipJson
 
         assert(!(hipTrust === mdtpTrust))

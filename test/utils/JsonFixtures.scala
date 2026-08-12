@@ -49,7 +49,7 @@ trait JsonFixtures extends JsonUtils {
   lazy val trustWithBeneficiaryTrustsFromHip: JsValue =
     getJsonValueFromFile("trust-with-beneficiary-trusts-from-hip.json").validate[JsValue].get
 
-  lazy val trustWithBeneficiaryTrustForHip: JsValue   =
+  lazy val trustWithBeneficiaryTrustForHip: JsValue =
     getJsonValueFromFile("trust-with-beneficiary-trust-for-hip.json").validate[JsValue].get
 
   lazy val trustVariationsNoPreviousPropertyValueRequest: JsValue = getJsonValueFromFile(

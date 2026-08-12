@@ -179,7 +179,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     http
       .post(url"$trustRegistrationEndpoint")
-      .withBody(Json.toJson(registration))
+      .withBody(Json.toJson(registration).convertToHipJson)
       .execute[RegistrationResponse](using httpReads, ec)
       .map(Right(_))
       .recover { case ex =>
@@ -200,7 +200,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
           case OK                    =>
-            val responseJson = response.json.converToMdtpJson
+            val responseJson = response.json.convertToMdtpJson
             responseJson.validate[HipGetTrustResponse] match {
               case JsSuccess(trustFound, _) => trustFound.success
               case JsError(errors)          =>
