@@ -44,7 +44,8 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper {
       .applicationBuilder()
       .configure(
         Seq(
-          "microservice.services.des.playback.port" -> server.port()
+          "microservice.services.des.playback.port" -> server.port(),
+          "features.hip.trusts"                     -> "false"
         ): _*
       )
 
