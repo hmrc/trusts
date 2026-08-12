@@ -177,7 +177,6 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
             ServiceUnavailableResponse
         }
 
-    println(Json.prettyPrint(Json.toJson(registration)))
     http
       .post(url"$trustRegistrationEndpoint")
       .withBody(Json.toJson(registration))
