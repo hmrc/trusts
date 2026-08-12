@@ -48,7 +48,8 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
             "http://localhost:9782/trusts/tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions",
           "microservice.services.tax-enrolments-migration.to-taxable.serviceName" -> "HMRC-TERS-ORG",
           "microservice.services.tax-enrolments-migration.to-taxable.callback"    ->
-            "http://localhost:9782/trusts/tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId"
+            "http://localhost:9782/trusts/tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId",
+          "features.hip.trusts" -> "false"
         ): _*
       )
 
