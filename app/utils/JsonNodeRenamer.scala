@@ -17,7 +17,7 @@
 package utils
 
 import play.api.Logger
-import play.api.libs.json.JsObject
+import play.api.libs.json.{JsObject, Json}
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
@@ -27,6 +27,8 @@ object JsonNodeRenamer {
   def renameNode(in: JsObject, dotNotatationPath: String, newName: String)(implicit logger: Logger): JsObject = {
 
     val pathIn = dotNotatationPath.split("\\.").toList
+
+    logger.warn(s"#####! got ${Json.prettyPrint(in)}")
 
     @tailrec
     def getNode(js: JsObject, path: List[String]): JsObject = path match {
@@ -50,9 +52,11 @@ object JsonNodeRenamer {
     }
 
     Try(rename(in, pathIn, newName)) match {
-      case Success(v) => v
+      case Success(v) =>
+        logger.warn(s"#####! returning ${Json.prettyPrint(v)}")
+        v
       case Failure(_) =>
-        logger.info(s"$dotNotatationPath not found when trying to rename target to $newName")
+        logger.info(s"#####! $dotNotatationPath not found when trying to rename target to $newName")
         in
     }
 
