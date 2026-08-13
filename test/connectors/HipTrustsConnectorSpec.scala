@@ -31,7 +31,7 @@ import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsObject, JsValue, Json, Reads}
+import play.api.libs.json.{JsLookupResult, JsObject, JsValue, Json, Reads}
 import play.api.test.Helpers.CONTENT_TYPE
 import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
@@ -1196,16 +1196,21 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     "change node names correctly " when {
       "converting trust json from hip to mdtp and back" in {
 
-        val hipTrust: JsValue  = Json.toJson(trustWithBeneficiaryTrustsFromHip)
+        val hipTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustsFromHip)
 
-        val mdtpTrust: JsValue = (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsValue]
+        val mdtpTrust: JsValue =
+          (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsValue]
 
         val convertedToMdtp = hipTrust.convertToMdtpJson
-        val convertedToHip  = mdtpTrust.convertToHipJson
+
+        val unwrappedMdtpTrust = (convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject]
+        val unwrappedHipTrust  = (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject]
+
+        val convertedToHip = mdtpTrust.convertToHipJson
 
         assert(!(hipTrust === mdtpTrust))
-        assert(convertedToMdtp === mdtpTrust)
-        assert(convertedToHip === hipTrust)
+        assert(unwrappedMdtpTrust === mdtpTrust)
+        assert(convertedToHip === unwrappedHipTrust)
       }
     }
   }
