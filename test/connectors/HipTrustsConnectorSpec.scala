@@ -1197,7 +1197,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
       "converting trust json from hip to mdtp and back" in {
 
         val hipTrust: JsValue  = Json.toJson(trustWithBeneficiaryTrustsFromHip)
-        val mdtpTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustForHip)
+
+        val mdtpTrust: JsValue = (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsValue]
 
         val convertedToMdtp = hipTrust.convertToMdtpJson
         val convertedToHip  = mdtpTrust.convertToHipJson

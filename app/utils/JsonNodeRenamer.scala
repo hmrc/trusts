@@ -28,8 +28,6 @@ object JsonNodeRenamer {
 
     val pathIn = dotNotatationPath.split("\\.").toList
 
-    logger.warn(s"#####! got ${Json.prettyPrint(in)}")
-
     @tailrec
     def getNode(js: JsObject, path: List[String]): JsObject = path match {
       case _ :: Nil => js
@@ -53,10 +51,10 @@ object JsonNodeRenamer {
 
     Try(rename(in, pathIn, newName)) match {
       case Success(v) =>
-        logger.warn(s"#####! returning ${Json.prettyPrint(v)}")
         v
       case Failure(_) =>
-        logger.info(s"#####! $dotNotatationPath not found when trying to rename target to $newName")
+        logger.info(s"$dotNotatationPath not found when trying to rename target to $newName, probably the field is not required" +
+          s"check your use case to see if you think it should be there")
         in
     }
 
