@@ -70,8 +70,9 @@ class IntegrationTestBase
     new GuiceApplicationBuilder()
       .configure(
         Seq(
-          "metrics.enabled"  -> false,
-          "auditing.enabled" -> false
+          "metrics.enabled"     -> false,
+          "auditing.enabled"    -> false,
+          "features.hip.trusts" -> "false"
         ): _*
       )
 

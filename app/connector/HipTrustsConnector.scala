@@ -37,7 +37,7 @@ import play.api.http.Status._
 import play.api.libs.json._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
-import utils.Session
+import utils.{Session, TrustsJsonBridge}
 import utils.TrustEnvelope.TrustEnvelope
 
 import java.time.Instant
@@ -48,7 +48,7 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
-    extends ConnectorErrorResponseHandler with TrustsConnector {
+    extends ConnectorErrorResponseHandler with TrustsConnector with TrustsJsonBridge {
 
   lazy val trustsServiceUrl: String =
     s"${config.hipRegistrationBaseUrl}/etmp/RESTAdapter/trustsandestates"
@@ -179,7 +179,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     http
       .post(url"$trustRegistrationEndpoint")
-      .withBody(Json.toJson(registration))
+      .withBody(Json.toJson(registration).convertToHipJson)
       .execute[RegistrationResponse](using httpReads, ec)
       .map(Right(_))
       .recover { case ex =>
@@ -200,14 +200,15 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
           case OK                    =>
-            response.json.validate[HipGetTrustResponse] match {
+            val responseJson = response.json.convertToMdtpJson
+            responseJson.validate[HipGetTrustResponse] match {
               case JsSuccess(trustFound, _) => trustFound.success
               case JsError(errors)          =>
                 logger.error(
                   s"[GetTrustResponse][httpReads][UTR/URN: $identifier] " +
                     s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}"
                 )
-                NotEnoughDataResponse(response.json, JsError.toJson(errors))
+                NotEnoughDataResponse(responseJson, JsError.toJson(errors))
             }
           case BAD_REQUEST           =>
             logger.warn(
@@ -326,7 +327,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     http
       .put(url"$trustVariationsEndpoint")
-      .withBody(trustVariations)
+      .withBody(trustVariations.convertToHipJson)
       .execute[VariationResponse](using httpReads, ec)
       .map {
         case response: VariationSuccessResponse => Right(response)

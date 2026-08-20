@@ -25,22 +25,22 @@ import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse.{
   AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
 }
-import models.get_trust.{
-  BadRequestResponse, GetTrustResponse, InternalServerErrorResponse, NotEnoughDataResponse, ResourceNotFoundResponse,
-  ResponseHeader, ServiceUnavailableResponse, TrustFoundResponse, TrustProcessedResponse
-}
+import models.get_trust._
 import models.registration.RegistrationResponse
 import models.variation.{TrustVariation, VariationSuccessResponse}
 import org.scalatest.EitherValues
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsObject, JsValue, Json, Reads}
+import play.api.libs.json.{JsLookupResult, JsObject, JsValue, Json, Reads}
 import play.api.test.Helpers.CONTENT_TYPE
-import utils.NonTaxable5MLDFixtures
+import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
 import scala.concurrent.Future
 
 class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
+
+  val converter = new TrustsJsonBridge {}
+  import converter._
 
   override def applicationBuilder(): GuiceApplicationBuilder =
     super
@@ -106,6 +106,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
   private def get5MLDTrustUTREndpoint(utr: String) = s"/etmp/RESTAdapter/trustsandestates/registration/UTR/$utr"
   private def get5MLDTrustURNEndpoint(urn: String) = s"/etmp/RESTAdapter/trustsandestates/registration/URN/$urn"
+
+  private val registrationReq = Json.toJson(registrationRequest).convertToHipJson
 
   ".TrustVariation" should {
     val url = "/etmp/RESTAdapter/trustsandestates/registration"
@@ -328,7 +330,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
   ".registerTrust" should {
     "return HipSuccessRegistrationTrnResponse" when {
       "registration is successful " in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -351,7 +353,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return BadRequestResponse" when {
       "payload sent downstream is invalid" in {
-        val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
+        val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest).convertToHipJson)
         stubForPost(
           server,
           "/etmp/RESTAdapter/trustsandestates/registration",
@@ -378,7 +380,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return AlreadyRegisteredResponse" when {
       "trusts is already registered with provided details" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -407,7 +409,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return NoMatchResponse" when {
       "payload has UTR that does not match" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -436,7 +438,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return InternalServerErrorResponse" when {
       "we get a 422 999" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -465,7 +467,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return BadRequestResponse" when {
       "we get a 422 004" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -495,7 +497,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return ServiceUnavailableResponse" when {
       "downstream dependent service is not responding" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -522,7 +524,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return InternalServerErrorResponse" when {
       "downstream is experiencing some problem" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
           server,
@@ -550,7 +552,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return InternalServerErrorResponse" when {
       "downstream is returning 403 " in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+        val requestBody = Json.stringify(registrationReq)
 
         stubForPost(server, "/etmp/RESTAdapter/trustsandestates/registration", requestBody, FORBIDDEN, "{}")
         val futureResult = connector.registerTrust(registrationRequest).value
@@ -1186,6 +1188,29 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
             }
           }
         }
+      }
+    }
+  }
+
+  "TrustsJsonBridge" should {
+    "change node names correctly " when {
+      "converting trust json from hip to mdtp and back" in {
+
+        val hipTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustsFromHip)
+
+        val mdtpTrust: JsValue =
+          (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsValue]
+
+        val convertedToMdtp = hipTrust.convertToMdtpJson
+
+        val unwrappedMdtpTrust = (convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject]
+        val unwrappedHipTrust  = (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject]
+
+        val convertedToHip = mdtpTrust.convertToHipJson
+
+        assert(!(hipTrust === mdtpTrust))
+        assert(unwrappedMdtpTrust === mdtpTrust)
+        assert(convertedToHip === unwrappedHipTrust)
       }
     }
   }
