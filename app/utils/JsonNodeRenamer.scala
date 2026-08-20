@@ -53,9 +53,9 @@ object JsonNodeRenamer {
       case Success(v) =>
         v
       case Failure(_) =>
-        logger.info(
-          s"$dotNotatationPath not found when trying to rename target to $newName, probably the field is not required" +
-            s"check your use case to see if you think it should be there"
+        logger.warn(
+          s"$dotNotatationPath not found when trying to rename target to $newName, probably the field is not required." +
+            s"Check your use case to see if you think it should be there"
         )
         in
     }
