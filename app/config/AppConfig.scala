@@ -19,7 +19,6 @@ package config
 import play.api.{Configuration, Logging}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 @Singleton
