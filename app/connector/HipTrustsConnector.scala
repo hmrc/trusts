@@ -84,6 +84,8 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
       "Authorization"         -> s"Basic ${config.hipAuthorizationToken}"
     )
 
+  logger.debug(s"DEBUG HipHeaders: $hipHeaders")
+
   implicit private class RichHeaderCarrier(in: HeaderCarrier) {
 
     def correlationid =
