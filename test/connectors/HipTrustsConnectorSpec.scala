@@ -158,9 +158,15 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           BAD_REQUEST,
           s"""
              |{
-             | "code": "400",
-             | "message": "String",
-             | "logID": "00000000000000000000000000000000"
+             |  "origin": "HIP",
+             |  "response": {
+             |    "failures": [
+             |      {
+             |        "type": "Type of Failure",
+             |        "reason": "Reason for Failure"
+             |      }
+             |    ]
+             |  }
              |}""".stripMargin
         )
 
@@ -295,11 +301,14 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           requestBody,
           INTERNAL_SERVER_ERROR,
           s"""
-             |{
-             |  "error": {
-             |    "code": "500",
-             |    "message": "String",
-             |    "logID": "00000000000000000000000000000000"
+             {
+             |  "origin": "HoD",
+             |  "response": {
+             |    "error": {
+             |      "code": "500",
+             |      "logID": "00000000000000000000000000000000",
+             |      "message": "String"
+             |    }
              |  }
              |}""".stripMargin
         )
@@ -827,11 +836,16 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           SERVICE_UNAVAILABLE,
-          """{
-            |  "error": {
-            |    "code": "503",
-            |    "message": "String",
-            |    "logID": "00000000000000000000000000000000"
+          """
+            {
+            |  "origin": "HIP",
+            |  "response": {
+            |    "failures": [
+            |      {
+            |        "type": "503",
+            |        "reason": "string"
+            |      }
+            |    ]
             |  }
             |}""".stripMargin
         )
