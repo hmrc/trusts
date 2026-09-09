@@ -150,6 +150,13 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
         s"correlationid: ${hc.correlationid}"
     )
 
+    logger.debug(
+      s"[registerTrust] Request for registering a trust: ${Json.toJson(registration)}"
+    )
+    logger.debug(
+      s"[registerTrust] Request for registering a trust with the request transformed: ${Json.toJson(registration).convertToHipJson}"
+    )
+
     val httpReads: HttpReads[RegistrationResponse] =
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
