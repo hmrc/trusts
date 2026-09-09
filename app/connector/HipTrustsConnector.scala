@@ -150,6 +150,13 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
         s"correlationid: ${hc.correlationid}"
     )
 
+    logger.debug(
+      s"[registerTrust] Request for registering a trust: ${Json.toJson(registration)}"
+    )
+    logger.debug(
+      s"[registerTrust] Request for registering a trust with the request transformed: ${Json.toJson(registration).convertToHipJson}"
+    )
+
     val httpReads: HttpReads[RegistrationResponse] =
       (_: String, _: String, response: HttpResponse) =>
         response.status match {
@@ -170,7 +177,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
             } else
               BadRequestResponse
           case BAD_REQUEST | NOT_FOUND | UNAUTHORIZED =>
-            logger.error(s"[RegistrationResponse] ${response.status} from HIP")
+            logger.error(s"[RegistrationResponse] status: ${response.status} & body: ${response.body} from HIP")
             BadRequestResponse
           case INTERNAL_SERVER_ERROR | FORBIDDEN      =>
             InternalServerErrorResponse
