@@ -25,15 +25,27 @@ trait TrustsJsonBridge extends Logging {
 
     implicit val log: Logger = logger
 
-    def convertToMdtpJson: JsObject =
-      JsonNodeRenamer.renameNode(
+    def convertToMdtpJson: JsObject = {
+      val trustChange = JsonNodeRenamer.renameNode(
         in.as[JsObject],
         "success.trustOrEstateDisplay.details.trust.entities.beneficiary.trusts",
         "trust"
       )
+      val nameChange = JsonNodeRenamer.renameNode(
+        trustChange,
+        "success.trustOrEstateDisplay.details.trust.entities.leadTrustees.orgName",
+        "name"
+      )
+      nameChange
+    }
 
-    def convertToHipJson: JsObject =
-      JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
+    def convertToHipJson: JsObject = {
+      val trustsChange  =
+        JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
+      val orgNameChange =
+        JsonNodeRenamer.renameNode(trustsChange, "details.trust.entities.leadTrustees.name", "orgName")
+      orgNameChange
+    }
 
   }
 
