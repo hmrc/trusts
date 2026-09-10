@@ -594,12 +594,12 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           requestBody,
           UNPROCESSABLE_ENTITY,
           """{
-          |  "error": {
-          |    "processingDate": "2001-12-17T09:30:47.0",
-          |    "errorId": "001",
-          |    "text": "FAIL – NO MATCH"
-          |  }
-          |}""".stripMargin
+            |  "error": {
+            |    "processingDate": "2001-12-17T09:30:47.0",
+            |    "errorId": "001",
+            |    "text": "FAIL – NO MATCH"
+            |  }
+            |}""".stripMargin
         )
 
         val futureResult = connector.checkExistingTrust(request).value
@@ -955,8 +955,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 NotEnoughDataResponse(
                   jsonResponse204,
                   Json.parse("""
-                               |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
-                               |""".stripMargin)
+                      |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
+                      |""".stripMargin)
                 )
               )
             }
@@ -1097,8 +1097,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 NotEnoughDataResponse(
                   Json.parse(hipPayload),
                   Json.parse("""
-                               |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
-                               |""".stripMargin)
+                      |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                      |""".stripMargin)
                 )
               )
             }
@@ -1130,8 +1130,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 NotEnoughDataResponse(
                   jsonResponse204,
                   Json.parse("""
-                               |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
-                               |""".stripMargin)
+                      |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
+                      |""".stripMargin)
                 )
               )
             }
@@ -1196,21 +1196,27 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     "change node names correctly " when {
       "converting trust json from hip to mdtp and back" in {
 
-        val hipTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustsFromHip)
+        // convertToMdtpJson uses the trust payload with its success.trustOrEstatesToDisplay wrapper
+        val hipTrust = Json.toJson(trustWithBeneficiaryTrustsFromHip).as[JsObject]
 
+        // convertedToHip uses the trust payload without any success.trustOrEstatesToDisplay wrapper
         val mdtpTrust: JsValue =
-          (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsValue]
+          (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsObject]
 
         val convertedToMdtp = hipTrust.convertToMdtpJson
+        val convertedToHip  = mdtpTrust.convertToHipJson
 
-        val unwrappedMdtpTrust = (convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject]
-        val unwrappedHipTrust  = (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject]
-
-        val convertedToHip = mdtpTrust.convertToHipJson
-
+        assert(
+          (convertedToMdtp \ "success" \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
+        )
+        assert(
+          (convertedToMdtp \ "success" \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trust").isDefined
+        )
+        assert((convertedToHip \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "orgName").isDefined)
+        assert((convertedToHip \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trusts").isDefined)
         assert(!(hipTrust === mdtpTrust))
-        assert(unwrappedMdtpTrust === mdtpTrust)
-        assert(convertedToHip === unwrappedHipTrust)
+        assert((convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject] === mdtpTrust)
+        assert(convertedToHip === (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject])
       }
     }
   }

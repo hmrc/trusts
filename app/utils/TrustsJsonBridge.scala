@@ -16,8 +16,8 @@
 
 package utils
 
-import play.api.{Logger, Logging}
 import play.api.libs.json.{JsObject, JsValue}
+import play.api.{Logger, Logging}
 
 trait TrustsJsonBridge extends Logging {
 
@@ -25,27 +25,39 @@ trait TrustsJsonBridge extends Logging {
 
     implicit val log: Logger = logger
 
-    def convertToMdtpJson: JsObject = {
-      val trustChange = JsonNodeRenamer.renameNode(
-        in.as[JsObject],
-        "success.trustOrEstateDisplay.details.trust.entities.beneficiary.trusts",
-        "trust"
-      )
-      val nameChange = JsonNodeRenamer.renameNode(
-        trustChange,
-        "success.trustOrEstateDisplay.details.trust.entities.leadTrustees.orgName",
-        "name"
-      )
-      nameChange
-    }
+    def convertToMdtpJson: JsObject =
+      (in \ "success" \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name" \ "lastName").toOption match {
+        case None    =>
+          val trustChange = JsonNodeRenamer.renameNode(
+            in.as[JsObject],
+            "success.trustOrEstateDisplay.details.trust.entities.beneficiary.trusts",
+            "trust"
+          )
+          val nameChange  = JsonNodeRenamer.renameNode(
+            trustChange,
+            "success.trustOrEstateDisplay.details.trust.entities.leadTrustees.orgName",
+            "name"
+          )
+          nameChange
+        case Some(_) =>
+          JsonNodeRenamer.renameNode(
+            in.as[JsObject],
+            "success.trustOrEstateDisplay.details.trust.entities.beneficiary.trusts",
+            "trust"
+          )
+      }
 
-    def convertToHipJson: JsObject = {
-      val trustsChange  =
-        JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
-      val orgNameChange =
-        JsonNodeRenamer.renameNode(trustsChange, "details.trust.entities.leadTrustees.name", "orgName")
-      orgNameChange
-    }
+    def convertToHipJson: JsObject =
+      (in \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name" \ "lastName").toOption match {
+        case None    =>
+          val trustsChange  =
+            JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
+          val orgNameChange =
+            JsonNodeRenamer.renameNode(trustsChange, "details.trust.entities.leadTrustees.name", "orgName")
+          orgNameChange
+        case Some(_) =>
+          JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
+      }
 
   }
 
