@@ -78,7 +78,7 @@
               }
             ],
             "beneficiary": {
-              "trusts": [
+              "trust": [
                 {
                   "organisationName": "Organisation Name",
                   "beneficiaryDiscretion": false,

@@ -49,20 +49,9 @@ trait TrustsJsonBridge extends Logging {
       }
 
     def convertToHipJson: JsObject =
-      (in \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name" \ "lastName").toOption match {
-        case None    =>
-          val trustsChange  =
-            JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
-          val orgNameChange =
-            JsonNodeRenamer.renameNode(trustsChange, "details.trust.entities.leadTrustees.name", "orgName")
-          orgNameChange
-        case Some(_) =>
-          JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
-      }
+      JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.leadTrustees.name", "orgName")
 
     def convertToHipJsonForVariation: JsValue = {
-      val trustsChange: JsValue           =
-        JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
       val transformation: Reads[JsObject] = (__ \ "details" \ "trust" \ "entities" \ "leadTrustees").json.update(
         Reads
           .list {
@@ -76,9 +65,9 @@ trait TrustsJsonBridge extends Logging {
           .map(JsArray(_))
       )
 
-      trustsChange.transform(transformation).getOrElse {
+      in.transform(transformation).getOrElse {
         logger.warn("unable to convert name => orgName for trust variation payload")
-        trustsChange
+        in
       }
     }
 

@@ -1212,11 +1212,9 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
         assert(
           (variationJson \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name").isDefined
         )
-        assert((variationJson \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trust").isDefined)
         assert(
           (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "orgName").isDefined
         )
-        assert((transformed \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trusts").isDefined)
       }
       "converting trust json from hip to mdtp and back for registration" in {
 
@@ -1237,7 +1235,6 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
           (convertedToMdtp \ "success" \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trust").isDefined
         )
         assert((convertedToHip \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "orgName").isDefined)
-        assert((convertedToHip \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trusts").isDefined)
         assert(!(hipTrust === mdtpTrust))
         assert((convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject] === mdtpTrust)
         assert(convertedToHip === (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject])
