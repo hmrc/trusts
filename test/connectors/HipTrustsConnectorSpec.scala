@@ -22,9 +22,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{
-  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
-}
+import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
 import models.get_trust._
 import models.registration.RegistrationResponse
 import models.variation.VariationSuccessResponse
@@ -32,7 +30,8 @@ import org.scalatest.EitherValues
 import play.api.Logging
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.test.Helpers.CONTENT_TYPE
 import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
@@ -152,7 +151,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
     "return BadRequestErrorResponse" when {
       "payload sent to hip is invalid" in {
 
-        val foobar      = """{"foobar": {"foo": "bar"}}"""
+        val foobar      = JsObject(Seq("foobar" -> JsObject(Seq("foo" -> JsString("bar")))))
         val requestBody = Json.stringify(Json.toJson(foobar))
 
         stubForPutWithBody(
@@ -1199,18 +1198,23 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
   "TrustsJsonBridge" should {
     "return input json" when {
       "json has nothing to transform" in {
-        val in = Json.toJson("""{"foobar": {"foo": "bar"}}""")
+        val in = JsObject(Seq("foobar" -> JsObject(Seq("foo" -> JsString("bar")))))
         assert(in.convertToHipJsonForVariation === in)
       }
     }
     "change node names correctly " when {
       "converting the variation payload to hip format" in {
         val variationJson: JsValue = Json.toJson(trustVariationMdtpFormat)
-        val transformed = variationJson.convertToHipJsonForVariation
+        val transformed            = variationJson.convertToHipJsonForVariation
 
+        assert(
+          (variationJson \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name").isDefined
+        )
+        assert((variationJson \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trust").isDefined)
         assert(
           (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "orgName").isDefined
         )
+        assert((transformed \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trusts").isDefined)
       }
       "converting trust json from hip to mdtp and back for registration" in {
 

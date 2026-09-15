@@ -62,6 +62,23 @@
           }
         ],
         "beneficiary": {
+          "trust": [
+            {
+              "organisationName": "Organisation Name",
+              "beneficiaryDiscretion": false,
+              "beneficiaryShareOfIncome": "50",
+              "identification": {
+                "utr": "company utr",
+                "address": {
+                  "line1": "Line 1",
+                  "line2": "Line 2",
+                  "postCode": "NE1 1NE",
+                  "country": "GB"
+                }
+              },
+              "entityStart": "1990-10-10"
+            }
+          ],
           "individualDetails": [
             {
               "name": {
