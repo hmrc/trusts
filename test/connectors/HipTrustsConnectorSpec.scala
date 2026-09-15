@@ -27,17 +27,19 @@ import models.existing_trust.ExistingCheckResponse.{
 }
 import models.get_trust._
 import models.registration.RegistrationResponse
-import models.variation.{TrustVariation, VariationSuccessResponse}
+import models.variation.VariationSuccessResponse
 import org.scalatest.EitherValues
+import play.api.Logging
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsLookupResult, JsObject, JsValue, Json, Reads}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.Helpers.CONTENT_TYPE
 import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
 import scala.concurrent.Future
+import scala.language.postfixOps
 
-class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
+class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with Logging {
 
   val converter = new TrustsJsonBridge {}
   import converter._
@@ -114,7 +116,9 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return a VariationTrnResponse" when {
       "hip has returned a 200 with a trn" in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        // n.b. connector preforms transformation before sending to stubbed remote
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest).convertToHipJsonForVariation)
         stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
@@ -130,7 +134,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return a VariationTrnResponse" when {
       "hip has returned a 200 with a trn for a submission of property or land without previousValue" in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
+        val requestBody =
+          Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest.convertToHipJsonForVariation))
         stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest)).value
@@ -146,11 +151,10 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return BadRequestErrorResponse" when {
       "payload sent to hip is invalid" in {
-        implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
 
-        val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
+        val foobar      = """{"foobar": {"foo": "bar"}}"""
+        val requestBody = Json.stringify(Json.toJson(foobar))
 
-        val requestBody = Json.stringify(Json.toJson(variation))
         stubForPutWithBody(
           server,
           url,
@@ -164,7 +168,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(variation)).value
+        val futureResult = connector.trustVariation(Json.toJson(foobar)).value
 
         whenReady(futureResult) { result =>
           result mustBe Left(VariationFailureForAudit(BadRequestErrorResponse, "Bad request"))
@@ -174,7 +178,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "trusts two requests are submitted with the same Correlation ID." in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -203,7 +207,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "trusts provides an invalid Correlation ID." in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -254,7 +258,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "hip is experiencing some problem." in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -287,7 +291,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "hip returns 500" in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -1193,8 +1197,22 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
   }
 
   "TrustsJsonBridge" should {
+    "return input json" when {
+      "json has nothing to transform" in {
+        val in = Json.toJson("""{"foobar": {"foo": "bar"}}""")
+        assert(in.convertToHipJsonForVariation === in)
+      }
+    }
     "change node names correctly " when {
-      "converting trust json from hip to mdtp and back" in {
+      "converting the variation payload to hip format" in {
+        val variationJson: JsValue = Json.toJson(trustVariationMdtpFormat)
+        val transformed = variationJson.convertToHipJsonForVariation
+
+        assert(
+          (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "orgName").isDefined
+        )
+      }
+      "converting trust json from hip to mdtp and back for registration" in {
 
         // convertToMdtpJson uses the trust payload with its success.trustOrEstatesToDisplay wrapper
         val hipTrust = Json.toJson(trustWithBeneficiaryTrustsFromHip).as[JsObject]

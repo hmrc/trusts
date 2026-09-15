@@ -121,13 +121,13 @@
         "leadTrustees": [
           {
             "leadTrusteeOrg": {
-              "name": "Trust Services LTD",
               "phoneNumber": "0754545454",
               "email": "me@you.com",
               "identification": {
                 "utr": "5465416546"
               },
-              "entityStart": "1998-02-12"
+              "entityStart": "1998-02-12",
+              "name": "Trust Services LTD"
             }
           }
         ],

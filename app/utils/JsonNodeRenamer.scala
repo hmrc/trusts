@@ -17,7 +17,7 @@
 package utils
 
 import play.api.Logger
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.JsObject
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}

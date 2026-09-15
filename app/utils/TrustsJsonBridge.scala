@@ -16,7 +16,8 @@
 
 package utils
 
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.Reads._
+import play.api.libs.json._
 import play.api.{Logger, Logging}
 
 trait TrustsJsonBridge extends Logging {
@@ -58,6 +59,25 @@ trait TrustsJsonBridge extends Logging {
         case Some(_) =>
           JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.beneficiary.trust", "trusts")
       }
+
+    def convertToHipJsonForVariation: JsValue = {
+      val vr2: Reads[JsObject] = (__ \ "details" \ "trust" \ "entities" \ "leadTrustees").json.update(
+        Reads
+          .list {
+            ((__ \ "leadTrusteeOrg").json.update(
+              (__ \ "orgName").json.copyFrom((__ \ "name").json.pick) orElse
+                (__ \ "leadTrusteeInd").json.update((__ \ "name").json.copyFrom((__ \ "name").json.pick))
+            )) andThen
+              (__ \ "leadTrusteeOrg" \ 'name).json.prune orElse
+              (__ \ "leadTrusteeInd").json.update((__ \ "name").json.copyFrom((__ \ "name").json.pick))
+          }
+          .map(JsArray(_))
+      )
+      in.transform(vr2).getOrElse {
+        logger.warn("unable to convert name => orgName for trust variation payload")
+        in
+      }
+    }
 
   }
 
