@@ -53,7 +53,7 @@ trait JsonFixtures extends JsonUtils {
     getJsonValueFromFile("trust-with-beneficiary-trust-for-hip.json").validate[JsValue].get
 
   lazy val trustVariationMdtpFormat: JsValue =
-    getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees-expected.json").validate[JsValue].get
+    getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees-mdtp-format.json").validate[JsValue].get
 
   lazy val trustVariationsNoPreviousPropertyValueRequest: JsValue = getJsonValueFromFile(
     "valid-trusts-variations-no-previous-value-property-api.json"

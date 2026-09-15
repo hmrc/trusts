@@ -22,7 +22,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connector.HipTrustsConnector
 import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable}
+import models.existing_trust.ExistingCheckResponse.{
+  AlreadyRegistered, BadRequest, Matched, NotMatched, ServerError, ServiceUnavailable
+}
 import models.get_trust._
 import models.registration.RegistrationResponse
 import models.variation.VariationSuccessResponse
