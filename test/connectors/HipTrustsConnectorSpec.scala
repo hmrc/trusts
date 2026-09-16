@@ -145,7 +145,38 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return BadRequestErrorResponse" when {
-      "payload sent to hip is invalid" in {
+      "payload sent to hip is invalid and error origin is HoD" in {
+        implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
+
+        val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
+
+        val requestBody = Json.stringify(Json.toJson(variation))
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          BAD_REQUEST,
+          s"""
+             |{
+             |  "origin": "HoD",
+             |  "response": {
+             |    "error": {
+             |      "code": "400",
+             |      "logID": "00000000000000000000000000000000",
+             |      "message": "String"
+             |    }
+             |  }
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(variation)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(VariationFailureForAudit(BadRequestErrorResponse, "Bad request"))
+        }
+      }
+
+      "payload sent to hip is invalid and error origin is HIP" in {
         implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
 
         val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
@@ -245,7 +276,19 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           url,
           requestBody,
           IM_A_TEAPOT,
-          "foo"
+          """
+            |{
+            |  "origin": "HIP",
+            |  "response": {
+            |    "failures": [
+            |      {
+            |        "type": "string",
+            |        "reason": "string"
+            |      }
+            |    ]
+            |  }
+            |}
+            |""".stripMargin
         )
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
@@ -292,7 +335,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return errors.InternalServerErrorResponse" when {
-      "hip returns 500" in {
+      "hip returns 500 from Hip" in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPutWithBody(
@@ -301,7 +344,40 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           requestBody,
           INTERNAL_SERVER_ERROR,
           s"""
-             {
+             |{
+             |  "origin": "HIP",
+             |  "response": {
+             |    "failures": [
+             |      {
+             |        "type": "Type of Failure",
+             |        "reason": "Reason for Failure"
+             |      }
+             |    ]
+             |  }
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(
+            VariationFailureForAudit(
+              errors.InternalServerErrorResponse,
+              "hip is currently experiencing problems that require live service intervention"
+            )
+          )
+        }
+      }
+      "hip returns 500 from HoD" in {
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        stubForPutWithBody(
+          server,
+          url,
+          requestBody,
+          INTERNAL_SERVER_ERROR,
+          s"""
+             |{
              |  "origin": "HoD",
              |  "response": {
              |    "error": {
@@ -361,7 +437,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return BadRequestResponse" when {
-      "payload sent downstream is invalid" in {
+      "payload sent downstream is invalid and a 400 is returned by HoD" in {
         val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest).convertToHipJson)
         stubForPost(
           server,
@@ -370,12 +446,44 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           BAD_REQUEST,
           s"""
              |{
-             |  "error": {
-             |    "code": "400",
-             |    "message": "String",
-             |    "logID": "00000000000000000000000000000000"
+             |  "origin": "HoD",
+             |  "response": {
+             |    "error": {
+             |      "code": "400",
+             |      "logID": "00000000000000000000000000000000",
+             |      "message": "String"
+             |    }
              |  }
-             |}             |""".stripMargin
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(invalidRegistrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.BadRequestResponse)
+        }
+
+      }
+      "payload sent downstream is invalid and a 400 is returned by Hip" in {
+        val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest).convertToHipJson)
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          BAD_REQUEST,
+          s"""
+             |{
+             |  "origin": "HIP",
+             |  "response": {
+             |    "failures": [
+             |      {
+             |        "type": "Type of Failure",
+             |        "reason": "Reason for Failure"
+             |      }
+             |    ]
+             |  }
+             |}
+             |""".stripMargin
         )
 
         val futureResult = connector.registerTrust(invalidRegistrationRequest).value
@@ -515,12 +623,16 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           IM_A_TEAPOT,
           s"""
              |{
-             |  "error": {
-             |    "code": "418",
-             |    "message": "String",
-             |    "logID": "00000000000000000000000000000000"
+             |  "origin": "HIP",
+             |  "response": {
+             |    "failures": [
+             |      {
+             |        "type": "string",
+             |        "reason": "string"
+             |      }
+             |    ]
              |  }
-             |}             |""".stripMargin
+             |}""".stripMargin
         )
 
         val futureResult = connector.registerTrust(registrationRequest).value
@@ -532,7 +644,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return InternalServerErrorResponse" when {
-      "downstream is experiencing some problem" in {
+      "downstream is experiencing some problem and origin is HoD" in {
         val requestBody = Json.stringify(registrationReq)
 
         stubForPost(
@@ -542,13 +654,43 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           INTERNAL_SERVER_ERROR,
           s"""
              |{
-             |  "error": {
-             |    "code": "500",
-             |    "message": "String",
-             |    "logID": "00000000000000000000000000000000"
+             |  "origin": "HoD",
+             |  "response": {
+             |    "error": {
+             |      "code": "500",
+             |      "logID": "00000000000000000000000000000000",
+             |      "message": "String"
+             |    }
              |  }
-             |}             |}
-             |""".stripMargin
+             |}""".stripMargin
+        )
+
+        val futureResult = connector.registerTrust(registrationRequest).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(models.registration.InternalServerErrorResponse)
+        }
+      }
+      "downstream is experiencing some problem and origin is Hip" in {
+        val requestBody = Json.stringify(registrationReq)
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/registration",
+          requestBody,
+          INTERNAL_SERVER_ERROR,
+          s"""
+             |{
+             |  "origin": "HIP",
+             |  "response": {
+             |    "failures": [
+             |      {
+             |        "type": "Type of Failure",
+             |        "reason": "Reason for Failure"
+             |      }
+             |    ]
+             |  }
+             |}""".stripMargin
         )
 
         val futureResult = connector.registerTrust(registrationRequest).value
@@ -698,7 +840,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return BadRequest" when {
-      "for 400 response status" in {
+      "for 400 response status from HoD" in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(
@@ -706,11 +848,43 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
-          """{
-            |  "error": {
-            |    "code": "400",
-            |    "message": "String",
-            |    "logID": "00000000000000000000000000000000"
+          """
+            |{
+            |  "origin": "HoD",
+            |  "response": {
+            |    "error": {
+            |      "code": "400",
+            |      "logID": "00000000000000000000000000000000",
+            |      "message": "String"
+            |    }
+            |  }
+            |}""".stripMargin
+        )
+
+        val futureResult = connector.checkExistingTrust(request).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(BadRequest)
+        }
+      }
+      "for 400 response status from Hip" in {
+        val requestBody = Json.stringify(Json.toJson(request))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/match",
+          requestBody,
+          BAD_REQUEST,
+          """
+            |{
+            |  "origin": "HIP",
+            |  "response": {
+            |    "failures": [
+            |      {
+            |        "type": "Type of Failure",
+            |        "reason": "Reason for Failure"
+            |      }
+            |    ]
             |  }
             |}""".stripMargin
         )
@@ -732,13 +906,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
-          """{
-            |  "error": {
-            |    "code": "401",
-            |    "message": "String",
-            |    "logID": "00000000000000000000000000000000"
-            |  }
-            |}""".stripMargin
+          ""
         )
 
         val futureResult = connector.checkExistingTrust(request).value
@@ -758,13 +926,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
-          """{
-            |  "error": {
-            |    "code": "403",
-            |    "message": "String",
-            |    "logID": "00000000000000000000000000000000"
-            |  }
-            |}""".stripMargin
+          "".stripMargin
         )
 
         val futureResult = connector.checkExistingTrust(request).value
@@ -784,13 +946,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           BAD_REQUEST,
-          """{
-            |  "error": {
-            |    "code": "404",
-            |    "message": "String",
-            |    "logID": "00000000000000000000000000000000"
-            |  }
-            |}""".stripMargin
+          "".stripMargin
         )
 
         val futureResult = connector.checkExistingTrust(request).value
@@ -802,7 +958,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
 
     "return ServerError" when {
-      "for 500 response status" in {
+      "for 500 response status with HoD origin" in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(
@@ -810,11 +966,43 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           "/etmp/RESTAdapter/trustsandestates/match",
           requestBody,
           INTERNAL_SERVER_ERROR,
-          """{
-            |  "error": {
-            |    "code": "500",
-            |    "message": "String",
-            |    "logID": "00000000000000000000000000000000"
+          """
+            |{
+            |  "origin": "HoD",
+            |  "response": {
+            |    "error": {
+            |      "code": "500",
+            |      "logID": "00000000000000000000000000000000",
+            |      "message": "String"
+            |    }
+            |  }
+            |}""".stripMargin
+        )
+
+        val futureResult = connector.checkExistingTrust(request).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(ServerError)
+        }
+      }
+      "for 500 response status with Hip origin" in {
+        val requestBody = Json.stringify(Json.toJson(request))
+
+        stubForPost(
+          server,
+          "/etmp/RESTAdapter/trustsandestates/match",
+          requestBody,
+          INTERNAL_SERVER_ERROR,
+          """
+            |{
+            |  "origin": "HIP",
+            |  "response": {
+            |    "failures": [
+            |      {
+            |        "type": "Type of Failure",
+            |        "reason": "Reason for Failure"
+            |      }
+            |    ]
             |  }
             |}""".stripMargin
         )
@@ -837,7 +1025,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           requestBody,
           SERVICE_UNAVAILABLE,
           """
-            {
+            |{
             |  "origin": "HIP",
             |  "response": {
             |    "failures": [
@@ -935,7 +1123,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
         }
 
         "return BadRequestResponse" when {
-          "hip has returned a 400" in {
+          "hip has returned a 400 with origin HoD" in {
             val utr = "1234567891"
             stubForGet(
               server,
@@ -943,9 +1131,40 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
               BAD_REQUEST,
               """
                 |{
-                | "code": "400",
-                | "message": "String",
-                | "logID": "00000000000000000000000000000000"
+                |  "origin": "HoD",
+                |  "response": {
+                |    "error": {
+                |      "code": "400",
+                |      "logID": "00000000000000000000000000000000",
+                |      "message": "String"
+                |    }
+                |  }
+                |}""".stripMargin
+            )
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(BadRequestResponse)
+            }
+          }
+          "hip has returned a 400 with origin Hip" in {
+            val utr = "1234567891"
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              BAD_REQUEST,
+              """
+                |{
+                |  "origin": "HIP",
+                |  "response": {
+                |    "failures": [
+                |      {
+                |        "type": "Type of Failure",
+                |        "reason": "Reason for Failure"
+                |      }
+                |    ]
+                |  }
                 |}""".stripMargin
             )
 
@@ -1005,20 +1224,49 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
         }
 
         "return InternalServerErrorResponse" when {
-          "hip has returned a 500 with the code SERVER_ERROR" in {
+          "hip has returned a 500 with the code SERVER_ERROR with origin HoD" in {
             val utr = "1234567893"
             stubForGet(
               server,
               get5MLDTrustUTREndpoint(utr),
               INTERNAL_SERVER_ERROR,
-              """{
-                |  "error": {
-                |    "code": "500",
-                |    "message": "String",
-                |    "logID": "00000000000000000000000000000000"
+              """
+                |{
+                |  "origin": "HoD",
+                |  "response": {
+                |    "error": {
+                |      "code": "500",
+                |      "logID": "00000000000000000000000000000000",
+                |      "message": "String"
+                |    }
                 |  }
-                |}
-                |""".stripMargin
+                |}""".stripMargin
+            )
+
+            val futureResult = connector.getTrustInfo(utr).value
+
+            whenReady(futureResult) { result =>
+              result mustBe Right(InternalServerErrorResponse)
+            }
+          }
+          "hip has returned a 500 with the code SERVER_ERROR with origin Hip" in {
+            val utr = "1234567893"
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              INTERNAL_SERVER_ERROR,
+              """
+                |{
+                |  "origin": "HIP",
+                |  "response": {
+                |    "failures": [
+                |      {
+                |        "type": "Type of Failure",
+                |        "reason": "Reason for Failure"
+                |      }
+                |    ]
+                |  }
+                |}""".stripMargin
             )
 
             val futureResult = connector.getTrustInfo(utr).value
@@ -1032,7 +1280,23 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
         "return ServiceUnavailableResponse" when {
           "hip has returned a 503 with the code SERVICE_UNAVAILABLE" in {
             val utr = "1234567894"
-            stubForGet(server, get5MLDTrustUTREndpoint(utr), SERVICE_UNAVAILABLE, "")
+            stubForGet(
+              server,
+              get5MLDTrustUTREndpoint(utr),
+              SERVICE_UNAVAILABLE,
+              """
+                |{
+                |  "origin": "HIP",
+                |  "response": {
+                |    "failures": [
+                |      {
+                |        "type": "string",
+                |        "reason": "string"
+                |      }
+                |    ]
+                |  }
+                |}""".stripMargin
+            )
 
             val futureResult = connector.getTrustInfo(utr).value
 
@@ -1119,19 +1383,6 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           }
         }
 
-        "return BadRequestResponse" when {
-          "hip has returned a 400" in {
-            val urn = "1234567890ADCEF"
-            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST, Json.stringify(jsonResponse4005mld))
-
-            val futureResult = connector.getTrustInfo(urn).value
-
-            whenReady(futureResult) { result =>
-              result mustBe Right(BadRequestResponse)
-            }
-          }
-        }
-
         "return NotEnoughDataResponse" when {
           "des has returned a 204" in {
             val urn = "1234567890ADCEF"
@@ -1161,44 +1412,6 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
             whenReady(futureResult) { result =>
               result mustBe Right(ResourceNotFoundResponse)
-            }
-          }
-        }
-
-        "return InternalServerErrorResponse" when {
-          "hip has returned a 500 with the code INTERNAL_SERVER_ERROR" in {
-            val urn = "1234567890ADCEF"
-            stubForGet(
-              server,
-              get5MLDTrustURNEndpoint(urn),
-              INTERNAL_SERVER_ERROR,
-              """{
-                |  "error": {
-                |    "code": "500",
-                |    "message": "String",
-                |    "logID": "00000000000000000000000000000000"
-                |  }
-                |}
-                |""".stripMargin
-            )
-
-            val futureResult = connector.getTrustInfo(urn).value
-
-            whenReady(futureResult) { result =>
-              result mustBe Right(InternalServerErrorResponse)
-            }
-          }
-        }
-
-        "return ServiceUnavailableResponse" when {
-          "hip has returned a 503 with the code SERVICE_UNAVAILABLE" in {
-            val urn = "1234567890ADCEF"
-            stubForGet(server, get5MLDTrustURNEndpoint(urn), SERVICE_UNAVAILABLE, "")
-
-            val futureResult = connector.getTrustInfo(urn).value
-
-            whenReady(futureResult) { result =>
-              result mustBe Right(ServiceUnavailableResponse)
             }
           }
         }
