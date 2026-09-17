@@ -49,7 +49,10 @@ trait TrustsJsonBridge extends Logging {
       }
 
     def convertToHipJson: JsObject =
-      JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.leadTrustees.name", "orgName")
+      (in \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name" \ "lastName").toOption match {
+        case Some(_) => in.as[JsObject]
+        case None => JsonNodeRenamer.renameNode(in.as[JsObject], "details.trust.entities.leadTrustees.name", "orgName")
+      }
 
     def convertToHipJsonForVariation: JsValue = {
       val transformation: Reads[JsObject] = (__ \ "details" \ "trust" \ "entities" \ "leadTrustees").json.update(

@@ -1205,7 +1205,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
       }
     }
     "change node names correctly " when {
-      "converting the variation payload to hip format" in {
+      "converting the variation payload to hip format for leadTrusteeOrg" in {
         val variationJson: JsValue = Json.toJson(trustVariationMdtpFormat)
         val transformed            = variationJson.convertToHipJsonForVariation
 
@@ -1216,6 +1216,19 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
           (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "orgName").isDefined
         )
       }
+
+      "ensuring the name isn't changed when converting the registration payload to hip format for leadTrusteeInd" in {
+        val registrationJson: JsValue = Json.toJson(trustRegistrationWithIndLeadTrusteeMdtpFormat)
+        val transformed            = registrationJson.convertToHipJson
+
+        assert(
+          (registrationJson \ "details" \ "trust" \ "entities" \ "leadTrustees"  \ "name").isDefined
+        )
+        assert(
+          (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
+        )
+      }
+
       "converting trust json from hip to mdtp and back for registration" in {
 
         // convertToMdtpJson uses the trust payload with its success.trustOrEstatesToDisplay wrapper
