@@ -1219,10 +1219,10 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
 
       "ensuring the name isn't changed when converting the registration payload to hip format for leadTrusteeInd" in {
         val registrationJson: JsValue = Json.toJson(trustRegistrationWithIndLeadTrusteeMdtpFormat)
-        val transformed            = registrationJson.convertToHipJson
+        val transformed               = registrationJson.convertToHipJson
 
         assert(
-          (registrationJson \ "details" \ "trust" \ "entities" \ "leadTrustees"  \ "name").isDefined
+          (registrationJson \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
         )
         assert(
           (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
