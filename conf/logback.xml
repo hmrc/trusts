@@ -15,6 +15,7 @@
     <logger name="transformers" level="INFO"/>
     <logger name="utils" level="INFO"/>
     <logger name="retry" level="INFO"/>
+    <logger name="connector.HipTrustsConnector" level="DEBUG"/>
     <logger name="uk.gov.hmrc.audit.handler.DatastreamHandler" level="OFF"/>
 
     <root level="INFO">
