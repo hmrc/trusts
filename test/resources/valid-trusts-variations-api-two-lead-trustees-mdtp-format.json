@@ -31,6 +31,7 @@
     }
   },
   "details": {
+    "trust": {
       "details": {
         "startDate": "2001-01-01",
         "administrationCountry": "GB",
@@ -61,6 +62,23 @@
           }
         ],
         "beneficiary": {
+          "trust": [
+            {
+              "organisationName": "Organisation Name",
+              "beneficiaryDiscretion": false,
+              "beneficiaryShareOfIncome": "50",
+              "identification": {
+                "utr": "company utr",
+                "address": {
+                  "line1": "Line 1",
+                  "line2": "Line 2",
+                  "postCode": "NE1 1NE",
+                  "country": "GB"
+                }
+              },
+              "entityStart": "1990-10-10"
+            }
+          ],
           "individualDetails": [
             {
               "name": {
@@ -120,13 +138,32 @@
         "leadTrustees": [
           {
             "leadTrusteeOrg": {
+              "bpMatchStatus": "01",
+              "lineNo": "01",
+              "name": "Trust Services LTD",
               "phoneNumber": "0754545454",
               "email": "me@you.com",
               "identification": {
                 "utr": "5465416546"
               },
               "entityStart": "1998-02-12",
-              "name": "Trust Services LTD"
+              "entityEnd": "2019-02-10"
+            }
+          },
+          {
+            "leadTrusteeInd": {
+              "name": {
+                "firstName": "John",
+                "middleName": "William",
+                "lastName": "O'Connor"
+              },
+              "dateOfBirth": "1995-02-12",
+              "phoneNumber": "0754545454",
+              "email": "me@you.com",
+              "identification": {
+                "nino": "JP121212A"
+              },
+              "entityStart": "2019-02-10"
             }
           }
         ],
@@ -219,7 +256,8 @@
           }
         ]
       }
-    },
+    }
+  },
   "agentDetails": {
     "arn": "AARN1234567",
     "agentName": "Mr. xys abcde",

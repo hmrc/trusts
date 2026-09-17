@@ -336,7 +336,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
 
     http
       .put(url"$trustVariationsEndpoint")
-      .withBody(trustVariations.convertToHipJson)
+      .withBody(trustVariations.convertToHipJsonForVariation)
       .execute[VariationResponse](using httpReads, ec)
       .map {
         case response: VariationSuccessResponse => Right(response)

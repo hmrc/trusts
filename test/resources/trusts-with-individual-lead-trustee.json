@@ -1,0 +1,163 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "John Smith's Trust",
+    "address": {
+      "line1": "26",
+      "line2": "Grangetown",
+      "line3": "Tyne and Wear",
+      "line4": "Newcastle",
+      "postCode": "Z99 2YY",
+      "country": "GB"
+    },
+    "phoneNumber": "+123456789012345678"
+  },
+  "declaration": {
+    "name": {
+      "firstName": "John",
+      "middleName": "Stephen",
+      "lastName": "Smith"
+    },
+    "address": {
+      "line1": "26",
+      "line2": "Grangetown",
+      "line3": "Tyne and Wear",
+      "line4": "Newcastle",
+      "postCode": "Z99 2YY",
+      "country": "GB"
+    }
+  },
+  "submissionDate": "2026-09-17",
+  "details": {
+    "trust": {
+      "details": {
+        "startDate": "2025-04-06",
+        "lawCountry": "DO",
+        "administrationCountry": "DO",
+        "residentialStatus": {
+          "nonUK": {
+            "sch5atcgga92": false,
+            "s218ihta84": false
+          }
+        },
+        "typeOfTrust": "Inter vivos Settlement",
+        "interVivos": true,
+        "trustTaxable": true,
+        "expressTrust": true,
+        "trustUKResident": false,
+        "trustUKProperty": false,
+        "schedule3aExempt": true,
+        "trustRecorded": false,
+        "trustUKRelation": false
+      },
+      "assets": {
+        "monetary": [
+          {
+            "assetMonetaryAmount": 999999999999
+          }
+        ],
+        "partnerShip": [
+          {
+            "description": "Partnership Asset 1",
+            "partnershipStart": "2020-06-24"
+          }
+        ]
+      },
+      "entities": {
+        "naturalPerson": [
+          {
+            "name": {
+              "firstName": "John",
+              "middleName": "Jameson",
+              "lastName": "Marston"
+            },
+            "dateOfBirth": "1945-12-24",
+            "identification": {
+              "nino": "AB828378C"
+            },
+            "countryOfResidence": "DO",
+            "nationality": "DO"
+          }
+        ],
+        "beneficiary": {
+          "individualDetails": [
+            {
+              "name": {
+                "firstName": "John",
+                "middleName": "Stephen",
+                "lastName": "Doe"
+              },
+              "dateOfBirth": "2018-02-26",
+              "vulnerableBeneficiary": true,
+              "beneficiaryDiscretion": false,
+              "beneficiaryShareOfIncome": "100",
+              "identification": {
+                "nino": "AA123456A"
+              },
+              "countryOfResidence": "DO",
+              "nationality": "DO",
+              "legallyIncapable": true
+            }
+          ]
+        },
+        "protectors": {
+          "protector": [
+            {
+              "name": {
+                "firstName": "Individual",
+                "middleName": "Protector",
+                "lastName": "3"
+              },
+              "identification": {
+                "passport": {
+                  "number": "4536273648",
+                  "expirationDate": "1980-09-25",
+                  "countryOfIssue": "US"
+                },
+                "address": {
+                  "line1": "1600 Pennsylvania Avenue",
+                  "line2": "Washington",
+                  "line3": "District of Columbia",
+                  "country": "US"
+                }
+              },
+              "countryOfResidence": "AU",
+              "nationality": "AU"
+            }
+          ]
+        },
+        "settlors": {
+          "settlor": [
+            {
+              "name": {
+                "firstName": "John",
+                "middleName": "Winston",
+                "lastName": "Lennon"
+              },
+              "dateOfBirth": "1945-12-24",
+              "identification": {
+                "nino": "AA123456A"
+              },
+              "countryOfResidence": "DO",
+              "nationality": "DO"
+            }
+          ]
+        },
+        "leadTrustees": {
+          "dateOfBirth": "1900-01-01",
+          "phoneNumber": "+123456789012345678",
+          "identification": {
+            "nino": "AA100001A"
+          },
+          "countryOfResidence": "GB",
+          "nationality": "GB",
+          "name": {
+            "firstName": "John",
+            "middleName": "Stephen",
+            "lastName": "Smith"
+          }
+        }
+      }
+    }
+  }
+}

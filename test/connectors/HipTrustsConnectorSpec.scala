@@ -27,17 +27,20 @@ import models.existing_trust.ExistingCheckResponse.{
 }
 import models.get_trust._
 import models.registration.RegistrationResponse
-import models.variation.{TrustVariation, VariationSuccessResponse}
+import models.variation.VariationSuccessResponse
 import org.scalatest.EitherValues
+import play.api.Logging
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsLookupResult, JsObject, JsValue, Json, Reads}
+import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.test.Helpers.CONTENT_TYPE
 import utils.{NonTaxable5MLDFixtures, TrustsJsonBridge}
 
 import scala.concurrent.Future
+import scala.language.postfixOps
 
-class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
+class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with Logging {
 
   val converter = new TrustsJsonBridge {}
   import converter._
@@ -114,7 +117,9 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return a VariationTrnResponse" when {
       "hip has returned a 200 with a trn" in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+
+        // n.b. connector preforms transformation before sending to stubbed remote
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest).convertToHipJsonForVariation)
         stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
@@ -130,7 +135,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return a VariationTrnResponse" when {
       "hip has returned a 200 with a trn for a submission of property or land without previousValue" in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
+        val requestBody =
+          Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest.convertToHipJsonForVariation))
         stubForPutWithBody(server, url, requestBody, OK, """{ "success": {"tvn": "XXTVN1234567890"}}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest)).value
@@ -146,11 +152,10 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return BadRequestErrorResponse" when {
       "payload sent to hip is invalid" in {
-        implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
 
-        val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
+        val foobar      = JsObject(Seq("foobar" -> JsObject(Seq("foo" -> JsString("bar")))))
+        val requestBody = Json.stringify(Json.toJson(foobar))
 
-        val requestBody = Json.stringify(Json.toJson(variation))
         stubForPutWithBody(
           server,
           url,
@@ -164,7 +169,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(variation)).value
+        val futureResult = connector.trustVariation(Json.toJson(foobar)).value
 
         whenReady(futureResult) { result =>
           result mustBe Left(VariationFailureForAudit(BadRequestErrorResponse, "Bad request"))
@@ -174,7 +179,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "trusts two requests are submitted with the same Correlation ID." in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -203,7 +208,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "trusts provides an invalid Correlation ID." in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -254,7 +259,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "hip is experiencing some problem." in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -287,7 +292,7 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
     "return errors.InternalServerErrorResponse" when {
       "hip returns 500" in {
-        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest.convertToHipJsonForVariation))
 
         stubForPutWithBody(
           server,
@@ -594,12 +599,12 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
           requestBody,
           UNPROCESSABLE_ENTITY,
           """{
-          |  "error": {
-          |    "processingDate": "2001-12-17T09:30:47.0",
-          |    "errorId": "001",
-          |    "text": "FAIL – NO MATCH"
-          |  }
-          |}""".stripMargin
+            |  "error": {
+            |    "processingDate": "2001-12-17T09:30:47.0",
+            |    "errorId": "001",
+            |    "text": "FAIL – NO MATCH"
+            |  }
+            |}""".stripMargin
         )
 
         val futureResult = connector.checkExistingTrust(request).value
@@ -955,8 +960,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 NotEnoughDataResponse(
                   jsonResponse204,
                   Json.parse("""
-                               |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
-                               |""".stripMargin)
+                      |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
+                      |""".stripMargin)
                 )
               )
             }
@@ -1097,8 +1102,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 NotEnoughDataResponse(
                   Json.parse(hipPayload),
                   Json.parse("""
-                               |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
-                               |""".stripMargin)
+                      |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                      |""".stripMargin)
                 )
               )
             }
@@ -1130,8 +1135,8 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 NotEnoughDataResponse(
                   jsonResponse204,
                   Json.parse("""
-                               |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
-                               |""".stripMargin)
+                      |{"obj":[{"msg":["'success' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
+                      |""".stripMargin)
                 )
               )
             }
@@ -1193,24 +1198,59 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
   }
 
   "TrustsJsonBridge" should {
+    "return input json" when {
+      "json has nothing to transform" in {
+        val in = JsObject(Seq("foobar" -> JsObject(Seq("foo" -> JsString("bar")))))
+        assert(in.convertToHipJsonForVariation === in)
+      }
+    }
     "change node names correctly " when {
-      "converting trust json from hip to mdtp and back" in {
+      "converting the variation payload to hip format for leadTrusteeOrg" in {
+        val variationJson: JsValue = Json.toJson(trustVariationMdtpFormat)
+        val transformed            = variationJson.convertToHipJsonForVariation
 
-        val hipTrust: JsValue = Json.toJson(trustWithBeneficiaryTrustsFromHip)
+        assert(
+          (variationJson \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name").isDefined
+        )
+        assert(
+          (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "orgName").isDefined
+        )
+      }
 
+      "ensuring the name isn't changed when converting the registration payload to hip format for leadTrusteeInd" in {
+        val registrationJson: JsValue = Json.toJson(trustRegistrationWithIndLeadTrusteeMdtpFormat)
+        val transformed               = registrationJson.convertToHipJson
+
+        assert(
+          (registrationJson \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
+        )
+        assert(
+          (transformed \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
+        )
+      }
+
+      "converting trust json from hip to mdtp and back for registration" in {
+
+        // convertToMdtpJson uses the trust payload with its success.trustOrEstatesToDisplay wrapper
+        val hipTrust = Json.toJson(trustWithBeneficiaryTrustsFromHip).as[JsObject]
+
+        // convertedToHip uses the trust payload without any success.trustOrEstatesToDisplay wrapper
         val mdtpTrust: JsValue =
-          (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsValue]
+          (Json.toJson(trustWithBeneficiaryTrustForHip) \ "success" \ "trustOrEstateDisplay").as[JsObject]
 
         val convertedToMdtp = hipTrust.convertToMdtpJson
+        val convertedToHip  = mdtpTrust.convertToHipJson
 
-        val unwrappedMdtpTrust = (convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject]
-        val unwrappedHipTrust  = (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject]
-
-        val convertedToHip = mdtpTrust.convertToHipJson
-
+        assert(
+          (convertedToMdtp \ "success" \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "name").isDefined
+        )
+        assert(
+          (convertedToMdtp \ "success" \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "beneficiary" \ "trust").isDefined
+        )
+        assert((convertedToHip \ "details" \ "trust" \ "entities" \ "leadTrustees" \ "orgName").isDefined)
         assert(!(hipTrust === mdtpTrust))
-        assert(unwrappedMdtpTrust === mdtpTrust)
-        assert(convertedToHip === unwrappedHipTrust)
+        assert((convertedToMdtp \ "success" \ "trustOrEstateDisplay").as[JsObject] === mdtpTrust)
+        assert(convertedToHip === (hipTrust \ "success" \ "trustOrEstateDisplay").as[JsObject])
       }
     }
   }
