@@ -134,4 +134,112 @@ trait JsonFixtures extends JsonUtils {
   lazy val getTrustMalformedJsonResponse: String = getJsonFromFile("get-trust-malformed-json-response.json")
 
   lazy val expectedParsedJson: JsValue = getJsonValueFromFile("expected-parsed-trust-response.json")
+
+  object errorResponses {
+
+    val hipJsObjErr: String = jsObjErr()
+    val hodJsObjErr: String = jsObjErr("HoD")
+    val hipJsArrErr: String = jsArrErr()
+    val hodJsArrErr: String = jsObjErr("HoD")
+
+    def jsObjErr(origin: String = "HIP"): String =
+      s"""
+        |{
+        |  "origin": "$origin",
+        |  "response": {
+        |    "error": {
+        |      "code": "nnn",
+        |      "logID": "00000000000000000000000000000000",
+        |      "message": "String"
+        |    }
+        |  }
+        |}""".stripMargin
+
+    def jsArrErr(origin: String = "HIP"): String =
+      s"""
+        |{
+        |  "origin": "$origin",
+        |  "response": {
+        |    "failures": [
+        |      {
+        |        "type": "Type of Failure",
+        |        "reason": "Reason for Failure"
+        |      }
+        |    ]
+        |  }
+        |}
+        |""".stripMargin
+
+    val hip422DuplicateSubmission: String =
+      """
+         |{
+         |  "error":
+         |    {
+         |      "errorId": "004",
+         |      "processingDate": "2001-12-17T09:30:47.0",
+         |      "text": "Duplicate submission acknowledgment reference"
+         |    }
+         |}
+         |""".stripMargin
+
+    val hip422RequestNotProcessed: String =
+      """
+         |{
+         |  "error":
+         |    {
+         |      "errorId": "003",
+         |      "processingDate": "2001-12-17T09:30:47.0",
+         |      "text": "Request could not be processed"
+         |    }
+         |}""".stripMargin
+
+    val hip422TechnicalError: String =
+      """
+         |{
+         |  "error":
+         |    {
+         |      "errorId": "999",
+         |      "processingDate": "2001-12-17T09:30:47.0",
+         |      "text": "Technical System Error"
+         |    }
+         |}""".stripMargin
+
+    val hip422AlreadyRegistered: String =
+      """
+         |{
+         |  "error":
+         |    {
+         |      "errorId": "002",
+         |      "processingDate": "2001-12-17T09:30:47.0",
+         |      "text": "FAIL – ALREADY REGISTERED"
+         |    }
+         |}
+         |""".stripMargin
+
+    val hip422NoMatch: String =
+      """
+         |{
+         |  "error":
+         |    {
+         |      "errorId": "001",
+         |      "processingDate": "2001-12-17T09:30:47.0",
+         |      "text": "FAIL – NO MATCH"
+         |    }
+         |}
+         |""".stripMargin
+
+    val hip422UnknownError: String =
+      s"""
+         |{
+         |  "error":
+         |    {
+         |      "errorId": "000",
+         |      "processingDate": "2001-12-17T09:30:47.0",
+         |      "text": "some random error"
+         |    }
+         |}
+         |""".stripMargin
+
+  }
+
 }
