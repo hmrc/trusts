@@ -254,7 +254,7 @@ class HipTrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(impli
             } else { // 003 or unknown errorId
               logger.warn(
                 s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
-                  s" bad request returned from des: ${response.json}"
+                  s" bad request returned from hip: ${response.json}"
               )
               BadRequestResponse
             }
