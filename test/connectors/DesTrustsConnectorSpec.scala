@@ -865,4 +865,27 @@ class DesTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
     }
   }
 
+  "a connection fault" should {
+
+    "return a ServerError from checkExistingTrust" in {
+      stubConnectionFault(server)
+      whenReady(connector.checkExistingTrust(request).value)(mustBeConnectionError)
+    }
+
+    "return a ServerError from registerTrust" in {
+      stubConnectionFault(server)
+      whenReady(connector.registerTrust(registrationRequest).value)(mustBeConnectionError)
+    }
+
+    "return a ServerError from getTrustInfo" in {
+      stubConnectionFault(server)
+      whenReady(connector.getTrustInfo("1234567890").value)(mustBeConnectionError)
+    }
+
+    "return a ServerError from trustVariation" in {
+      stubConnectionFault(server)
+      whenReady(connector.trustVariation(Json.toJson(trustVariationsRequest)).value)(mustBeConnectionError)
+    }
+  }
+
 }

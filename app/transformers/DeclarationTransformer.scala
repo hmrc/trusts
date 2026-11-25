@@ -57,7 +57,8 @@ class DeclarationTransformer {
         addSubmissionDate(submissionDate)                                                                 andThen
         removeAdditionalShareAssetFields(responseJson)                                                    andThen
         removeAdditionalTrustDetailsField(responseJson)                                                   andThen
-        fixInvalidTrustDetails(responseJson)
+        fixInvalidTrustDetails(responseJson)                                                              andThen
+        normaliseBeneficiariesShareOfIncome
     )
   }
 
@@ -269,5 +270,41 @@ class DeclarationTransformer {
 
   private def addSubmissionDate(submissionDate: LocalDate): Reads[JsObject] =
     putNewValue(SUBMISSION_DATE, Json.toJson(submissionDate))
+
+  private val incomeBeneficiaryTypes: Seq[String] = Seq(
+    INDIVIDUAL_BENEFICIARY,
+    COMPANY_BENEFICIARY,
+    TRUST_BENEFICIARY,
+    CHARITY_BENEFICIARY,
+    UNIDENTIFIED_BENEFICIARY,
+    LARGE_BENEFICIARY,
+    OTHER_BENEFICIARY
+  )
+
+  private val shareOfIncomeWithLeadingZeros = "0+(\\d+)".r
+
+  private def normaliseBeneficiariesShareOfIncome: Reads[JsObject] =
+    incomeBeneficiaryTypes.foldLeft(doNothing()) { (acc, beneficiaryType) =>
+      val path = ENTITIES \ BENEFICIARIES \ beneficiaryType
+
+      acc andThen Reads[JsObject] { json =>
+        json.transform(path.json.pick[JsArray]) match {
+          case JsSuccess(beneficiaries, _) =>
+            json.transform(prunePathAndPutNewValue(path, JsArray(beneficiaries.value.map(normaliseShareOfIncome))))
+          case _                           =>
+            json.validate[JsObject]
+        }
+      }
+    }
+
+  private def normaliseShareOfIncome(beneficiary: JsValue): JsValue =
+    beneficiary match {
+      case obj: JsObject =>
+        (obj \ SHARE_OF_INCOME).asOpt[String] match {
+          case Some(shareOfIncomeWithLeadingZeros(share)) => obj + (SHARE_OF_INCOME -> JsString(share))
+          case _                                          => obj
+        }
+      case _             => beneficiary
+    }
 
 }

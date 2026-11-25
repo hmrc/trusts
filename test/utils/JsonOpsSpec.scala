@@ -17,7 +17,7 @@
 package utils
 
 import base.BaseSpec
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsNull, JsValue, Json}
 import utils.JsonOps._
 
 class JsonOpsSpec extends BaseSpec {
@@ -46,6 +46,16 @@ class JsonOpsSpec extends BaseSpec {
 
         initialJson.applyRules mustBe reformattedJson
 
+      }
+    }
+
+    "JsValueOps.traverse" should {
+
+      "leave null values unchanged" in {
+
+        val initialJson: JsValue = Json.obj("phoneNumber" -> JsNull, "numbers" -> Json.arr(JsNull))
+
+        initialJson.applyRules mustBe initialJson
       }
     }
 
@@ -100,6 +110,25 @@ class JsonOpsSpec extends BaseSpec {
           )
 
           initialJson.removeAnswerRows() mustBe reformattedJson
+        }
+
+        "return original json if a beneficiary has no answer rows" in {
+
+          val initialJson: JsValue =
+            Json.obj("answerSections" -> Json.obj("beneficiaries" -> Json.arr(Json.obj("heading" -> "Beneficiary"))))
+
+          initialJson.removeAnswerRows() mustBe initialJson
+        }
+
+        "return original json if an answer row has no label" in {
+
+          val initialJson: JsValue = Json.obj(
+            "answerSections" -> Json.obj(
+              "beneficiaries" -> Json.arr(Json.obj("rows" -> Json.arr(Json.obj("answer" -> "Director"))))
+            )
+          )
+
+          initialJson.removeAnswerRows() mustBe initialJson
         }
       }
 

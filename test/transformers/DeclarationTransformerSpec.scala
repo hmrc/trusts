@@ -186,6 +186,17 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       result.asOpt.value mustBe afterJson
     }
 
+    "strip leading zeros from beneficiaryShareOfIncome on every beneficiary type" in {
+      val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-leading-zeroes-share-of-income.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson     =
+        JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-leading-zeroes-share-of-income-removed.json")
+      val transformer   = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
+      result.asOpt.value mustBe afterJson
+    }
+
     "transform json successfully when invalid trust details" in {
       val beforeJson    = JsonUtils.getJsonValueFromFile("trusts-etmp-invalid-trust-details.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]

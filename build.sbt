@@ -1,11 +1,9 @@
 import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
 ThisBuild / scalaVersion := "2.13.18"
-ThisBuild / majorVersion := 0
+ThisBuild / majorVersion := 1
 
-val appName = "trusts"
-
-lazy val microservice = Project(appName, file("."))
+lazy val microservice = Project("trusts", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
