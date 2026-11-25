@@ -19,10 +19,32 @@ package transformers.mdtp
 import models.variation.{TrusteeIndividualType, TrusteeOrgType, TrusteeType}
 import play.api.libs.json._
 import utils.Constants._
+import utils.JsonOps.{prunePathAndPutNewValue, putNewValue}
 
 object Trustees extends Entities[TrusteeType] {
 
   override val path: JsPath = ENTITIES \ TRUSTEES
+
+  override def transform(response: JsValue)(implicit rds: Reads[TrusteeType]): Reads[JsObject] =
+    response
+      .transform(path.json.pick)
+      .fold(
+        _ => putNewValue(path, JsArray()),
+        entities => {
+
+          val reshapedForJsArray: List[TrusteeType] = entities.as[List[TrusteeType]].flatMap { x =>
+            if (x.trusteeOrg.nonEmpty && x.trusteeInd.nonEmpty) {
+              List(TrusteeType(x.trusteeInd, None), TrusteeType(None, x.trusteeOrg))
+            } else List(x)
+          }
+
+          val updatedEntities = JsArray(reshapedForJsArray.map { entity =>
+            updateEntity(entity)
+          })
+
+          prunePathAndPutNewValue(path, updatedEntities)
+        }
+      )
 
   override def updateEntity(trustee: TrusteeType): JsValue =
     trustee match {
