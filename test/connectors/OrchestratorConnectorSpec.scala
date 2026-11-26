@@ -85,4 +85,11 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
     }
   }
 
+  "a connection fault" should {
+    "return a ServerError from migrateToTaxable" in {
+      stubConnectionFault(server)
+      whenReady(connector.migrateToTaxable("NTTRUST00000001", "123456789").value)(mustBeConnectionError)
+    }
+  }
+
 }

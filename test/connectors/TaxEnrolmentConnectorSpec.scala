@@ -354,4 +354,11 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     }
   }
 
+  "a connection fault" should {
+    "return a ServerError from enrolSubscriber" in {
+      stubConnectionFault(server)
+      whenReady(connector.enrolSubscriber("123456789", taxable = true, "XTRN1234567").value)(mustBeConnectionError)
+    }
+  }
+
 }

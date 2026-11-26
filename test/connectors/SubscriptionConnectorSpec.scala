@@ -105,4 +105,11 @@ class SubscriptionConnectorSpec extends ConnectorSpecHelper {
     }
   }
 
+  "a connection fault" should {
+    "return a ServerError from getSubscriptionId" in {
+      stubConnectionFault(server)
+      whenReady(connector.getSubscriptionId("XTRN1234567").value)(mustBeConnectionError)
+    }
+  }
+
 }

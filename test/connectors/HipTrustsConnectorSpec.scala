@@ -1173,4 +1173,63 @@ class HipTrustsConnectorSpec extends ConnectorSpecHelper with EitherValues with 
     }
   }
 
+  "a 422 response not handled above" should {
+
+    "return InternalServerErrorResponse from getTrustInfo for errorId 999" in {
+      val utr = "1234567894"
+      stubForGet(server, get5MLDTrustUTREndpoint(utr), UNPROCESSABLE_ENTITY, hip422TechnicalError)
+
+      whenReady(connector.getTrustInfo(utr).value) { result =>
+        result mustBe Right(InternalServerErrorResponse)
+      }
+    }
+
+    "return BadRequestResponse from getTrustInfo for errorId 003" in {
+      val utr = "1234567895"
+      stubForGet(server, get5MLDTrustUTREndpoint(utr), UNPROCESSABLE_ENTITY, hip422RequestNotProcessed)
+
+      whenReady(connector.getTrustInfo(utr).value) { result =>
+        result mustBe Right(BadRequestResponse)
+      }
+    }
+
+    "return BadRequestErrorResponse from trustVariation for an unknown errorId" in {
+      val requestBody = Json.stringify(Json.toJson(trustVariationsRequest).convertToHipJsonForVariation)
+      stubForPutWithBody(
+        server,
+        "/etmp/RESTAdapter/trustsandestates/registration",
+        requestBody,
+        UNPROCESSABLE_ENTITY,
+        hip422UnknownError
+      )
+
+      whenReady(connector.trustVariation(Json.toJson(trustVariationsRequest)).value) { result =>
+        result mustBe Left(VariationFailureForAudit(BadRequestErrorResponse, "Bad request"))
+      }
+    }
+  }
+
+  "a connection fault" should {
+
+    "return a ServerError from checkExistingTrust" in {
+      stubConnectionFault(server)
+      whenReady(connector.checkExistingTrust(request).value)(mustBeConnectionError)
+    }
+
+    "return a ServerError from registerTrust" in {
+      stubConnectionFault(server)
+      whenReady(connector.registerTrust(registrationRequest).value)(mustBeConnectionError)
+    }
+
+    "return a ServerError from getTrustInfo" in {
+      stubConnectionFault(server)
+      whenReady(connector.getTrustInfo("1234567890").value)(mustBeConnectionError)
+    }
+
+    "return a ServerError from trustVariation" in {
+      stubConnectionFault(server)
+      whenReady(connector.trustVariation(Json.toJson(trustVariationsRequest)).value)(mustBeConnectionError)
+    }
+  }
+
 }

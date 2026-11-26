@@ -19,7 +19,9 @@ package connectors
 import base.BaseSpec
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import errors.{ServerError, TrustErrors}
 import org.scalatest.concurrent.IntegrationPatience
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
@@ -224,6 +226,17 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
             .withFixedDelay(delayResponse)
         )
     )
+
+  def stubConnectionFault(server: WireMockServer): StubMapping =
+    server.stubFor(
+      any(anyUrl())
+        .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER))
+    )
+
+  def mustBeConnectionError[A](result: Either[TrustErrors, A]): Unit =
+    inside(result) { case Left(ServerError(message)) =>
+      message must startWith("Error occurred when calling http://localhost")
+    }
 
   def stubForGet(
     server: WireMockServer,
