@@ -72,6 +72,8 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val get5MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
 
+  lazy val get5MLDTrustResponseJsonWithMalformedTrustees: String = getJsonFromFile("valid-get-trust-response.json")
+
   lazy val get5MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
 
   lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile(
