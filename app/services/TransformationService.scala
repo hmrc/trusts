@@ -26,6 +26,7 @@ import repositories.TransformationRepository
 import services.auditing.AuditService
 import transformers._
 import transformers.beneficiaries.{AddBeneficiaryTransform, AmendBeneficiaryTransform}
+import transformers.mdtp.Trustees
 import transformers.settlors.{AddSettlorTransform, AmendSettlorTransform}
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.http.HeaderCarrier
@@ -105,9 +106,9 @@ class TransformationService @Inject() (
   ): TrustEnvelope[JsResult[JsValue]] = EitherT {
     repository.get(identifier, internalId, Session.id(hc)).value.map {
       case Right(None)                  =>
-        Right(JsSuccess(json))
+        Right(Trustees.splitTrusteesInOneSlot(json))
       case Right(Some(transformations)) =>
-        Right(transformations.applyTransform(json))
+        Right(Trustees.splitTrusteesInOneSlot(json).flatMap(transformations.applyTransform))
       case Left(trustErrors)            => Left(trustErrors)
     }
   }
@@ -135,14 +136,15 @@ class TransformationService @Inject() (
         )
 
         val expectedTransformedResult = for {
-          initial     <- {
+          trusteesSplit <- Trustees.splitTrusteesInOneSlot(json)
+          initial       <- {
             logger.info(
               s"[$className][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
                 s" applying transformations"
             )
-            transformations.applyTransform(json)
+            transformations.applyTransform(trusteesSplit)
           }
-          transformed <- {
+          transformed   <- {
             logger.info(
               s"[$className][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
                 s" applying declaration transformations"
