@@ -17,17 +17,18 @@
 package uk.gov.hmrc.transformations.trustees
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, urlEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connector.HipTrustsConnector
 import connectors.ConnectorSpecHelper
 import controllers.GetTrustController
 import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
-import play.api.http.Status.OK
+import play.api.http.{HeaderNames, Status}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
-import play.api.test.{DefaultAwaitTimeout, FakeRequest, Helpers}
+import play.api.test.{DefaultAwaitTimeout, FakeRequest, Helpers, ResultExtractors}
 import services.auditing.AuditService
 import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -35,7 +36,8 @@ import utils.RequiredEntityDetailsForMigration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class HipGetTrusteesSpec extends ConnectorSpecHelper with DefaultAwaitTimeout {
+class HipGetTrusteesSpec
+    extends ConnectorSpecHelper with Status with HeaderNames with ResultExtractors with DefaultAwaitTimeout {
 
   override def applicationBuilder(): GuiceApplicationBuilder =
     super
@@ -82,7 +84,16 @@ class HipGetTrusteesSpec extends ConnectorSpecHelper with DefaultAwaitTimeout {
     returnStatus: Int,
     responseBody: String,
     delayResponse: Int = 0
-  ): StubMapping = super.stubForGet(server, url, returnStatus, responseBody, delayResponse)
+  ): StubMapping =
+    server.stubFor(
+      get(urlEqualTo(url))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
 
   "GetTrustController.getTrustees" should {
     "return correct trustees despite malformed trustees array in the json payload from the HipTrustsConnector " in {
