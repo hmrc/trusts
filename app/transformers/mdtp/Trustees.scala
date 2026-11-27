@@ -46,6 +46,35 @@ object Trustees extends Entities[TrusteeType] {
         }
       )
 
+  /** HIP/ETMP sometimes returns a trusteeInd and a trusteeOrg in the same slot of the trustees array. [[transform]]
+    * shows such a slot as two trustees, the individual first, and the frontends send amend and remove requests with
+    * those indexes. This splits the raw ETMP json the same way, so the transforms find the trustee at that index.
+    */
+  def splitTrusteesInOneSlot(json: JsValue): JsResult[JsValue] =
+    json.transform(path.json.pick[JsArray]) match {
+      case JsSuccess(trustees, _) if trustees.value.exists(isInOneSlot) =>
+        json.transform(prunePathAndPutNewValue(path, JsArray(trustees.value.flatMap(split))))
+      case _                                                            =>
+        JsSuccess(json)
+    }
+
+  private def isInOneSlot(slot: JsValue): Boolean =
+    slot match {
+      case slot: JsObject => slot.keys.contains(INDIVIDUAL_TRUSTEE) && slot.keys.contains(BUSINESS_TRUSTEE)
+      case _              => false
+    }
+
+  private def split(slot: JsValue): Seq[JsValue] =
+    slot match {
+      case slot: JsObject if isInOneSlot(slot) =>
+        Seq(
+          Json.obj(INDIVIDUAL_TRUSTEE -> slot(INDIVIDUAL_TRUSTEE)),
+          Json.obj(BUSINESS_TRUSTEE   -> slot(BUSINESS_TRUSTEE))
+        )
+      case _                                   =>
+        Seq(slot)
+    }
+
   override def updateEntity(trustee: TrusteeType): JsValue =
     trustee match {
       case TrusteeType(Some(trusteeInd), None) =>

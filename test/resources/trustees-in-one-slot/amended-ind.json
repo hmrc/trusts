@@ -1,0 +1,14 @@
+{
+  "lineNo": "1",
+  "name": {
+    "firstName": "Tamara",
+    "middleName": "Hingis",
+    "lastName": "Renamed"
+  },
+  "dateOfBirth": "1965-02-28",
+  "identification": {
+    "nino": "AA100001B"
+  },
+  "phoneNumber": "+447456788112",
+  "entityStart": "2017-02-28"
+}
