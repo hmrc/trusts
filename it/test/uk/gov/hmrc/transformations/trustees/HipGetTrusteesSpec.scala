@@ -78,7 +78,7 @@ class HipGetTrusteesSpec
   private def wrapInSuccessNode(in: String) =
     Json.obj("success" -> Json.parse(in))
 
-  def connectorStubForGet(
+  override def stubForGet(
     server: WireMockServer,
     url: String,
     returnStatus: Int,
@@ -143,7 +143,11 @@ class HipGetTrusteesSpec
       )
 
       val result =
-        trustController.getTrustees("1234567890").apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
+        trustController
+          .getTrustees("1234567890")
+          .apply(
+            FakeRequest(GET, s"/trusts/trustees/$utr/transformed")
+          )
 
       assert(trustsService.trustsConnector.isInstanceOf[HipTrustsConnector])
       assert(contentAsJson(result) === expected)
